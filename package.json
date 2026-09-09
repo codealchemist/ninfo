@@ -1,0 +1,51 @@
+{
+  "name": "ninfo",
+  "version": "1.0.0",
+  "description": "Nutritional reports",
+  "type": "module",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy:preview": "npx --yes netlify-cli deploy --build",
+    "deploy": "npx --yes netlify-cli deploy --build --prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codealchemist/nutriport.git"
+  },
+  "keywords": [
+    "nutrition",
+    "report"
+  ],
+  "author": "Alberto Miranda",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/codealchemist/nutriport/issues"
+  },
+  "homepage": "https://github.com/codealchemist/nutriport#readme",
+  "dependencies": {
+    "chart.js": "^4.4.4",
+    "html-to-image": "^1.11.13",
+    "lucide-react": "^0.441.0",
+    "papaparse": "^5.4.1",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@types/papaparse": "^5.3.14",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.3"
+  }
+}
