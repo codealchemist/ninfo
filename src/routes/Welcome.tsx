@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Check,
   Download,
@@ -23,6 +23,7 @@ import LoadingModal from '../components/common/LoadingModal'
 
 export default function Welcome() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const loadDemo = useAppStore(s => s.loadDemo)
   const loadUploadedFile = useAppStore(s => s.loadUploadedFile)
   const restoreUploadedSnapshot = useAppStore(s => s.restoreUploadedSnapshot)
@@ -41,6 +42,7 @@ export default function Welcome() {
   const [replaceTarget, setReplaceTarget] = useState('new')
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const handledSharedLink = useRef(false)
 
   const refreshLinkList = () => setLinks(listSheetLinks())
 
@@ -55,6 +57,18 @@ export default function Welcome() {
       })
     refreshLinkList()
   }, [])
+
+  // A link shared via the "Share" action lands here as ?sheet=<url> — import it the same way
+  // a pasted URL would be, so opening a shared link is a one-click path straight into the app.
+  useEffect(() => {
+    const sharedUrl = searchParams.get('sheet')
+    if (!sharedUrl || handledSharedLink.current) return
+    handledSharedLink.current = true
+    setLinkInput(sharedUrl)
+    addSheetLinkAndLoad(sharedUrl, null).then(ok => {
+      if (ok) goToApp()
+    })
+  }, [searchParams])
 
   const goToApp = () => navigate('/app/today')
 
