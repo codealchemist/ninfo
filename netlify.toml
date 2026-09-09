@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Client-side routing (react-router) — any path that isn't a real file falls
+# through to index.html so /app/today, /app/macros, etc. work on direct load/refresh.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
