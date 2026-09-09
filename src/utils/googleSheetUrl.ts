@@ -41,3 +41,15 @@ export function buildSheetExportCsvUrl({ spreadsheetId, gid }: ParsedGoogleSheet
   const params = new URLSearchParams({ format: 'csv', gid })
   return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?${params.toString()}`
 }
+
+/**
+ * Builds a link back into this app that, when opened, imports the given Google Sheet link
+ * automatically — the same "Import from a shared link" flow as pasting the URL into the
+ * welcome screen's form. This is what the "Share" action hands out, so the dashboard for a
+ * linked sheet can be forwarded to someone else without them needing the sheet URL in hand.
+ */
+export function buildShareableAppUrl(sheetUrl: string): string {
+  const url = new URL('/', window.location.origin)
+  url.searchParams.set('sheet', sheetUrl)
+  return url.toString()
+}
