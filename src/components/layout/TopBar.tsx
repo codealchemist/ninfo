@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Check, CalendarRange, LayoutDashboard, QrCode as QrCodeIcon, RefreshCw, RotateCcw, Salad, Share2 } from 'lucide-react'
+import { Activity, Check, CalendarRange, LayoutDashboard, QrCode as QrCodeIcon, RefreshCw, RotateCcw, Salad, Share2 } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 import { getSheetLink } from '../../db/sheetLinkStorage'
 import { buildShareableAppUrl } from '../../utils/googleSheetUrl'
@@ -63,6 +63,9 @@ export default function TopBar() {
           </NavLink>
           <NavLink to="/app/timeline" className={({ isActive }) => (isActive ? 'active' : '')}>
             <CalendarRange size={16} /> <span>Timeline</span>
+          </NavLink>
+          <NavLink to="/app/bia" className={({ isActive }) => (isActive ? 'active' : '')}>
+            <Activity size={16} /> <span>BIA</span>
           </NavLink>
         </nav>
         {meta?.mode === 'sheet-link' && (

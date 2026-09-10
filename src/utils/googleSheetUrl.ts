@@ -43,6 +43,17 @@ export function buildSheetExportCsvUrl({ spreadsheetId, gid }: ParsedGoogleSheet
 }
 
 /**
+ * Same gviz endpoint as buildSheetGvizCsvUrl, but addressed by tab name instead of gid. Used
+ * for tabs (like "Bioimpedancia") that live alongside the main linked sheet — the workbook's
+ * spreadsheetId is already known from the Registro link, but each copy of the workbook assigns
+ * its own gids, so looking the tab up by name is the only way that generalizes across copies.
+ */
+export function buildSheetGvizCsvUrlByName(spreadsheetId: string, sheetName: string): string {
+  const params = new URLSearchParams({ tqx: 'out:csv', sheet: sheetName })
+  return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${params.toString()}`
+}
+
+/**
  * Builds a link back into this app that, when opened, imports the given Google Sheet link
  * automatically — the same "Import from a shared link" flow as pasting the URL into the
  * welcome screen's form. This is what the "Share" action hands out, so the dashboard for a

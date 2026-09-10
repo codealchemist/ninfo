@@ -6,32 +6,13 @@ import {
   buildSheetGvizCsvUrl,
   parseGoogleSheetUrl,
 } from '../../utils/googleSheetUrl'
+import { fetchSheetCsv } from '../../utils/fetchSheetCsv'
 import type { NutritionSource } from './NutritionSource'
 
 const SHARE_HINT =
   'Make sure the sheet is shared as "Anyone with the link can view", and that the link was ' +
   'copied while the "Registro" tab was open (Share → Copy link, from within that tab) — ' +
   'otherwise the link points at whichever tab is first, not necessarily Registro.'
-
-async function fetchCsv(url: string, signal?: AbortSignal): Promise<string> {
-  const res = await fetch(url, { signal })
-  if (!res.ok) throw new Error(`Google Sheets returned an error (${res.status}).`)
-  const text = await res.text()
-
-  // A "200 OK" HTML page (sign-in prompt, "request access", etc.) is what Google serves —
-  // instead of an error status — when a sheet isn't actually viewable by anyone with the
-  // link, despite the URL otherwise looking right. Catch that here with a precise message,
-  // rather than letting it fall through to the CSV parser and produce a confusing "found
-  // instead: <!DOCTYPE html..." diagnostic.
-  if (/^\s*<(!doctype|html)/i.test(text)) {
-    throw new Error(
-      'Google returned a sign-in page instead of your spreadsheet — this sheet isn\'t ' +
-        'actually shared as "Anyone with the link can view" yet (File → Share → General access).'
-    )
-  }
-
-  return text
-}
 
 /**
  * Reads a `Registro` tab straight from a shared Google Sheets link — no OAuth, no picker.
@@ -64,7 +45,7 @@ export class GoogleSheetLinkSource implements NutritionSource {
     for (const url of attempts) {
       let csvText: string
       try {
-        csvText = await fetchCsv(url, signal)
+        csvText = await fetchSheetCsv(url, signal)
       } catch (err) {
         if ((err as { name?: string }).name === 'AbortError') throw err
         lastError = err as Error
