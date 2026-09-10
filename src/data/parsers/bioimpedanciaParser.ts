@@ -10,8 +10,10 @@ export interface BiaEntry {
   date: string // ISO yyyy-mm-dd
   weightKg: number
   bodyFatPct: number
+  bodyFatKg: number
   visceralFat: number
   muscleMassPct: number
+  muscleMassKg: number
   bmi: number
   notes: string | null
 }
@@ -23,9 +25,10 @@ export interface BiaEntry {
  *   A Fecha | B Días | C Peso | D Diff | E x mes | F CGT% | G CGT(kg) | H Diff | I Diff(kg) |
  *   J GV | K Diff | L MM% | M MM(kg) | N Diff | O Diff(kg) | P IMC | Q Diff | R Notes
  *
- * Only the primary value of each metric is read (percentages for CGT/MM%, not their derived
- * kg columns) — the sheet's own Diff/"x mes" columns are trend helpers for the spreadsheet
- * itself and aren't parsed; deltas are computed from consecutive entries once loaded instead.
+ * CGT and MM% each carry both a percentage and a derived kg value (their weight-relative
+ * absolute mass) — both are read. The sheet's own Diff/"x mes" columns are trend helpers for
+ * the spreadsheet itself and aren't parsed; deltas are computed from consecutive entries once
+ * loaded instead.
  */
 export function parseBioimpedanciaCsv(csvText: string, today: Date = new Date()): BiaEntry[] {
   const { data } = Papa.parse<string[]>(csvText, { skipEmptyLines: false })
@@ -56,8 +59,10 @@ export function parseBioimpedanciaCsv(csvText: string, today: Date = new Date())
       date,
       weightKg: parseNumber(pesoRaw),
       bodyFatPct: parseNumber(row[5]),
+      bodyFatKg: parseNumber(row[6]),
       visceralFat: parseNumber(row[9]),
       muscleMassPct: parseNumber(row[11]),
+      muscleMassKg: parseNumber(row[12]),
       bmi: parseNumber(row[15]),
       notes: row[17]?.trim() || null,
     })

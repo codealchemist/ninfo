@@ -1,26 +1,28 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
+import { Info, LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { getSheetLink } from '../db/sheetLinkStorage'
 import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { BioimpedanciaSource } from '../data/sources/BioimpedanciaSource'
 import type { BiaEntry } from '../data/parsers/bioimpedanciaParser'
 import BiaTrendChart from '../components/charts/BiaTrendChart'
+import BiaGlossaryModal from '../components/common/BiaGlossaryModal'
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
 const METRICS: Array<{
   key: keyof Pick<BiaEntry, 'weightKg' | 'bodyFatPct' | 'visceralFat' | 'muscleMassPct' | 'bmi'>
+  kgKey?: keyof Pick<BiaEntry, 'bodyFatKg' | 'muscleMassKg'>
   label: string
   unit: string
   color: string
   decimals: number
 }> = [
   { key: 'weightKg', label: 'Weight', unit: 'kg', color: '#577590', decimals: 1 },
-  { key: 'bodyFatPct', label: 'Body fat', unit: '%', color: '#e07a5f', decimals: 1 },
+  { key: 'bodyFatPct', kgKey: 'bodyFatKg', label: 'Body fat', unit: '%', color: '#e07a5f', decimals: 1 },
   { key: 'visceralFat', label: 'Visceral fat', unit: '', color: '#f2b134', decimals: 0 },
-  { key: 'muscleMassPct', label: 'Muscle mass', unit: '%', color: '#3d9970', decimals: 1 },
+  { key: 'muscleMassPct', kgKey: 'muscleMassKg', label: 'Muscle mass', unit: '%', color: '#3d9970', decimals: 1 },
   { key: 'bmi', label: 'BMI', unit: '', color: '#9b5de5', decimals: 1 },
 ]
 
@@ -28,11 +30,28 @@ function fmt(value: number, decimals: number): string {
   return value.toFixed(decimals)
 }
 
+function fmtDelta(value: number, decimals: number): string {
+  return `${value >= 0 ? '+' : ''}${fmt(value, decimals)}`
+}
+
+const UNIT_TOGGLE_OPTIONS = [
+  { value: 'pct', label: '%' },
+  { value: 'kg', label: 'kg' },
+]
+
+const DIFF_TOGGLE_OPTIONS = [
+  { value: 'value', label: 'Value' },
+  { value: 'diff', label: 'Diff' },
+]
+
 export default function Bia() {
   const sheetLinkId = useAppStore((s) => s.sheetLinkId)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
   const [entries, setEntries] = useState<BiaEntry[]>([])
+  const [chartUnits, setChartUnits] = useState<Record<string, 'pct' | 'kg'>>({})
+  const [chartDiff, setChartDiff] = useState<Record<string, boolean>>({})
+  const [showGlossary, setShowGlossary] = useState(false)
 
   const spreadsheetId = sheetLinkId
     ? parseGoogleSheetUrl(getSheetLink(sheetLinkId)?.url ?? '')?.spreadsheetId ?? null
@@ -79,9 +98,14 @@ export default function Bia() {
       <section className="card">
         <div className="bia-header">
           <h2>Bioimpedancia</h2>
-          <button className="link-button" onClick={load} disabled={status === 'loading'} title="Re-fetch the latest measurements">
-            <RefreshCw size={14} className={status === 'loading' ? 'spin' : undefined} /> <span>Refresh</span>
-          </button>
+          <div className="bia-header-actions">
+            <button className="link-button" onClick={() => setShowGlossary(true)} title="What do these terms mean?">
+              <Info size={14} /> <span>Terms</span>
+            </button>
+            <button className="link-button" onClick={load} disabled={status === 'loading'} title="Re-fetch the latest measurements">
+              <RefreshCw size={14} className={status === 'loading' ? 'spin' : undefined} /> <span>Refresh</span>
+            </button>
+          </div>
         </div>
 
         {status === 'loading' && entries.length === 0 && (
@@ -109,6 +133,7 @@ export default function Bia() {
                     {fmt(latest[m.key], m.decimals)}
                     {m.unit && <span className="bia-stat-unit">{m.unit}</span>}
                   </span>
+                  {m.kgKey && <span className="bia-stat-kg">{fmt(latest[m.kgKey], 1)} kg</span>}
                   <span className="bia-stat-label">{m.label}</span>
                 </div>
               ))}
@@ -125,12 +150,12 @@ export default function Bia() {
               <div className="delta-row">
                 {METRICS.map((m) => {
                   const delta = latest[m.key] - previous[m.key]
-                  const sign = delta >= 0 ? '+' : ''
+                  const kgDelta = m.kgKey ? latest[m.kgKey] - previous[m.kgKey] : null
                   return (
                     <span key={m.key} className="delta-chip">
-                      {m.label} {sign}
-                      {fmt(delta, m.decimals)}
-                      {m.unit} vs. previous
+                      {m.label} {fmtDelta(delta, m.decimals)}
+                      {m.unit}
+                      {kgDelta !== null && ` (${fmtDelta(kgDelta, 1)} kg)`} vs. previous
                     </span>
                   )
                 })}
@@ -144,9 +169,49 @@ export default function Bia() {
         <section className="card">
           <h2>Trends</h2>
           <div className="bia-chart-grid">
-            {METRICS.map((m) => (
-              <BiaTrendChart key={m.key} entries={entries} metric={m.key} label={m.label} unit={m.unit} color={m.color} />
-            ))}
+            {METRICS.map((m) => {
+              const diff = chartDiff[m.key] ?? false
+              const diffToggle = {
+                options: DIFF_TOGGLE_OPTIONS,
+                value: diff ? 'diff' : 'value',
+                onChange: (value: string) => setChartDiff((prev) => ({ ...prev, [m.key]: value === 'diff' })),
+              }
+
+              if (!m.kgKey) {
+                return (
+                  <BiaTrendChart
+                    key={m.key}
+                    entries={entries}
+                    metric={m.key}
+                    label={m.label}
+                    unit={m.unit}
+                    color={m.color}
+                    diff={diff}
+                    diffToggle={diffToggle}
+                  />
+                )
+              }
+
+              const unit = chartUnits[m.key] ?? 'pct'
+              const kgKey = m.kgKey
+              return (
+                <BiaTrendChart
+                  key={m.key}
+                  entries={entries}
+                  metric={unit === 'pct' ? m.key : kgKey}
+                  label={m.label}
+                  unit={unit === 'pct' ? m.unit : 'kg'}
+                  color={m.color}
+                  diff={diff}
+                  unitToggle={{
+                    options: UNIT_TOGGLE_OPTIONS,
+                    value: unit,
+                    onChange: (value) => setChartUnits((prev) => ({ ...prev, [m.key]: value as 'pct' | 'kg' })),
+                  }}
+                  diffToggle={diffToggle}
+                />
+              )
+            })}
           </div>
         </section>
       )}
@@ -172,9 +237,13 @@ export default function Bia() {
                   <tr key={e.date}>
                     <td>{new Date(e.date + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</td>
                     <td>{fmt(e.weightKg, 1)} kg</td>
-                    <td>{fmt(e.bodyFatPct, 1)}%</td>
+                    <td>
+                      {fmt(e.bodyFatPct, 1)}% <span className="bia-table-kg">({fmt(e.bodyFatKg, 1)} kg)</span>
+                    </td>
                     <td>{fmt(e.visceralFat, 0)}</td>
-                    <td>{fmt(e.muscleMassPct, 1)}%</td>
+                    <td>
+                      {fmt(e.muscleMassPct, 1)}% <span className="bia-table-kg">({fmt(e.muscleMassKg, 1)} kg)</span>
+                    </td>
                     <td>{fmt(e.bmi, 1)}</td>
                     <td>{e.notes ?? ''}</td>
                   </tr>
@@ -184,6 +253,8 @@ export default function Bia() {
           </div>
         </section>
       )}
+
+      {showGlossary && <BiaGlossaryModal onClose={() => setShowGlossary(false)} />}
     </div>
   )
 }
