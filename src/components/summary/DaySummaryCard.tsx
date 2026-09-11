@@ -133,11 +133,13 @@ export default function DaySummaryCard({
             </div>
             {(prevDayTotals || weekMedianTotals || monthMedianTotals) && (
               <div className="day-summary-footer">
-                <ToggleSwitch
-                  className="day-summary-comparison-toggle"
-                  toggle={{ options: comparisonOptions, value: comparisonMode, onChange: (v) => setComparisonMode(v as ComparisonMode) }}
-                />
-                {comparisonMode !== 'yesterday' && <p className="hint day-summary-median-hint">{t('today.medianHint')}</p>}
+                <div className="day-summary-footer-top">
+                  <ToggleSwitch
+                    className="day-summary-comparison-toggle"
+                    toggle={{ options: comparisonOptions, value: comparisonMode, onChange: (v) => setComparisonMode(v as ComparisonMode) }}
+                  />
+                  {comparisonMode !== 'yesterday' && <p className="hint day-summary-median-hint">{t('today.medianHint')}</p>}
+                </div>
                 {activeComparison && (
                   <div className="delta-row">
                     {macros.map((macro) => {
