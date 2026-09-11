@@ -65,14 +65,6 @@ export interface DailyAggregate {
 export const MACRO_KEYS = ['protein', 'carbs', 'fat', 'fiber', 'calories'] as const
 export type MacroKey = (typeof MACRO_KEYS)[number]
 
-export const MACRO_LABELS: Record<MacroKey, string> = {
-  protein: 'Protein',
-  carbs: 'Carbs',
-  fat: 'Fat',
-  fiber: 'Fiber',
-  calories: 'Calories',
-}
-
 export const MACRO_UNITS: Record<MacroKey, string> = {
   protein: 'g',
   carbs: 'g',

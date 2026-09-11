@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Check,
   Download,
   FlaskConical,
+  Github,
+  Heart,
   Link2,
   LogIn,
   Pencil,
@@ -19,9 +22,17 @@ import {
   renameSheetLink,
   type StoredSheetLink
 } from '../db/sheetLinkStorage'
+import { setLanguage, type SupportedLanguage } from '../i18n'
 import LoadingModal from '../components/common/LoadingModal'
+import ToggleSwitch from '../components/common/ToggleSwitch'
+
+const LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'EN' },
+  { value: 'es', label: 'ES' }
+]
 
 export default function Welcome() {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const loadDemo = useAppStore(s => s.loadDemo)
@@ -144,25 +155,51 @@ export default function Welcome() {
             <Salad size={32} strokeWidth={1.75} />
             <h1>Ninfo</h1>
             <span className='brand-version'>v{__APP_VERSION__}</span>
+            <ToggleSwitch
+              toggle={{
+                options: LANGUAGE_OPTIONS,
+                value: i18n.language,
+                onChange: value => setLanguage(value as SupportedLanguage)
+              }}
+            />
           </div>
-          <p className='welcome-tagline'>
-            Turn your daily food log into a real nutrition dashboard —
-            today's meals, macro trends, and AI-assisted insights.
-          </p>
+          <p className='welcome-tagline'>{t('welcome.tagline')}</p>
           <ul className='welcome-features'>
             <li className='welcome-feature'>
               <Check size={14} />
-              <span>Parsed entirely in your browser — nothing is ever uploaded</span>
+              <span>{t('welcome.features.local')}</span>
             </li>
             <li className='welcome-feature'>
               <Check size={14} />
-              <span>Link a live Google Sheet and refresh it in one click</span>
+              <span>{t('welcome.features.liveSheet')}</span>
             </li>
             <li className='welcome-feature'>
               <Check size={14} />
-              <span>Macro, fat-quality, and glycemic-risk breakdowns — not just calories</span>
+              <span>{t('welcome.features.breakdowns')}</span>
             </li>
           </ul>
+          <div className='welcome-links'>
+            <a
+              className='welcome-link'
+              href='https://github.com/codealchemist/ninfo'
+              target='_blank'
+              rel='noopener noreferrer'
+              aria-label={t('welcome.githubAria')}
+              title={t('welcome.githubTitle')}
+            >
+              <Github size={16} />
+            </a>
+            <a
+              className='welcome-link'
+              href='https://albertomiranda.com.ar'
+              target='_blank'
+              rel='noopener noreferrer'
+              aria-label={t('welcome.websiteAria')}
+              title={t('welcome.websiteTitle')}
+            >
+              <Heart size={16} />
+            </a>
+          </div>
         </aside>
 
         <div className='welcome-actions'>
@@ -174,10 +211,14 @@ export default function Welcome() {
             >
               <Upload size={20} />
               <div>
-                <strong>Continue with your data</strong>
+                <strong>{t('welcome.continueWithData')}</strong>
                 <span>
-                  {snapshotInfo.fileName} — uploaded{' '}
-                  {new Date(snapshotInfo.uploadedAt).toLocaleString()}
+                  {t('welcome.uploadedAt', {
+                    fileName: snapshotInfo.fileName,
+                    date: new Date(snapshotInfo.uploadedAt).toLocaleString(
+                      i18n.language
+                    )
+                  })}
                 </span>
               </div>
             </button>
@@ -196,17 +237,17 @@ export default function Welcome() {
                     <input
                       autoFocus
                       type='text'
-                      placeholder='Name this sheet'
+                      placeholder={t('welcome.namePlaceholder')}
                       value={renameValue}
                       onChange={e => setRenameValue(e.target.value)}
                     />
-                    <button type='submit'>Save</button>
+                    <button type='submit'>{t('common.save')}</button>
                     <button
                       type='button'
                       className='button-secondary'
                       onClick={() => setRenamingId(null)}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </button>
                   </div>
                 </div>
@@ -220,10 +261,15 @@ export default function Welcome() {
                 >
                   <Link2 size={20} />
                   <div>
-                    <strong>{link.name || 'Continue with linked sheet'}</strong>
+                    <strong>
+                      {link.name || t('welcome.continueLinkedSheetDefault')}
+                    </strong>
                     <span>
-                      Last loaded {new Date(link.loadedAt).toLocaleString()} —
-                      will re-fetch the latest data
+                      {t('welcome.lastLoaded', {
+                        date: new Date(link.loadedAt).toLocaleString(
+                          i18n.language
+                        )
+                      })}
                     </span>
                   </div>
                 </button>
@@ -233,8 +279,8 @@ export default function Welcome() {
                       className='icon-button icon-button--ghost'
                       onClick={() => handleStartRename(link)}
                       disabled={busy}
-                      aria-label='Rename this sheet'
-                      title='Rename'
+                      aria-label={t('welcome.renameAria')}
+                      title={t('welcome.renameTitle')}
                     >
                       <Pencil size={14} />
                     </button>
@@ -243,8 +289,8 @@ export default function Welcome() {
                     className='icon-button icon-button--ghost'
                     onClick={() => handleRemoveLink(link.id)}
                     disabled={busy}
-                    aria-label='Remove this sheet'
-                    title='Remove'
+                    aria-label={t('welcome.removeAria')}
+                    title={t('welcome.removeTitle')}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -256,11 +302,8 @@ export default function Welcome() {
           <button className='option-card' onClick={handleDemo} disabled={busy}>
             <FlaskConical size={20} />
             <div>
-              <strong>Try the demo</strong>
-              <span>
-                Explore every report with a bundled sample dataset — no account
-                needed.
-              </span>
+              <strong>{t('welcome.tryDemo')}</strong>
+              <span>{t('welcome.tryDemoDesc')}</span>
             </div>
           </button>
 
@@ -271,11 +314,8 @@ export default function Welcome() {
           >
             <Upload size={20} />
             <div>
-              <strong>Upload your CSV</strong>
-              <span>
-                Export your spreadsheet's "Registro" tab as CSV and drop it here —
-                parsed entirely in your browser, never uploaded anywhere.
-              </span>
+              <strong>{t('welcome.uploadCsv')}</strong>
+              <span>{t('welcome.uploadCsvDesc')}</span>
             </div>
           </button>
           <input
@@ -292,26 +332,20 @@ export default function Welcome() {
           >
             <Link2 size={20} />
             <div className='option-card-form-body'>
-              <strong>Import from a shared link</strong>
-              <span>
-                Open your spreadsheet, click the "Registro" tab, then copy the URL
-                straight from your browser's address bar (it should end in
-                "#gid=..." once Registro is open). The sheet must be shared as
-                "Anyone with the link can view" — we'll re-fetch it fresh each
-                time you come back, no login needed.
-              </span>
+              <strong>{t('welcome.importFromLink')}</strong>
+              <span>{t('welcome.importFromLinkDesc')}</span>
               <div className='option-card-form-row'>
                 <input
                   type='url'
                   inputMode='url'
-                  placeholder='https://docs.google.com/spreadsheets/d/...'
+                  placeholder={t('welcome.urlPlaceholder')}
                   value={linkInput}
                   onChange={e => setLinkInput(e.target.value)}
                   disabled={busy}
                   required
                 />
                 <button type='submit' disabled={busy || !linkInput.trim()}>
-                  Import
+                  {t('welcome.import')}
                 </button>
               </div>
               {links.length > 0 && (
@@ -321,18 +355,22 @@ export default function Welcome() {
                     onChange={e => handleReplaceTargetChange(e.target.value)}
                     disabled={busy}
                   >
-                    <option value='new'>Add as a new sheet</option>
+                    <option value='new'>{t('welcome.addAsNewSheet')}</option>
                     {links.map(link => (
                       <option key={link.id} value={link.id}>
-                        Replace:{' '}
+                        {t('welcome.replacePrefix')}
                         {link.name ||
-                          `sheet from ${new Date(link.loadedAt).toLocaleDateString()}`}
+                          t('welcome.sheetFromDate', {
+                            date: new Date(link.loadedAt).toLocaleDateString(
+                              i18n.language
+                            )
+                          })}
                       </option>
                     ))}
                   </select>
                   <input
                     type='text'
-                    placeholder='Name this sheet (optional)'
+                    placeholder={t('welcome.nameOptionalPlaceholder')}
                     value={nameInput}
                     onChange={e => setNameInput(e.target.value)}
                     disabled={busy}
@@ -349,27 +387,20 @@ export default function Welcome() {
           >
             <Download size={20} />
             <div>
-              <strong>Download sample spreadsheet</strong>
-              <span>
-                No data yet? Grab a template with the right tabs and columns, fill
-                in your own meals, then export its "Registro" tab as CSV and
-                upload it above.
-              </span>
+              <strong>{t('welcome.downloadSample')}</strong>
+              <span>{t('welcome.downloadSampleDesc')}</span>
             </div>
           </a>
 
           <button
             className='option-card option-card--disabled'
             disabled
-            title='Coming soon'
+            title={t('welcome.comingSoon')}
           >
             <LogIn size={20} />
             <div>
-              <strong>Sign in with Google</strong>
-              <span>
-                Connect your companion spreadsheet for reports that stay live.
-                Coming soon.
-              </span>
+              <strong>{t('welcome.signInGoogle')}</strong>
+              <span>{t('welcome.signInGoogleDesc')}</span>
             </div>
           </button>
         </div>

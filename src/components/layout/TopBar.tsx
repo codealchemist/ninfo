@@ -1,29 +1,54 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
-import { Activity, Check, CalendarRange, LayoutDashboard, QrCode as QrCodeIcon, RefreshCw, RotateCcw, Salad, Share2 } from 'lucide-react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Activity, Check, CalendarRange, LayoutDashboard, QrCode as QrCodeIcon, RefreshCw, RotateCcw, Salad, Share2, X } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 import { getSheetLink } from '../../db/sheetLinkStorage'
 import { buildShareableAppUrl } from '../../utils/googleSheetUrl'
 import { copyTextToClipboard } from '../../utils/clipboard'
+import { setLanguage, type SupportedLanguage } from '../../i18n'
 import DateNavigator from './DateNavigator'
 import MacroFilterChips from './MacroFilterChips'
 import ShareQrModal from '../common/ShareQrModal'
+import ToggleSwitch from '../common/ToggleSwitch'
 
-const MODE_LABEL: Record<string, string> = {
-  demo: 'Demo',
-  upload: 'Snapshot',
-  'sheet-link': 'Linked',
-  google: 'Live',
-}
+const LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'EN' },
+  { value: 'es', label: 'ES' },
+]
 
 export default function TopBar() {
+  const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const meta = useAppStore((s) => s.meta)
   const status = useAppStore((s) => s.status)
   const reset = useAppStore((s) => s.reset)
   const refreshSheetLink = useAppStore((s) => s.refreshSheetLink)
   const sheetLinkId = useAppStore((s) => s.sheetLinkId)
+  const pinnedDate = useAppStore((s) => s.pinnedDate)
+  const setSelectedDate = useAppStore((s) => s.setSelectedDate)
+  const goToToday = useAppStore((s) => s.goToToday)
+  const clearPinnedDate = useAppStore((s) => s.clearPinnedDate)
   const [shared, setShared] = useState(false)
   const [qrUrl, setQrUrl] = useState<string | null>(null)
+
+  const handleGoToChipDate = () => {
+    if (pinnedDate) setSelectedDate(pinnedDate)
+    navigate('/app/today')
+  }
+
+  const handleRemoveDateChip = () => {
+    clearPinnedDate()
+    goToToday()
+    navigate('/app/today')
+  }
+
+  const modeLabels: Record<string, string> = {
+    demo: t('topBar.modeLabels.demo'),
+    upload: t('topBar.modeLabels.upload'),
+    'sheet-link': t('topBar.modeLabels.sheetLink'),
+    google: t('topBar.modeLabels.google'),
+  }
 
   const shareUrl = (): string | null => {
     if (!sheetLinkId) return null
@@ -50,22 +75,44 @@ export default function TopBar() {
     <header className="top-bar">
       <div className="top-bar-row">
         <div className="brand">
-          <Link to="/" className="brand-link" title="Back to welcome">
+          <Link to="/" className="brand-link" title={t('topBar.backToWelcome')}>
             <Salad size={22} />
             <span className="brand-name">Ninfo</span>
           </Link>
           <span className="brand-version">v{__APP_VERSION__}</span>
-          {meta && <span className={`mode-badge mode-badge--${meta.mode}`}>{MODE_LABEL[meta.mode]}</span>}
+          {meta && <span className={`mode-badge mode-badge--${meta.mode}`}>{modeLabels[meta.mode]}</span>}
+          <ToggleSwitch
+            toggle={{
+              options: LANGUAGE_OPTIONS,
+              value: i18n.language,
+              onChange: (value) => setLanguage(value as SupportedLanguage),
+            }}
+          />
         </div>
         <nav className="top-nav">
-          <NavLink to="/app/today" className={({ isActive }) => (isActive ? 'active' : '')}>
-            <LayoutDashboard size={16} /> <span>Today</span>
+          <NavLink to="/app/today" onClick={() => goToToday()} className={({ isActive }) => (isActive ? 'active' : '')}>
+            <LayoutDashboard size={16} /> <span>{t('topBar.nav.today')}</span>
           </NavLink>
+          {pinnedDate && (
+            <span className="date-chip">
+              <button className="date-chip-label" onClick={handleGoToChipDate}>
+                {new Date(pinnedDate + 'T00:00:00').toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })}
+              </button>
+              <button
+                className="date-chip-close"
+                onClick={handleRemoveDateChip}
+                aria-label={t('topBar.clearDateAria')}
+                title={t('topBar.clearDateAria')}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          )}
           <NavLink to="/app/timeline" className={({ isActive }) => (isActive ? 'active' : '')}>
-            <CalendarRange size={16} /> <span>Timeline</span>
+            <CalendarRange size={16} /> <span>{t('topBar.nav.timeline')}</span>
           </NavLink>
           <NavLink to="/app/bia" className={({ isActive }) => (isActive ? 'active' : '')}>
-            <Activity size={16} /> <span>BIA</span>
+            <Activity size={16} /> <span>{t('topBar.nav.bia')}</span>
           </NavLink>
         </nav>
         {meta?.mode === 'sheet-link' && (
@@ -74,30 +121,30 @@ export default function TopBar() {
               className="link-button"
               onClick={() => refreshSheetLink()}
               disabled={status === 'loading'}
-              title="Re-fetch the latest data from the linked sheet"
+              title={t('topBar.refreshTitle')}
             >
               <RefreshCw size={14} className={status === 'loading' ? 'spin' : undefined} />{' '}
-              <span>Refresh</span>
+              <span>{t('topBar.refresh')}</span>
             </button>
             <button
               className="link-button"
               onClick={handleShare}
-              title="Copy a link that opens this spreadsheet directly in Ninfo"
+              title={t('topBar.shareTitle')}
             >
               {shared ? <Check size={14} /> : <Share2 size={14} />}{' '}
-              <span>{shared ? 'Copied!' : 'Share'}</span>
+              <span>{shared ? t('topBar.shareCopied') : t('topBar.share')}</span>
             </button>
             <button
               className="link-button"
               onClick={handleShareAsQr}
-              title="Show a QR code that opens this spreadsheet directly in Ninfo"
+              title={t('topBar.qrTitle')}
             >
-              <QrCodeIcon size={14} /> <span>QR code</span>
+              <QrCodeIcon size={14} /> <span>{t('topBar.qrCode')}</span>
             </button>
           </>
         )}
-        <button className="link-button" onClick={reset} title="Start over">
-          <RotateCcw size={14} /> <span>Start over</span>
+        <button className="link-button" onClick={reset} title={t('topBar.startOver')}>
+          <RotateCcw size={14} /> <span>{t('topBar.startOver')}</span>
         </button>
       </div>
       <div className="top-bar-row top-bar-row--secondary">

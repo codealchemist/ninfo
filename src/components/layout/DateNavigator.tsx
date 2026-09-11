@@ -1,13 +1,15 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 
-function formatDateLabel(iso: string): string {
+function formatDateLabel(iso: string, locale: string): string {
   const d = new Date(iso + 'T00:00:00')
-  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+  return d.toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
 export default function DateNavigator() {
+  const { t, i18n } = useTranslation()
   const dates = useAppStore((s) => s.dates)
   const selectedDate = useAppStore((s) => s.selectedDate)
   const stepDate = useAppStore((s) => s.stepDate)
@@ -44,7 +46,7 @@ export default function DateNavigator() {
         className="icon-button"
         onClick={() => stepDate(-1)}
         disabled={isFirst}
-        aria-label="Previous day"
+        aria-label={t('dateNavigator.previousDay')}
       >
         <ChevronLeft size={18} />
       </button>
@@ -56,18 +58,18 @@ export default function DateNavigator() {
         max={lastDate}
         onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
       />
-      <span className="date-nav-label">{formatDateLabel(selectedDate)}</span>
+      <span className="date-nav-label">{formatDateLabel(selectedDate, i18n.language)}</span>
       <button
         className="icon-button"
         onClick={() => stepDate(1)}
         disabled={isLast}
-        aria-label="Next day"
+        aria-label={t('dateNavigator.nextDay')}
       >
         <ChevronRight size={18} />
       </button>
       {selectedDate !== lastDate && (
         <button className="link-button" onClick={() => setSelectedDate(lastDate)}>
-          Jump to latest
+          {t('dateNavigator.jumpToLatest')}
         </button>
       )}
     </div>

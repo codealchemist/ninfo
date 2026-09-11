@@ -1,4 +1,5 @@
 import { forwardRef, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Check, Copy, Image as ImageIcon } from 'lucide-react'
 import type { Meal } from '../../data/types'
 import { analyzeFat } from '../../data/lipidAnalysis'
@@ -22,6 +23,7 @@ type CopyState = 'idle' | 'copied' | 'failed'
 /** Renders a meal's aggregate macros as a classic "Nutrition Facts" style label. */
 const NutritionLabel = forwardRef<HTMLDivElement, Props>(
   function NutritionLabel({ meal }, ref) {
+    const { t } = useTranslation()
     const { totals, lipids } = meal
     const fatBreakdown = analyzeFat(lipids, totals.fat)
     const glycemicRisk = analyzeGlycemicRisk(totals)
@@ -56,7 +58,7 @@ const NutritionLabel = forwardRef<HTMLDivElement, Props>(
         <div className='nutrition-label-content' ref={contentRef}>
           <div className='nutrition-label-header'>
             <div className='nutrition-label-heading'>
-              <div className='nutrition-label-title'>Nutrition Facts</div>
+              <div className='nutrition-label-title'>{t('meals.nutritionLabel.title')}</div>
               <div className='nutrition-label-subtitle'>
                 {formatMealDateLabel(meal.date)} · {meal.time}
               </div>
@@ -65,32 +67,32 @@ const NutritionLabel = forwardRef<HTMLDivElement, Props>(
           </div>
           <div className='nutrition-label-rule nutrition-label-rule--thick' />
           <div className='nutrition-label-calories'>
-            <span>Calories</span>
+            <span>{t('common.macros.calories')}</span>
             <strong>{Math.round(totals.calories)}</strong>
           </div>
           <div className='nutrition-label-rule' />
 
           <div className='nutrition-label-row nutrition-label-row--bold'>
-            <span>Fat</span>
+            <span>{t('common.macros.fat')}</span>
             <span>{round(totals.fat)} g</span>
           </div>
           <FatSection lipids={lipids} breakdown={fatBreakdown} />
 
           <div className='nutrition-label-rule' />
           <div className='nutrition-label-row nutrition-label-row--bold'>
-            <span>Carbs</span>
+            <span>{t('common.macros.carbs')}</span>
             <span>{round(totals.carbs)} g</span>
           </div>
 
           <div className='nutrition-label-rule' />
           <div className='nutrition-label-row nutrition-label-row--bold'>
-            <span>Fiber</span>
+            <span>{t('common.macros.fiber')}</span>
             <span>{round(totals.fiber)} g</span>
           </div>
 
           <div className='nutrition-label-rule' />
           <div className='nutrition-label-row nutrition-label-row--bold'>
-            <span>Protein</span>
+            <span>{t('common.macros.protein')}</span>
             <span>{round(totals.protein)} g</span>
           </div>
           <div className='nutrition-label-rule nutrition-label-rule--thick' />
@@ -100,8 +102,8 @@ const NutritionLabel = forwardRef<HTMLDivElement, Props>(
           <button
             className='icon-button icon-button--ghost'
             onClick={handleCopyText}
-            aria-label='Copy nutritional info'
-            title='Copy nutritional info as text'
+            aria-label={t('meals.nutritionLabel.copyTextAria')}
+            title={t('meals.nutritionLabel.copyTextTitle')}
           >
             {textCopyState === 'copied' ? (
               <Check size={13} />
@@ -112,8 +114,8 @@ const NutritionLabel = forwardRef<HTMLDivElement, Props>(
           <button
             className='icon-button icon-button--ghost'
             onClick={handleCopyImage}
-            aria-label='Copy nutritional info as image'
-            title='Copy nutritional info as an image'
+            aria-label={t('meals.nutritionLabel.copyImageAria')}
+            title={t('meals.nutritionLabel.copyImageTitle')}
           >
             {imageCopyState === 'copied' ? (
               <Check size={13} />
@@ -121,7 +123,7 @@ const NutritionLabel = forwardRef<HTMLDivElement, Props>(
               <ImageIcon size={13} />
             )}
           </button>
-          <span className='nutrition-label-hint'>Click for food details →</span>
+          <span className='nutrition-label-hint'>{t('meals.nutritionLabel.detailsHint')}</span>
         </div>
       </div>
     )

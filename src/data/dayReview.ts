@@ -1,11 +1,19 @@
-import { MACRO_LABELS, type MacroKey, type MacroTotals } from './types'
+import type { MacroKey, MacroTotals } from './types'
+import i18n from '../i18n'
 
 const TRACKED_MACROS: MacroKey[] = ['protein', 'carbs', 'fat', 'fiber']
 
 /** A short, human-readable read on how the day's macros are shaping up vs. goals. */
 export function generateDayReview(totals: MacroTotals, goals: MacroTotals | null): string {
   if (!goals) {
-    return `Logged ${Math.round(totals.calories)} kcal so far today — ${Math.round(totals.protein)}g protein, ${Math.round(totals.carbs)}g carbs, ${Math.round(totals.fat)}g fat, ${Math.round(totals.fiber)}g fiber. Set daily goals in your sheet to see progress here.`
+    const summary = i18n.t('dayReview.noGoals', {
+      calories: Math.round(totals.calories),
+      protein: Math.round(totals.protein),
+      carbs: Math.round(totals.carbs),
+      fat: Math.round(totals.fat),
+      fiber: Math.round(totals.fiber),
+    })
+    return `${summary} ${i18n.t('dayReview.noGoalsHint')}`
   }
 
   const pct = (key: MacroKey) => (goals[key] > 0 ? totals[key] / goals[key] : 0)
@@ -16,15 +24,23 @@ export function generateDayReview(totals: MacroTotals, goals: MacroTotals | null
   const lagging = ranked[ranked.length - 1]
 
   const calorieDelta = Math.round(goals.calories - totals.calories)
-  const calorieClause =
+  const calorieSentence =
     calorieDelta >= 0
-      ? `${calorieDelta} kcal left in today's budget`
-      : `${Math.abs(calorieDelta)} kcal over today's budget`
+      ? i18n.t('dayReview.underBudget', { pct: Math.round(calPct * 100), delta: calorieDelta })
+      : i18n.t('dayReview.overBudget', { pct: Math.round(calPct * 100), delta: Math.abs(calorieDelta) })
 
-  const macroClause =
+  const macroSentence =
     leading.key !== lagging.key
-      ? `${MACRO_LABELS[leading.key]} is leading at ${Math.round(leading.pct * 100)}% of goal, while ${MACRO_LABELS[lagging.key].toLowerCase()} lags at ${Math.round(lagging.pct * 100)}%.`
-      : `${MACRO_LABELS[leading.key]} is at ${Math.round(leading.pct * 100)}% of goal.`
+      ? i18n.t('dayReview.macroLeadLag', {
+          leadMacro: i18n.t(`common.macros.${leading.key}`),
+          leadPct: Math.round(leading.pct * 100),
+          lagMacro: i18n.t(`common.macros.${lagging.key}`),
+          lagPct: Math.round(lagging.pct * 100),
+        })
+      : i18n.t('dayReview.macroSingle', {
+          macro: i18n.t(`common.macros.${leading.key}`),
+          pct: Math.round(leading.pct * 100),
+        })
 
-  return `You're at ${Math.round(calPct * 100)}% of your calorie goal, with ${calorieClause}. ${macroClause}`
+  return `${calorieSentence} ${macroSentence}`
 }

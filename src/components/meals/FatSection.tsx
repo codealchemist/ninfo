@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
 import type { LipidTotals } from '../../data/types'
 import { LIPID_LABELS } from '../../data/types'
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default function FatSection({ lipids, breakdown }: Props) {
+  const { t } = useTranslation()
   const [detailsOpen, setDetailsOpen] = useState(false)
 
   return (
@@ -37,13 +39,20 @@ export default function FatSection({ lipids, breakdown }: Props) {
             colorA="var(--fat-saturated)"
             colorB="var(--fat-unsaturated)"
             centerLabel={formatRatio(breakdown.saturated, breakdown.unsaturated)}
-            title={`Saturated ${round(breakdown.saturated)}g / Unsaturated ${round(breakdown.unsaturated)}g`}
+            title={t('meals.fatSection.ratioTitleSatUnsat', {
+              a: round(breakdown.saturated),
+              b: round(breakdown.unsaturated),
+            })}
           />
           <div className="fat-dial-legend">
-            <LegendItem colorVar="--fat-saturated" label="Saturated" value={`${round(breakdown.saturated)}g`} />
+            <LegendItem
+              colorVar="--fat-saturated"
+              label={t('meals.fatSection.saturated')}
+              value={`${round(breakdown.saturated)}g`}
+            />
             <LegendItem
               colorVar="--fat-unsaturated"
-              label="Unsaturated"
+              label={t('meals.fatSection.unsaturated')}
               value={`${round(breakdown.unsaturated)}g`}
             />
           </div>
@@ -56,17 +65,20 @@ export default function FatSection({ lipids, breakdown }: Props) {
             colorA="var(--fat-omega6)"
             colorB="var(--fat-omega3)"
             centerLabel={formatRatio(breakdown.omega6, breakdown.omega3)}
-            title={`Ω-6 ${round(breakdown.omega6)}g / Ω-3 ${round(breakdown.omega3)}g`}
+            title={t('meals.fatSection.ratioTitleOmega', {
+              a: round(breakdown.omega6),
+              b: round(breakdown.omega3),
+            })}
           />
           <div className="fat-dial-legend">
-            <LegendItem colorVar="--fat-omega6" label="Ω-6" value={`${round(breakdown.omega6)}g`} />
-            <LegendItem colorVar="--fat-omega3" label="Ω-3" value={`${round(breakdown.omega3)}g`} />
+            <LegendItem colorVar="--fat-omega6" label={LIPID_LABELS.omega6} value={`${round(breakdown.omega6)}g`} />
+            <LegendItem colorVar="--fat-omega3" label={LIPID_LABELS.omega3} value={`${round(breakdown.omega3)}g`} />
           </div>
         </div>
       </div>
 
       <div className="fat-section-hint">
-        <span>{breakdown.trans > 0 ? `${round(breakdown.trans)}g trans` : ''}</span>
+        <span>{breakdown.trans > 0 ? t('meals.fatSection.transHint', { grams: round(breakdown.trans) }) : ''}</span>
         <ChevronDown size={12} className={detailsOpen ? 'chevron chevron--open' : 'chevron'} />
       </div>
 
@@ -90,10 +102,11 @@ function LegendItem({ colorVar, label, value }: { colorVar: string; label: strin
 }
 
 function FatDetailsList({ lipids }: { lipids: LipidTotals }) {
+  const { t } = useTranslation()
   const groups: Array<{ heading: string; keys: Array<keyof LipidTotals> }> = [
-    { heading: 'Unsaturated', keys: ['omega3', 'omega6', 'omega9'] },
-    { heading: 'Saturated', keys: ['scfa', 'mcfa', 'lcfa'] },
-    { heading: 'Trans', keys: ['tox'] },
+    { heading: t('meals.fatSection.unsaturated'), keys: ['omega3', 'omega6', 'omega9'] },
+    { heading: t('meals.fatSection.saturated'), keys: ['scfa', 'mcfa', 'lcfa'] },
+    { heading: t('meals.fatSection.trans'), keys: ['tox'] },
   ]
 
   return (

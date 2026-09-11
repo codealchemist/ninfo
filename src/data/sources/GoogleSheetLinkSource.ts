@@ -7,12 +7,9 @@ import {
   parseGoogleSheetUrl,
 } from '../../utils/googleSheetUrl'
 import { fetchSheetCsv } from '../../utils/fetchSheetCsv'
+import { HeaderNotFoundError } from '../../utils/sheetDates'
+import i18n from '../../i18n'
 import type { NutritionSource } from './NutritionSource'
-
-const SHARE_HINT =
-  'Make sure the sheet is shared as "Anyone with the link can view", and that the link was ' +
-  'copied while the "Registro" tab was open (Share → Copy link, from within that tab) — ' +
-  'otherwise the link points at whichever tab is first, not necessarily Registro.'
 
 /**
  * Reads a `Registro` tab straight from a shared Google Sheets link — no OAuth, no picker.
@@ -34,9 +31,7 @@ export class GoogleSheetLinkSource implements NutritionSource {
   async load(signal?: AbortSignal) {
     const parsed = parseGoogleSheetUrl(this.shareUrl)
     if (!parsed) {
-      throw new Error(
-        "That doesn't look like a Google Sheets link. Copy it from the address bar or via Share → Copy link."
-      )
+      throw new Error(i18n.t('errors.notGoogleSheetLink'))
     }
 
     const attempts = [buildSheetGvizCsvUrl(parsed), buildSheetExportCsvUrl(parsed)]
@@ -71,10 +66,11 @@ export class GoogleSheetLinkSource implements NutritionSource {
     if (lastError) {
       // The header-not-found case is genuinely ambiguous (wrong tab vs. wrong sheet vs.
       // something else) so it gets the full hint appended; the sign-in-page and HTTP-status
-      // errors above are already specific and self-explanatory — don't dilute those.
-      const isAmbiguous = /Registro header row/.test(lastError.message)
-      throw new Error(isAmbiguous ? `${lastError.message} ${SHARE_HINT}` : lastError.message)
+      // errors above are already specific and self-explanatory — don't dilute those. Checked
+      // by error type rather than matching message text, since that text is translated.
+      const isAmbiguous = lastError instanceof HeaderNotFoundError
+      throw new Error(isAmbiguous ? `${lastError.message} ${i18n.t('errors.shareHintRegistro')}` : lastError.message)
     }
-    throw new Error(`Couldn't reach that spreadsheet. ${SHARE_HINT}`)
+    throw new Error(`${i18n.t('errors.couldNotReachSheet')} ${i18n.t('errors.shareHintRegistro')}`)
   }
 }

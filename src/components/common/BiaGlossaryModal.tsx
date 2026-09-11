@@ -1,44 +1,26 @@
+import { useTranslation } from 'react-i18next'
 import Modal from './Modal'
 
-const GLOSSARY: Array<{ term: string; name: string; description: string }> = [
-  { term: 'Peso', name: 'Weight', description: 'Total body weight, in kilograms.' },
-  {
-    term: 'CGT',
-    name: 'Grasa Corporal Total',
-    description: 'Total body fat, as a percentage of body weight (with its kg equivalent alongside).',
-  },
-  {
-    term: 'GV',
-    name: 'Grasa Visceral',
-    description: "Visceral fat rating — fat stored around internal organs, on the scale's own index. Lower is generally better.",
-  },
-  {
-    term: 'MM%',
-    name: 'Masa Muscular',
-    description: 'Muscle mass, as a percentage of body weight (with its kg equivalent alongside).',
-  },
-  {
-    term: 'IMC',
-    name: 'Índice de Masa Corporal',
-    description: 'Body Mass Index — weight relative to height². A general indicator, less accurate for very muscular builds.',
-  },
-]
+const GLOSSARY_KEYS = ['peso', 'cgt', 'gv', 'mm', 'imc'] as const
 
 interface BiaGlossaryModalProps {
   onClose: () => void
 }
 
 export default function BiaGlossaryModal({ onClose }: BiaGlossaryModalProps) {
+  const { t } = useTranslation()
+
   return (
     <Modal onClose={onClose} className="bia-glossary-modal">
-      <h3>Bioimpedancia terms</h3>
+      <h3>{t('bia.glossaryTitle')}</h3>
       <dl className="bia-glossary-list">
-        {GLOSSARY.map((g) => (
-          <div className="bia-glossary-item" key={g.term}>
+        {GLOSSARY_KEYS.map((key) => (
+          <div className="bia-glossary-item" key={key}>
             <dt>
-              {g.term} <span className="bia-glossary-name">— {g.name}</span>
+              {t(`bia.glossary.${key}.term`)}{' '}
+              <span className="bia-glossary-name">— {t(`bia.glossary.${key}.name`)}</span>
             </dt>
-            <dd>{g.description}</dd>
+            <dd>{t(`bia.glossary.${key}.description`)}</dd>
           </div>
         ))}
       </dl>

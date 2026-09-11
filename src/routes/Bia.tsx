@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Info, LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { getSheetLink } from '../db/sheetLinkStorage'
@@ -14,16 +15,16 @@ type Status = 'idle' | 'loading' | 'ready' | 'error'
 const METRICS: Array<{
   key: keyof Pick<BiaEntry, 'weightKg' | 'bodyFatPct' | 'visceralFat' | 'muscleMassPct' | 'bmi'>
   kgKey?: keyof Pick<BiaEntry, 'bodyFatKg' | 'muscleMassKg'>
-  label: string
+  labelKey: 'weight' | 'bodyFat' | 'visceralFat' | 'muscleMass' | 'bmi'
   unit: string
   color: string
   decimals: number
 }> = [
-  { key: 'weightKg', label: 'Weight', unit: 'kg', color: '#577590', decimals: 1 },
-  { key: 'bodyFatPct', kgKey: 'bodyFatKg', label: 'Body fat', unit: '%', color: '#e07a5f', decimals: 1 },
-  { key: 'visceralFat', label: 'Visceral fat', unit: '', color: '#f2b134', decimals: 0 },
-  { key: 'muscleMassPct', kgKey: 'muscleMassKg', label: 'Muscle mass', unit: '%', color: '#3d9970', decimals: 1 },
-  { key: 'bmi', label: 'BMI', unit: '', color: '#9b5de5', decimals: 1 },
+  { key: 'weightKg', labelKey: 'weight', unit: 'kg', color: '#577590', decimals: 1 },
+  { key: 'bodyFatPct', kgKey: 'bodyFatKg', labelKey: 'bodyFat', unit: '%', color: '#e07a5f', decimals: 1 },
+  { key: 'visceralFat', labelKey: 'visceralFat', unit: '', color: '#f2b134', decimals: 0 },
+  { key: 'muscleMassPct', kgKey: 'muscleMassKg', labelKey: 'muscleMass', unit: '%', color: '#3d9970', decimals: 1 },
+  { key: 'bmi', labelKey: 'bmi', unit: '', color: '#9b5de5', decimals: 1 },
 ]
 
 function fmt(value: number, decimals: number): string {
@@ -34,17 +35,8 @@ function fmtDelta(value: number, decimals: number): string {
   return `${value >= 0 ? '+' : ''}${fmt(value, decimals)}`
 }
 
-const UNIT_TOGGLE_OPTIONS = [
-  { value: 'pct', label: '%' },
-  { value: 'kg', label: 'kg' },
-]
-
-const DIFF_TOGGLE_OPTIONS = [
-  { value: 'value', label: 'Value' },
-  { value: 'diff', label: 'Diff' },
-]
-
 export default function Bia() {
+  const { t, i18n } = useTranslation()
   const sheetLinkId = useAppStore((s) => s.sheetLinkId)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -52,6 +44,15 @@ export default function Bia() {
   const [chartUnits, setChartUnits] = useState<Record<string, 'pct' | 'kg'>>({})
   const [chartDiff, setChartDiff] = useState<Record<string, boolean>>({})
   const [showGlossary, setShowGlossary] = useState(false)
+
+  const unitToggleOptions = [
+    { value: 'pct', label: t('bia.unitToggle.pct') },
+    { value: 'kg', label: t('bia.unitToggle.kg') },
+  ]
+  const diffToggleOptions = [
+    { value: 'value', label: t('bia.diffToggle.value') },
+    { value: 'diff', label: t('bia.diffToggle.diff') },
+  ]
 
   const spreadsheetId = sheetLinkId
     ? parseGoogleSheetUrl(getSheetLink(sheetLinkId)?.url ?? '')?.spreadsheetId ?? null
@@ -80,9 +81,11 @@ export default function Bia() {
     return (
       <div className="page">
         <section className="card">
-          <h2>Bioimpedancia</h2>
+          <h2>{t('bia.title')}</h2>
           <p className="hint">
-            This report reads the "Bioimpedancia" tab from a linked Google Sheet. <Link to="/">Import one from a shared link</Link> to see it.
+            {t('bia.needsLinkedSheet')}
+            <Link to="/">{t('bia.importLink')}</Link>
+            {t('bia.toSeeIt')}
           </p>
         </section>
       </div>
@@ -97,20 +100,20 @@ export default function Bia() {
     <div className="page">
       <section className="card">
         <div className="bia-header">
-          <h2>Bioimpedancia</h2>
+          <h2>{t('bia.title')}</h2>
           <div className="bia-header-actions">
-            <button className="link-button" onClick={() => setShowGlossary(true)} title="What do these terms mean?">
-              <Info size={14} /> <span>Terms</span>
+            <button className="link-button" onClick={() => setShowGlossary(true)} title={t('bia.termsTitle')}>
+              <Info size={14} /> <span>{t('bia.termsButton')}</span>
             </button>
-            <button className="link-button" onClick={load} disabled={status === 'loading'} title="Re-fetch the latest measurements">
-              <RefreshCw size={14} className={status === 'loading' ? 'spin' : undefined} /> <span>Refresh</span>
+            <button className="link-button" onClick={load} disabled={status === 'loading'} title={t('bia.refreshTitle')}>
+              <RefreshCw size={14} className={status === 'loading' ? 'spin' : undefined} /> <span>{t('bia.refresh')}</span>
             </button>
           </div>
         </div>
 
         {status === 'loading' && entries.length === 0 && (
           <p className="hint">
-            <LoaderCircle size={14} className="spin" /> Loading measurements…
+            <LoaderCircle size={14} className="spin" /> {t('bia.loading')}
           </p>
         )}
 
@@ -121,7 +124,7 @@ export default function Bia() {
         )}
 
         {status === 'ready' && entries.length === 0 && (
-          <p className="hint">No measurements found in the Bioimpedancia tab yet.</p>
+          <p className="hint">{t('bia.noMeasurements')}</p>
         )}
 
         {latest && (
@@ -134,15 +137,17 @@ export default function Bia() {
                     {m.unit && <span className="bia-stat-unit">{m.unit}</span>}
                   </span>
                   {m.kgKey && <span className="bia-stat-kg">{fmt(latest[m.kgKey], 1)} kg</span>}
-                  <span className="bia-stat-label">{m.label}</span>
+                  <span className="bia-stat-label">{t(`bia.metrics.${m.labelKey}`)}</span>
                 </div>
               ))}
             </div>
             <p className="hint" style={{ margin: '10px 0 0' }}>
-              Latest measurement: {new Date(latest.date + 'T00:00:00').toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
+              {t('bia.latestMeasurement', {
+                date: new Date(latest.date + 'T00:00:00').toLocaleDateString(i18n.language, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                }),
               })}
               {latest.notes && ` — ${latest.notes}`}
             </p>
@@ -153,9 +158,9 @@ export default function Bia() {
                   const kgDelta = m.kgKey ? latest[m.kgKey] - previous[m.kgKey] : null
                   return (
                     <span key={m.key} className="delta-chip">
-                      {m.label} {fmtDelta(delta, m.decimals)}
+                      {t(`bia.metrics.${m.labelKey}`)} {fmtDelta(delta, m.decimals)}
                       {m.unit}
-                      {kgDelta !== null && ` (${fmtDelta(kgDelta, 1)} kg)`} vs. previous
+                      {kgDelta !== null && ` (${fmtDelta(kgDelta, 1)} kg)`} {t('bia.vsPrevious')}
                     </span>
                   )
                 })}
@@ -167,15 +172,16 @@ export default function Bia() {
 
       {entries.length > 1 && (
         <section className="card">
-          <h2>Trends</h2>
+          <h2>{t('bia.trends')}</h2>
           <div className="bia-chart-grid">
             {METRICS.map((m) => {
               const diff = chartDiff[m.key] ?? false
               const diffToggle = {
-                options: DIFF_TOGGLE_OPTIONS,
+                options: diffToggleOptions,
                 value: diff ? 'diff' : 'value',
                 onChange: (value: string) => setChartDiff((prev) => ({ ...prev, [m.key]: value === 'diff' })),
               }
+              const label = t(`bia.metrics.${m.labelKey}`)
 
               if (!m.kgKey) {
                 return (
@@ -183,7 +189,7 @@ export default function Bia() {
                     key={m.key}
                     entries={entries}
                     metric={m.key}
-                    label={m.label}
+                    label={label}
                     unit={m.unit}
                     color={m.color}
                     diff={diff}
@@ -199,12 +205,12 @@ export default function Bia() {
                   key={m.key}
                   entries={entries}
                   metric={unit === 'pct' ? m.key : kgKey}
-                  label={m.label}
+                  label={label}
                   unit={unit === 'pct' ? m.unit : 'kg'}
                   color={m.color}
                   diff={diff}
                   unitToggle={{
-                    options: UNIT_TOGGLE_OPTIONS,
+                    options: unitToggleOptions,
                     value: unit,
                     onChange: (value) => setChartUnits((prev) => ({ ...prev, [m.key]: value as 'pct' | 'kg' })),
                   }}
@@ -218,24 +224,30 @@ export default function Bia() {
 
       {entries.length > 0 && (
         <section className="card">
-          <h2>History</h2>
+          <h2>{t('bia.history')}</h2>
           <div className="bia-table-scroll">
             <table className="bia-table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Weight</th>
-                  <th>Body fat</th>
-                  <th>Visceral fat</th>
-                  <th>Muscle mass</th>
-                  <th>BMI</th>
-                  <th>Notes</th>
+                  <th>{t('bia.table.date')}</th>
+                  <th>{t('bia.table.weight')}</th>
+                  <th>{t('bia.table.bodyFat')}</th>
+                  <th>{t('bia.table.visceralFat')}</th>
+                  <th>{t('bia.table.muscleMass')}</th>
+                  <th>{t('bia.table.bmi')}</th>
+                  <th>{t('bia.table.notes')}</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((e) => (
                   <tr key={e.date}>
-                    <td>{new Date(e.date + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                    <td>
+                      {new Date(e.date + 'T00:00:00').toLocaleDateString(i18n.language, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </td>
                     <td>{fmt(e.weightKg, 1)} kg</td>
                     <td>
                       {fmt(e.bodyFatPct, 1)}% <span className="bia-table-kg">({fmt(e.bodyFatKg, 1)} kg)</span>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, Timer } from 'lucide-react'
 import type { Meal } from '../../data/types'
 import MealCard from './MealCard'
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function MealTimelineStrip({ meals }: Props) {
+  const { t } = useTranslation()
   const [focusedIndex, setFocusedIndex] = useState(0)
   const [flippedKeys, setFlippedKeys] = useState<Set<string>>(new Set())
   const cardRefs = useRef<Array<HTMLDivElement | null>>([])
@@ -57,19 +59,19 @@ export default function MealTimelineStrip({ meals }: Props) {
   }, [meals, focusedIndex])
 
   if (meals.length === 0) {
-    return <p className="empty-state">No meals logged for this day.</p>
+    return <p className="empty-state">{t('meals.timelineStrip.empty')}</p>
   }
 
   return (
     <section className="card">
       <div className="meal-strip-header">
-        <h2>Meals by time</h2>
+        <h2>{t('meals.timelineStrip.heading')}</h2>
         <div className="meal-strip-controls">
           <button
             className="icon-button"
             onClick={goPrev}
             disabled={focusedIndex === 0}
-            aria-label="Previous meal"
+            aria-label={t('meals.timelineStrip.prevMeal')}
           >
             <ChevronLeft size={18} />
           </button>
@@ -80,7 +82,7 @@ export default function MealTimelineStrip({ meals }: Props) {
             className="icon-button"
             onClick={goNext}
             disabled={focusedIndex === meals.length - 1}
-            aria-label="Next meal"
+            aria-label={t('meals.timelineStrip.nextMeal')}
           >
             <ChevronRight size={18} />
           </button>

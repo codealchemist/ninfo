@@ -1,5 +1,6 @@
 import type { FatBreakdown } from './lipidAnalysis'
 import type { Meal, MealItem } from './types'
+import i18n from '../i18n'
 
 const round = (n: number) => Math.round(n * 10) / 10
 
@@ -12,7 +13,7 @@ const round = (n: number) => Math.round(n * 10) / 10
  * no reason to reproduce that problem in what we export.
  */
 export function formatMealDateLabel(dateIso: string): string {
-  return new Date(`${dateIso}T00:00:00`).toLocaleDateString(undefined, {
+  return new Date(`${dateIso}T00:00:00`).toLocaleDateString(i18n.language, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -26,11 +27,12 @@ export function formatMealItemsAsText(
   label: string
 ): string {
   const lines = [label, '']
+  const macros = i18n.t('common.macros', { returnObjects: true }) as Record<string, string>
 
   for (const item of items) {
     const qty = item.quantity !== 1 ? ` ×${item.quantity}` : ''
     lines.push(
-      `- ${item.food}${qty} — ${Math.round(item.protein)}g protein, ${Math.round(item.carbs)}g carbs, ${Math.round(item.fat)}g fat, ${Math.round(item.fiber)}g fiber, ${Math.round(item.calories)} kcal`
+      `- ${item.food}${qty} — ${Math.round(item.protein)}g ${macros.protein.toLowerCase()}, ${Math.round(item.carbs)}g ${macros.carbs.toLowerCase()}, ${Math.round(item.fat)}g ${macros.fat.toLowerCase()}, ${Math.round(item.fiber)}g ${macros.fiber.toLowerCase()}, ${Math.round(item.calories)} kcal`
     )
   }
 
@@ -47,7 +49,7 @@ export function formatMealItemsAsText(
 
   lines.push('')
   lines.push(
-    `Totals: ${Math.round(totals.protein)}g protein, ${Math.round(totals.carbs)}g carbs, ${Math.round(totals.fat)}g fat, ${Math.round(totals.fiber)}g fiber, ${Math.round(totals.calories)} kcal`
+    `${i18n.t('meals.nutritionLabel.totals')}: ${Math.round(totals.protein)}g ${macros.protein.toLowerCase()}, ${Math.round(totals.carbs)}g ${macros.carbs.toLowerCase()}, ${Math.round(totals.fat)}g ${macros.fat.toLowerCase()}, ${Math.round(totals.fiber)}g ${macros.fiber.toLowerCase()}, ${Math.round(totals.calories)} kcal`
   )
 
   return lines.join('\n')
@@ -60,26 +62,30 @@ export function formatNutritionLabelAsText(
   meal: Meal,
   fat: FatBreakdown
 ): string {
+  const macros = i18n.t('common.macros', { returnObjects: true }) as Record<string, string>
+  const fatSection = i18n.t('meals.fatSection', { returnObjects: true }) as Record<string, string>
+  const itemsCount = i18n.t('meals.nutritionLabel.itemsCount', { count: meal.items.length })
+
   const lines = [
     RULE,
-    `Nutrition Facts — ${formatMealDateLabel(meal.date)}, ${meal.time} (${meal.items.length} item${meal.items.length !== 1 ? 's' : ''})`,
+    `${i18n.t('meals.nutritionLabel.title')} — ${formatMealDateLabel(meal.date)}, ${meal.time} (${itemsCount})`,
     RULE,
-    `Calories: ${Math.round(meal.totals.calories)}`,
+    `${macros.calories}: ${Math.round(meal.totals.calories)}`,
     RULE,
-    `Fat: ${round(meal.totals.fat)}g`,
-    `  Saturated: ${round(fat.saturated)}g / Unsaturated: ${round(fat.unsaturated)}g`
+    `${macros.fat}: ${round(meal.totals.fat)}g`,
+    `  ${fatSection.saturated}: ${round(fat.saturated)}g / ${fatSection.unsaturated}: ${round(fat.unsaturated)}g`
   ]
 
   if (fat.omega6to3Ratio !== null) {
     lines.push(
-      `  Ω-6:Ω-3 ratio: ${fat.omega6to3Ratio === Infinity ? '∞' : `${round(fat.omega6to3Ratio)}:1`}`
+      `  Ω-6:Ω-3: ${fat.omega6to3Ratio === Infinity ? '∞' : `${round(fat.omega6to3Ratio)}:1`}`
     )
   }
-  if (fat.trans > 0) lines.push(`  Trans: ${round(fat.trans)}g`)
+  if (fat.trans > 0) lines.push(`  ${fatSection.trans}: ${round(fat.trans)}g`)
 
-  lines.push(RULE, `Carbs: ${round(meal.totals.carbs)}g`)
-  lines.push(RULE, `Fiber: ${round(meal.totals.fiber)}g`)
-  lines.push(RULE, `Protein: ${round(meal.totals.protein)}g`)
+  lines.push(RULE, `${macros.carbs}: ${round(meal.totals.carbs)}g`)
+  lines.push(RULE, `${macros.fiber}: ${round(meal.totals.fiber)}g`)
+  lines.push(RULE, `${macros.protein}: ${round(meal.totals.protein)}g`)
   lines.push(RULE)
 
   return lines.join('\n')

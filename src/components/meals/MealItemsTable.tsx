@@ -1,8 +1,9 @@
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowDown, ArrowUp, ArrowUpDown, Check, Copy, Maximize2, Minimize2, X } from 'lucide-react'
 import type { Meal, MealItem } from '../../data/types'
-import { MACRO_KEYS, MACRO_LABELS, type MacroKey } from '../../data/types'
+import { MACRO_KEYS, type MacroKey } from '../../data/types'
 import { formatMealItemsAsText } from '../../data/mealText'
 import { copyTextToClipboard } from '../../utils/clipboard'
 
@@ -18,6 +19,7 @@ const MealItemsTable = forwardRef<HTMLDivElement, Props>(function MealItemsTable
   { meal, onFlipBack },
   ref
 ) {
+  const { t } = useTranslation()
   const [sort, setSort] = useState<{ column: SortColumn; direction: SortDirection } | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [maximized, setMaximized] = useState(false)
@@ -71,8 +73,8 @@ const MealItemsTable = forwardRef<HTMLDivElement, Props>(function MealItemsTable
       selectedIds.size > 0 ? meal.items.filter((i) => selectedIds.has(i.id)) : meal.items
     const label =
       selectedIds.size > 0
-        ? `${selectedIds.size} selected item${selectedIds.size !== 1 ? 's' : ''} from meal at ${meal.time}`
-        : `Meal at ${meal.time} — ${meal.items.length} item${meal.items.length !== 1 ? 's' : ''}`
+        ? t('meals.table.selectedItems', { count: selectedIds.size, time: meal.time })
+        : t('meals.table.itemsAtMeal', { count: meal.items.length, time: meal.time })
     const ok = await copyTextToClipboard(formatMealItemsAsText(itemsToCopy, label))
     if (ok) {
       setCopied(true)
@@ -89,16 +91,20 @@ const MealItemsTable = forwardRef<HTMLDivElement, Props>(function MealItemsTable
     )
   }
 
+  const detailsHeading = t('meals.table.detailsHeading', { time: meal.time })
+  const selectedSuffix =
+    selectedIds.size > 0 ? ` · ${t('meals.table.selectedSuffix', { count: selectedIds.size })}` : ''
+
   const table = (
     <div className="meal-items-table-scroll">
       <table className="meal-items-table">
         <thead>
           <tr>
             <th className="col-num" />
-            <th className="col-food">Food</th>
+            <th className="col-food">{t('meals.table.food')}</th>
             {MACRO_KEYS.map((macro) => (
               <th key={macro} onClick={(e) => handleSort(macro, e)} className="sortable-col">
-                {MACRO_LABELS[macro]} {sortIcon(macro)}
+                {t(`common.macros.${macro}`)} {sortIcon(macro)}
               </th>
             ))}
           </tr>
@@ -134,15 +140,15 @@ const MealItemsTable = forwardRef<HTMLDivElement, Props>(function MealItemsTable
     <div className="meal-items-table-wrap" ref={ref}>
       <div className="meal-items-table-header">
         <span>
-          {meal.time} — food details
-          {selectedIds.size > 0 ? ` · ${selectedIds.size} selected` : ''}
+          {detailsHeading}
+          {selectedSuffix}
         </span>
         <div className="meal-items-table-actions">
           <button
             className="icon-button icon-button--ghost"
             onClick={handleCopy}
-            aria-label="Copy meal details"
-            title={selectedIds.size > 0 ? 'Copy selected rows' : 'Copy meal details'}
+            aria-label={t('meals.table.copyAria')}
+            title={selectedIds.size > 0 ? t('meals.table.copySelectedTitle') : t('meals.table.copyAllTitle')}
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
           </button>
@@ -152,7 +158,7 @@ const MealItemsTable = forwardRef<HTMLDivElement, Props>(function MealItemsTable
               e.stopPropagation()
               setMaximized(true)
             }}
-            aria-label="Maximize"
+            aria-label={t('meals.table.maximizeAria')}
           >
             <Maximize2 size={14} />
           </button>
@@ -162,7 +168,7 @@ const MealItemsTable = forwardRef<HTMLDivElement, Props>(function MealItemsTable
               e.stopPropagation()
               onFlipBack()
             }}
-            aria-label="Back to summary"
+            aria-label={t('meals.table.backToSummaryAria')}
           >
             <X size={14} />
           </button>
@@ -176,21 +182,21 @@ const MealItemsTable = forwardRef<HTMLDivElement, Props>(function MealItemsTable
             <div className="meal-items-modal" onClick={(e) => e.stopPropagation()}>
               <div className="meal-items-table-header">
                 <span>
-                  {meal.time} — food details
-                  {selectedIds.size > 0 ? ` · ${selectedIds.size} selected` : ''}
+                  {detailsHeading}
+                  {selectedSuffix}
                 </span>
                 <div className="meal-items-table-actions">
                   <button
                     className="icon-button icon-button--ghost"
                     onClick={handleCopy}
-                    aria-label="Copy meal details"
+                    aria-label={t('meals.table.copyAria')}
                   >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                   </button>
                   <button
                     className="icon-button icon-button--ghost"
                     onClick={() => setMaximized(false)}
-                    aria-label="Restore"
+                    aria-label={t('meals.table.restoreAria')}
                   >
                     <Minimize2 size={14} />
                   </button>

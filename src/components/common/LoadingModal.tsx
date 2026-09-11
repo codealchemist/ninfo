@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { LoaderCircle, TriangleAlert } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 
 export default function LoadingModal() {
+  const { t } = useTranslation()
   const status = useAppStore((s) => s.status)
   const error = useAppStore((s) => s.error)
   const cancelLoad = useAppStore((s) => s.cancelLoad)
@@ -14,9 +16,9 @@ export default function LoadingModal() {
         {status === 'loading' ? (
           <>
             <LoaderCircle size={32} className="spin" />
-            <p>Loading your data…</p>
+            <p>{t('common.loadingYourData')}</p>
             <button onClick={cancelLoad}>
-              Cancel
+              {t('common.cancel')}
             </button>
           </>
         ) : (
@@ -24,7 +26,7 @@ export default function LoadingModal() {
             <TriangleAlert size={32} className="load-modal-error-icon" />
             <p className="load-modal-error">{error}</p>
             <button onClick={cancelLoad}>
-              Close
+              {t('common.close')}
             </button>
           </>
         )}

@@ -1,4 +1,4 @@
-const DB_NAME = 'nutriport'
+const DB_NAME = 'ninfo'
 const STORE = 'snapshots'
 const KEY = 'uploaded-registro-csv'
 

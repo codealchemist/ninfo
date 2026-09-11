@@ -1,6 +1,13 @@
 import { useMemo } from 'react'
 import { useAppStore } from '../store/appStore'
-import { dailyLipids, dailyTotals, groupIntoMeals, itemsForDate } from '../data/aggregate/dailyTotals'
+import {
+  dailyLipids,
+  dailyTotals,
+  groupIntoMeals,
+  itemsForDate,
+  medianTotals,
+  trailingDates,
+} from '../data/aggregate/dailyTotals'
 import DaySummaryCard from '../components/summary/DaySummaryCard'
 import MealTimelineStrip from '../components/meals/MealTimelineStrip'
 
@@ -32,15 +39,29 @@ export default function Today() {
     return dailyTotals(meals, dates[idx - 1])
   }, [meals, dates, selectedDate])
 
+  const weekMedianTotals = useMemo(() => {
+    if (!selectedDate) return null
+    return medianTotals(meals, trailingDates(dates, selectedDate, 7))
+  }, [meals, dates, selectedDate])
+
+  const monthMedianTotals = useMemo(() => {
+    if (!selectedDate) return null
+    return medianTotals(meals, trailingDates(dates, selectedDate, 30))
+  }, [meals, dates, selectedDate])
+
   if (!selectedDate || !totals || !lipids) return null
 
   return (
     <div className="page today-page">
       <DaySummaryCard
+        date={selectedDate}
+        meals={dayMeals}
         totals={totals}
         lipids={lipids}
         goals={goalsByDate[selectedDate] ?? null}
         prevDayTotals={prevDayTotals}
+        weekMedianTotals={weekMedianTotals}
+        monthMedianTotals={monthMedianTotals}
       />
       <MealTimelineStrip meals={dayMeals} />
     </div>

@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'nutriport:sheet-links'
+const STORAGE_KEY = 'ninfo:sheet-links'
 
 export interface StoredSheetLink {
   id: string
@@ -8,7 +8,8 @@ export interface StoredSheetLink {
 }
 
 function makeId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  if (typeof crypto !== 'undefined' && crypto.randomUUID)
+    return crypto.randomUUID()
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
@@ -37,18 +38,26 @@ export function listSheetLinks(): StoredSheetLink[] {
 }
 
 export function getSheetLink(id: string): StoredSheetLink | null {
-  return readAll().find((l) => l.id === id) ?? null
+  return readAll().find(l => l.id === id) ?? null
 }
 
-export function addSheetLink(url: string, name: string | null = null): StoredSheetLink {
-  const link: StoredSheetLink = { id: makeId(), url, name, loadedAt: new Date().toISOString() }
+export function addSheetLink(
+  url: string,
+  name: string | null = null
+): StoredSheetLink {
+  const link: StoredSheetLink = {
+    id: makeId(),
+    url,
+    name,
+    loadedAt: new Date().toISOString()
+  }
   writeAll([...readAll(), link])
   return link
 }
 
 export function replaceSheetLink(id: string, url: string): void {
   const links = readAll()
-  const idx = links.findIndex((l) => l.id === id)
+  const idx = links.findIndex(l => l.id === id)
   if (idx === -1) return
   links[idx] = { ...links[idx], url, loadedAt: new Date().toISOString() }
   writeAll(links)
@@ -56,7 +65,7 @@ export function replaceSheetLink(id: string, url: string): void {
 
 export function touchSheetLink(id: string): void {
   const links = readAll()
-  const idx = links.findIndex((l) => l.id === id)
+  const idx = links.findIndex(l => l.id === id)
   if (idx === -1) return
   links[idx] = { ...links[idx], loadedAt: new Date().toISOString() }
   writeAll(links)
@@ -64,14 +73,14 @@ export function touchSheetLink(id: string): void {
 
 export function renameSheetLink(id: string, name: string): void {
   const links = readAll()
-  const idx = links.findIndex((l) => l.id === id)
+  const idx = links.findIndex(l => l.id === id)
   if (idx === -1) return
   links[idx] = { ...links[idx], name: name.trim() || null }
   writeAll(links)
 }
 
 export function removeSheetLink(id: string): void {
-  writeAll(readAll().filter((l) => l.id !== id))
+  writeAll(readAll().filter(l => l.id !== id))
 }
 
 export function clearSheetLinks(): void {
