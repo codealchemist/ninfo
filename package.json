@@ -1,6 +1,6 @@
 {
   "name": "ninfo",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Nutritional reports",
   "type": "module",
   "main": "index.js",
