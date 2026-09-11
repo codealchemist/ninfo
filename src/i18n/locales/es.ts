@@ -90,6 +90,13 @@ export const es: typeof en = {
     clearDateAria: 'Volver a hoy'
   },
 
+  mobileMenu: {
+    openAria: 'Menú',
+    macrosLabel: 'Macros mostrados',
+    installApp: 'Instalar app',
+    installAppTitle: 'Instalar Ninfo en este dispositivo'
+  },
+
   dateNavigator: {
     previousDay: 'Día anterior',
     nextDay: 'Día siguiente',
@@ -113,6 +120,7 @@ export const es: typeof en = {
     vsGoal: 'vs objetivo',
     pctOver: '+{{pct}}%',
     pctMissing: '-{{pct}}%',
+    toggleRingBadgeAria: 'Cambiar entre porcentaje y valor',
     showRingDetailsAria: 'Mostrar detalles de macros',
     showRingDetailsTitle: 'Mostrar el objetivo y la diferencia de cada macro',
     hideRingDetailsAria: 'Ocultar detalles de macros',

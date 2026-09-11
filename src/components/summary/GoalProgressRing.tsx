@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const SIZE = 86
@@ -25,6 +26,7 @@ interface Props {
 
 export default function GoalProgressRing({ label, value, goal, unit, colorVar, showDetails = true }: Props) {
   const { t } = useTranslation()
+  const [showValue, setShowValue] = useState(false)
   const ratio = goal && goal > 0 ? value / goal : 0
   const innerDash = Math.min(ratio, 1) * INNER_CIRCUMFERENCE
   // Capped at one extra full lap (200% of goal) — beyond that, more precision on the ring
@@ -37,10 +39,16 @@ export default function GoalProgressRing({ label, value, goal, unit, colorVar, s
   const diffSign = diff != null && diff >= 0 ? '+' : ''
   const pctOver = goal != null && ratio > 1 ? Math.round((ratio - 1) * 100) : null
   const pctMissing = goal != null && ratio <= 1 ? Math.round((1 - ratio) * 100) : null
+  const hasBadge = pctMissing != null || pctOver != null
 
   return (
     <div className="progress-ring">
-      <div className="progress-ring-dial">
+      <div
+        className={'progress-ring-dial' + (hasBadge ? ' progress-ring-dial--interactive' : '')}
+        onClick={() => hasBadge && setShowValue((v) => !v)}
+        role={hasBadge ? 'button' : undefined}
+        aria-label={hasBadge ? t('today.toggleRingBadgeAria') : undefined}
+      >
         <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
           <circle
             cx={CENTER}
@@ -93,20 +101,26 @@ export default function GoalProgressRing({ label, value, goal, unit, colorVar, s
         </svg>
         {pctMissing != null && (
           <span className="progress-ring-badge progress-ring-badge--under">
-            <span className="progress-ring-badge-pct">{t('today.pctMissing', { pct: pctMissing })}</span>
-            <span className="progress-ring-badge-value">
-              {diffSign}
-              {Math.round(diff!)} {unit}
-            </span>
+            {showValue ? (
+              <span className="progress-ring-badge-value">
+                {diffSign}
+                {Math.round(diff!)} {unit}
+              </span>
+            ) : (
+              <span className="progress-ring-badge-pct">{t('today.pctMissing', { pct: pctMissing })}</span>
+            )}
           </span>
         )}
         {pctOver != null && (
           <span className="progress-ring-badge progress-ring-badge--over">
-            <span className="progress-ring-badge-pct">{t('today.pctOver', { pct: pctOver })}</span>
-            <span className="progress-ring-badge-value">
-              {diffSign}
-              {Math.round(diff!)} {unit}
-            </span>
+            {showValue ? (
+              <span className="progress-ring-badge-value">
+                {diffSign}
+                {Math.round(diff!)} {unit}
+              </span>
+            ) : (
+              <span className="progress-ring-badge-pct">{t('today.pctOver', { pct: pctOver })}</span>
+            )}
           </span>
         )}
       </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Activity, Check, CalendarRange, LayoutDashboard, QrCode as QrCodeIcon, RefreshCw, RotateCcw, Salad, Share2, X } from 'lucide-react'
+import { Activity, Check, CalendarRange, LayoutDashboard, Menu, QrCode as QrCodeIcon, RefreshCw, RotateCcw, Salad, Share2, X } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 import { getSheetLink } from '../../db/sheetLinkStorage'
 import { buildShareableAppUrl } from '../../utils/googleSheetUrl'
@@ -9,6 +9,7 @@ import { copyTextToClipboard } from '../../utils/clipboard'
 import { setLanguage, type SupportedLanguage } from '../../i18n'
 import DateNavigator from './DateNavigator'
 import MacroFilterChips from './MacroFilterChips'
+import MobileMenu from './MobileMenu'
 import ShareQrModal from '../common/ShareQrModal'
 import ToggleSwitch from '../common/ToggleSwitch'
 
@@ -31,6 +32,7 @@ export default function TopBar() {
   const clearPinnedDate = useAppStore((s) => s.clearPinnedDate)
   const [shared, setShared] = useState(false)
   const [qrUrl, setQrUrl] = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const handleGoToChipDate = () => {
     if (pinnedDate) setSelectedDate(pinnedDate)
@@ -73,6 +75,12 @@ export default function TopBar() {
 
   return (
     <header className="top-bar">
+      <div className="top-bar-mobile-row">
+        <button className="hamburger-button" onClick={() => setMenuOpen(true)} aria-label={t('mobileMenu.openAria')}>
+          <Menu size={20} />
+        </button>
+        <DateNavigator />
+      </div>
       <div className="top-bar-row">
         <div className="brand">
           <Link to="/" className="brand-link" title={t('topBar.backToWelcome')}>
@@ -152,6 +160,22 @@ export default function TopBar() {
         <MacroFilterChips />
       </div>
       {qrUrl && <ShareQrModal url={qrUrl} onClose={() => setQrUrl(null)} />}
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        meta={meta}
+        modeLabels={modeLabels}
+        refreshing={status === 'loading'}
+        pinnedDate={pinnedDate}
+        onGoToChipDate={handleGoToChipDate}
+        onRemoveDateChip={handleRemoveDateChip}
+        onGoToday={goToToday}
+        onRefreshSheet={() => refreshSheetLink()}
+        onShare={handleShare}
+        onShareAsQr={handleShareAsQr}
+        shared={shared}
+        onReset={reset}
+      />
     </header>
   )
 }
