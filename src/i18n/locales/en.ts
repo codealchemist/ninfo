@@ -84,6 +84,13 @@ export const en = {
     clearDateAria: 'Back to today'
   },
 
+  mobileMenu: {
+    openAria: 'Menu',
+    macrosLabel: 'Macros shown',
+    installApp: 'Install app',
+    installAppTitle: 'Install Ninfo on this device'
+  },
+
   dateNavigator: {
     previousDay: 'Previous day',
     nextDay: 'Next day',
@@ -107,6 +114,7 @@ export const en = {
     vsGoal: 'vs goal',
     pctOver: '+{{pct}}%',
     pctMissing: '-{{pct}}%',
+    toggleRingBadgeAria: 'Switch between percent and value',
     showRingDetailsAria: 'Show macro details',
     showRingDetailsTitle: 'Show goal and difference for each macro',
     hideRingDetailsAria: 'Hide macro details',

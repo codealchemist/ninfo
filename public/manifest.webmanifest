@@ -1,0 +1,14 @@
+{
+  "name": "Ninfo — Nutrition Dashboard",
+  "short_name": "Ninfo",
+  "description": "Turn your daily food log into a real nutrition dashboard.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f6f3",
+  "theme_color": "#3d7a5c",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

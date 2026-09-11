@@ -12,6 +12,7 @@ import DaySummaryShareCard from './DaySummaryShareCard'
 import MealCardWarnings from '../meals/MealCardWarnings'
 import ToggleSwitch from '../common/ToggleSwitch'
 import { useAppStore } from '../../store/appStore'
+import { useSwipe } from '../../hooks/useSwipe'
 
 const COLOR_VARS: Record<string, string> = {
   protein: '--macro-protein',
@@ -47,6 +48,8 @@ export default function DaySummaryCard({
 }: Props) {
   const { t } = useTranslation()
   const visibleMacros = useAppStore((s) => s.visibleMacros)
+  const stepDate = useAppStore((s) => s.stepDate)
+  const swipeHandlers = useSwipe({ onSwipeLeft: () => stepDate(1), onSwipeRight: () => stepDate(-1) })
   const macros = MACRO_KEYS.filter((m) => visibleMacros.has(m))
   const [collapsed, setCollapsed] = useState(false)
   const [showRingDetails, setShowRingDetails] = useState(false)
@@ -99,7 +102,7 @@ export default function DaySummaryCard({
   }
 
   return (
-    <section className="card day-summary-card">
+    <section className="card day-summary-card" {...swipeHandlers}>
       <div className="day-summary-main">
         <div className="day-summary-header">
           <button

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 
 function formatDateLabel(iso: string, locale: string): string {
@@ -68,8 +68,13 @@ export default function DateNavigator() {
         <ChevronRight size={18} />
       </button>
       {selectedDate !== lastDate && (
-        <button className="link-button" onClick={() => setSelectedDate(lastDate)}>
-          {t('dateNavigator.jumpToLatest')}
+        <button
+          className="icon-button"
+          onClick={() => setSelectedDate(lastDate)}
+          aria-label={t('dateNavigator.jumpToLatest')}
+          title={t('dateNavigator.jumpToLatest')}
+        >
+          <ChevronsRight size={18} />
         </button>
       )}
     </div>

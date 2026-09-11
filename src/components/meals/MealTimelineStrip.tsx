@@ -13,6 +13,11 @@ export default function MealTimelineStrip({ meals }: Props) {
   const [focusedIndex, setFocusedIndex] = useState(0)
   const [flippedKeys, setFlippedKeys] = useState<Set<string>>(new Set())
   const cardRefs = useRef<Array<HTMLDivElement | null>>([])
+  const stripRef = useRef<HTMLDivElement>(null)
+  // Set right before a scroll-driven setFocusedIndex, so the scrollIntoView effect below knows
+  // to skip itself — the card is already where the user's swipe left it, no need to re-animate.
+  const scrollSyncRef = useRef(false)
+  const scrollSettleTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     setFocusedIndex(0)
@@ -20,12 +25,50 @@ export default function MealTimelineStrip({ meals }: Props) {
   }, [meals])
 
   useEffect(() => {
+    if (scrollSyncRef.current) {
+      scrollSyncRef.current = false
+      return
+    }
     cardRefs.current[focusedIndex]?.scrollIntoView({
       behavior: 'smooth',
       inline: 'center',
       block: 'nearest',
     })
   }, [focusedIndex])
+
+  useEffect(() => {
+    return () => {
+      if (scrollSettleTimeout.current) clearTimeout(scrollSettleTimeout.current)
+    }
+  }, [])
+
+  // Swiping the strip scroll-snaps cards natively (see .meal-strip in styles.css); once the
+  // scroll settles, sync focusedIndex to whichever card landed nearest center so the position
+  // counter, focus ring, and prev/next buttons stay in sync with what the user swiped to.
+  const handleScroll = () => {
+    if (scrollSettleTimeout.current) clearTimeout(scrollSettleTimeout.current)
+    scrollSettleTimeout.current = setTimeout(() => {
+      const strip = stripRef.current
+      if (!strip) return
+      const containerCenter = strip.getBoundingClientRect().left + strip.clientWidth / 2
+      let nearest = 0
+      let nearestDistance = Infinity
+      cardRefs.current.forEach((el, i) => {
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        const distance = Math.abs(rect.left + rect.width / 2 - containerCenter)
+        if (distance < nearestDistance) {
+          nearestDistance = distance
+          nearest = i
+        }
+      })
+      setFocusedIndex((current) => {
+        if (current === nearest) return current
+        scrollSyncRef.current = true
+        return nearest
+      })
+    }, 120)
+  }
 
   const goPrev = () => setFocusedIndex((i) => Math.max(0, i - 1))
   const goNext = () => setFocusedIndex((i) => Math.min(meals.length - 1, i + 1))
@@ -88,7 +131,7 @@ export default function MealTimelineStrip({ meals }: Props) {
           </button>
         </div>
       </div>
-      <div className="meal-strip">
+      <div className="meal-strip" ref={stripRef} onScroll={handleScroll}>
         {meals.map((meal, i) => (
           <div className="meal-strip-entry" key={meal.key}>
             {i > 0 && meal.items[0].fastingSincePrev && (
