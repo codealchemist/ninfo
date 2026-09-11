@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   CategoryScale,
   Chart as ChartJS,
@@ -10,6 +11,7 @@ import {
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import type { BiaEntry } from '../../data/parsers/bioimpedanciaParser'
+import ToggleSwitch, { type ToggleControl } from '../common/ToggleSwitch'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip)
 
@@ -17,12 +19,6 @@ type NumericMetric = keyof Pick<
   BiaEntry,
   'weightKg' | 'bodyFatPct' | 'bodyFatKg' | 'visceralFat' | 'muscleMassPct' | 'muscleMassKg' | 'bmi'
 >
-
-interface ToggleControl {
-  options: Array<{ value: string; label: string }>
-  value: string
-  onChange: (value: string) => void
-}
 
 interface Props {
   entries: BiaEntry[]
@@ -38,36 +34,10 @@ interface Props {
   diffToggle?: ToggleControl
 }
 
-function ToggleSwitch({ toggle }: { toggle: ToggleControl }) {
-  const count = toggle.options.length
-  const activeIndex = Math.max(
-    toggle.options.findIndex((opt) => opt.value === toggle.value),
-    0
-  )
-
-  return (
-    <div className="bia-toggle">
-      <span
-        className="bia-toggle-thumb"
-        style={{ width: `calc((100% - 4px) / ${count})`, transform: `translateX(${activeIndex * 100}%)` }}
-      />
-      {toggle.options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          className={'bia-toggle-option' + (toggle.value === opt.value ? ' bia-toggle-option--active' : '')}
-          onClick={() => toggle.onChange(opt.value)}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 export default function BiaTrendChart({ entries, metric, label, unit, color, diff, unitToggle, diffToggle }: Props) {
+  const { t, i18n } = useTranslation()
   const dateLabel = (date: string) =>
-    new Date(date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    new Date(date + 'T00:00:00').toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
 
   // A diff has nothing to compare the very first entry against, so the series is one point
   // shorter — each point is the change from the previous row to the row named on the axis.
@@ -118,7 +88,7 @@ export default function BiaTrendChart({ entries, metric, label, unit, color, dif
         </div>
       </div>
       {values.length === 0 ? (
-        <p className="hint">Not enough measurements yet for a diff.</p>
+        <p className="hint">{t('bia.notEnoughForDiff')}</p>
       ) : (
         <div className="bia-chart-container">
           <Line data={data} options={options} />

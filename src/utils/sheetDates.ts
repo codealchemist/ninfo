@@ -1,3 +1,10 @@
+import i18n from '../i18n'
+
+/** Thrown when a sheet's expected header row can't be found — a distinct class rather than a
+ * plain Error so callers can detect this specific failure by type instead of matching against
+ * the (translatable, therefore unstable) error message text. */
+export class HeaderNotFoundError extends Error {}
+
 const MONTHS: Record<string, number> = {
   jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
   jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
@@ -50,7 +57,7 @@ export function describeSheetContentForDiagnostics(rows: string[][]): string {
     .filter((r) => r.length > 0)
 
   if (nonEmptyRows.length === 0) {
-    return ' The file appears to be empty.'
+    return i18n.t('errors.fileEmpty')
   }
 
   const preview = nonEmptyRows
@@ -58,5 +65,5 @@ export function describeSheetContentForDiagnostics(rows: string[][]): string {
     .map((r) => r.slice(0, 5).join(', '))
     .join(' | ')
 
-  return ` Found instead: "${preview}" — check that this is the right tab.`
+  return i18n.t('errors.foundInstead', { preview })
 }

@@ -1,4 +1,5 @@
 import qrcode from 'qrcode-generator'
+import { useTranslation } from 'react-i18next'
 
 interface QrCodeProps {
   value: string
@@ -13,6 +14,7 @@ interface QrCodeProps {
  * background.
  */
 export default function QrCode({ value, size = 220, className }: QrCodeProps) {
+  const { t } = useTranslation()
   const qr = qrcode(0, 'M')
   qr.addData(value)
   qr.make()
@@ -35,7 +37,7 @@ export default function QrCode({ value, size = 220, className }: QrCodeProps) {
       height={size}
       className={className}
       role="img"
-      aria-label="QR code"
+      aria-label={t('topBar.qrCode')}
     >
       <rect width={size} height={size} fill="#ffffff" />
       <path d={modules} fill="#000000" />

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Check, Image as ImageIcon, Maximize2, Minimize2 } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { aggregateByDay } from '../data/aggregate/dailyTotals'
@@ -10,10 +11,11 @@ import MacroTimelineChart from '../components/charts/MacroTimelineChart'
 const RANGES = [7, 30, 90, 0] as const // 0 = all
 
 export default function Timeline() {
+  const { t } = useTranslation()
   const meals = useAppStore((s) => s.meals)
   const goalsByDate = useAppStore((s) => s.goalsByDate)
   const visibleMacros = useAppStore((s) => s.visibleMacros)
-  const setSelectedDate = useAppStore((s) => s.setSelectedDate)
+  const jumpToDate = useAppStore((s) => s.jumpToDate)
   const [range, setRange] = useState<number>(30)
   const chartRef = useRef<HTMLDivElement>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
@@ -30,7 +32,7 @@ export default function Timeline() {
   }, [fullscreen])
 
   const handleDayClick = (date: string) => {
-    setSelectedDate(date)
+    jumpToDate(date)
     navigate('/app/today')
   }
 
@@ -47,7 +49,7 @@ export default function Timeline() {
   const content = (
     <>
       <div className="timeline-header">
-        <h2>Macro-nutrient timeline</h2>
+        <h2>{t('timeline.title')}</h2>
         <div className="range-buttons">
           {RANGES.map((r) => (
             <button
@@ -55,31 +57,28 @@ export default function Timeline() {
               className={'range-button' + (range === r ? ' range-button--active' : '')}
               onClick={() => setRange(r)}
             >
-              {r === 0 ? 'All' : `${r}d`}
+              {r === 0 ? t('timeline.all') : t('timeline.rangeDays', { count: r })}
             </button>
           ))}
           <button
             className="icon-button icon-button--ghost"
             onClick={handleCopyImage}
-            aria-label="Copy chart as image"
-            title="Copy chart as an image"
+            aria-label={t('timeline.copyImageAria')}
+            title={t('timeline.copyImageTitle')}
           >
             {copyState === 'copied' ? <Check size={14} /> : <ImageIcon size={14} />}
           </button>
           <button
             className="icon-button icon-button--ghost"
             onClick={() => setFullscreen((f) => !f)}
-            aria-label={fullscreen ? 'Exit fullscreen' : 'View fullscreen'}
-            title={fullscreen ? 'Exit fullscreen' : 'View fullscreen'}
+            aria-label={fullscreen ? t('timeline.exitFullscreen') : t('timeline.viewFullscreen')}
+            title={fullscreen ? t('timeline.exitFullscreen') : t('timeline.viewFullscreen')}
           >
             {fullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         </div>
       </div>
-      <p className="hint">
-        Use the macro chips in the top bar to filter which nutrients are plotted. Click a day to
-        open its details.
-      </p>
+      <p className="hint">{t('timeline.hint')}</p>
       <MacroTimelineChart
         ref={chartRef}
         days={days}

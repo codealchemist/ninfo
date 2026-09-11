@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Ban, TriangleAlert, Zap } from 'lucide-react'
 import type { FatBreakdown } from '../../data/lipidAnalysis'
 import { FAT_WARNING_THRESHOLDS } from '../../data/lipidAnalysis'
@@ -14,52 +15,57 @@ interface Props {
 
 /** All of a meal's risk warnings, gathered in one place for the card header. */
 export default function MealCardWarnings({ fat, glycemic }: Props) {
+  const { t } = useTranslation()
   const { warnings } = fat
   if (!warnings.saturatedHigh && !warnings.omegaImbalance && !warnings.transFatPresent && !glycemic.spikeRisk) {
     return null
   }
 
+  const omegaRatio =
+    fat.omega6to3Ratio === Infinity
+      ? t('meals.warnings.omegaImbalance.undefinedRatio')
+      : `${round(fat.omega6to3Ratio!)}:1`
+
   return (
     <div className="meal-card-warnings">
       {warnings.saturatedHigh && (
-        <WarningIcon icon={TriangleAlert} tone="amber" label="High saturated fat">
-          <strong>High saturated fat</strong>
+        <WarningIcon icon={TriangleAlert} tone="amber" label={t('meals.warnings.saturatedFat.label')}>
+          <strong>{t('meals.warnings.saturatedFat.label')}</strong>
           <p>
-            Saturated fat ({round(fat.saturated)}g) is{' '}
-            {Math.round((fat.saturated / fat.totalFat) * 100)}% of this meal's total fat — above
-            the {Math.round(FAT_WARNING_THRESHOLDS.saturatedShareOfFat * 100)}% commonly cited as a
-            healthy upper bound.
+            {t('meals.warnings.saturatedFat.body', {
+              grams: round(fat.saturated),
+              pct: Math.round((fat.saturated / fat.totalFat) * 100),
+              threshold: Math.round(FAT_WARNING_THRESHOLDS.saturatedShareOfFat * 100),
+            })}
           </p>
         </WarningIcon>
       )}
       {warnings.omegaImbalance && (
-        <WarningIcon icon={TriangleAlert} tone="amber" label="Omega-6 to omega-3 imbalance">
-          <strong>Ω-6:Ω-3 imbalance</strong>
+        <WarningIcon icon={TriangleAlert} tone="amber" label={t('meals.warnings.omegaImbalance.label')}>
+          <strong>{t('meals.warnings.omegaImbalance.heading')}</strong>
           <p>
-            Ratio is{' '}
-            {fat.omega6to3Ratio === Infinity ? 'undefined (no Ω-3)' : `${round(fat.omega6to3Ratio!)}:1`}
-            , above the {FAT_WARNING_THRESHOLDS.omega6to3Ratio}:1 commonly cited as a healthy upper
-            bound. Diets skewed heavily toward Ω-6 are linked to more inflammation.
+            {t('meals.warnings.omegaImbalance.body', {
+              ratio: omegaRatio,
+              threshold: FAT_WARNING_THRESHOLDS.omega6to3Ratio,
+            })}
           </p>
         </WarningIcon>
       )}
       {warnings.transFatPresent && (
-        <WarningIcon icon={Ban} tone="red" label="Contains trans fat">
-          <strong>Trans fat present</strong>
-          <p>
-            This meal has {round(fat.trans)}g of trans/"Tóx" fat. Guidance treats any amount of
-            trans fat as unsafe.
-          </p>
+        <WarningIcon icon={Ban} tone="red" label={t('meals.warnings.transFat.label')}>
+          <strong>{t('meals.warnings.transFat.heading')}</strong>
+          <p>{t('meals.warnings.transFat.body', { grams: round(fat.trans) })}</p>
         </WarningIcon>
       )}
       {glycemic.spikeRisk && (
-        <WarningIcon icon={Zap} tone="amber" label="Glucose spike risk">
-          <strong>Glucose spike risk</strong>
+        <WarningIcon icon={Zap} tone="amber" label={t('meals.warnings.glucoseSpike.label')}>
+          <strong>{t('meals.warnings.glucoseSpike.label')}</strong>
           <p>
-            This meal gets {Math.round(glycemic.carbsShareOfCalories * 100)}% of its calories from
-            carbs, with too little protein or fat (under{' '}
-            {GLUCOSE_SPIKE_THRESHOLDS.minProteinGrams}g / {GLUCOSE_SPIKE_THRESHOLDS.minFatGrams}g)
-            to slow absorption. Carb-heavy meals like this can spike blood sugar.
+            {t('meals.warnings.glucoseSpike.body', {
+              pct: Math.round(glycemic.carbsShareOfCalories * 100),
+              minProtein: GLUCOSE_SPIKE_THRESHOLDS.minProteinGrams,
+              minFat: GLUCOSE_SPIKE_THRESHOLDS.minFatGrams,
+            })}
           </p>
         </WarningIcon>
       )}

@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   CategoryScale,
   Chart as ChartJS,
@@ -12,7 +13,6 @@ import {
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import type { DailyAggregate, MacroKey } from '../../data/types'
-import { MACRO_LABELS } from '../../data/types'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend)
 
@@ -34,15 +34,16 @@ const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimel
   { days, visibleMacros, onDayClick },
   ref
 ) {
+  const { t, i18n } = useTranslation()
   const labels = days.map((d) =>
-    new Date(d.date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    new Date(d.date + 'T00:00:00').toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
   )
 
   const gramKeys: MacroKey[] = ['protein', 'carbs', 'fat', 'fiber']
   const datasets = gramKeys
     .filter((k) => visibleMacros.has(k))
     .map((k) => ({
-      label: MACRO_LABELS[k],
+      label: t(`common.macros.${k}`),
       data: days.map((d) => d.totals[k]),
       borderColor: COLORS[k],
       backgroundColor: COLORS[k],
@@ -53,7 +54,7 @@ const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimel
 
   if (visibleMacros.has('calories')) {
     datasets.push({
-      label: MACRO_LABELS.calories,
+      label: t('common.macros.calories'),
       data: days.map((d) => d.totals.calories),
       borderColor: COLORS.calories,
       backgroundColor: COLORS.calories,

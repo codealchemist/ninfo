@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/codealchemist/nutriport.git"
+    "url": "git+https://github.com/codealchemist/ninfo.git"
   },
   "keywords": [
     "nutrition",
@@ -26,18 +26,20 @@
   "author": "Alberto Miranda",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/codealchemist/nutriport/issues"
+    "url": "https://github.com/codealchemist/ninfo/issues"
   },
-  "homepage": "https://github.com/codealchemist/nutriport#readme",
+  "homepage": "https://github.com/codealchemist/ninfo#readme",
   "dependencies": {
     "chart.js": "^4.4.4",
     "html-to-image": "^1.11.13",
+    "i18next": "^26.4.2",
     "lucide-react": "^0.441.0",
     "papaparse": "^5.4.1",
     "qrcode-generator": "^2.0.4",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.13",
     "react-router-dom": "^6.26.2",
     "zustand": "^4.5.5"
   },

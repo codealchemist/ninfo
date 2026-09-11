@@ -1,3 +1,5 @@
+import i18n from '../i18n'
+
 /**
  * Fetches a Google Sheets CSV export URL and validates the response is actually CSV.
  *
@@ -9,14 +11,11 @@
  */
 export async function fetchSheetCsv(url: string, signal?: AbortSignal): Promise<string> {
   const res = await fetch(url, { signal })
-  if (!res.ok) throw new Error(`Google Sheets returned an error (${res.status}).`)
+  if (!res.ok) throw new Error(i18n.t('errors.httpError', { status: res.status }))
   const text = await res.text()
 
   if (/^\s*<(!doctype|html)/i.test(text)) {
-    throw new Error(
-      'Google returned a sign-in page instead of your spreadsheet — this sheet isn\'t ' +
-        'actually shared as "Anyone with the link can view" yet (File → Share → General access).'
-    )
+    throw new Error(i18n.t('errors.signInPage'))
   }
 
   return text

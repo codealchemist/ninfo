@@ -25,6 +25,8 @@ interface AppState {
   foodCatalog: FoodCatalogItem[]
   dates: string[]
   selectedDate: string | null
+  /** The date shown on the top bar's "other date" chip, if any — see jumpToDate/setSelectedDate. */
+  pinnedDate: string | null
   visibleMacros: Set<MacroKey>
   sheetLinkId: string | null
   loadController: AbortController | null
@@ -41,7 +43,17 @@ interface AppState {
 
   setSelectedDate: (date: string) => void
   stepDate: (direction: 1 | -1) => void
+  jumpToDate: (date: string) => void
+  goToToday: () => void
+  clearPinnedDate: () => void
   toggleMacro: (macro: MacroKey) => void
+}
+
+/** Today's real calendar date if it has data, otherwise the most recent date that does. */
+export function getDefaultSelectedDate(dates: string[]): string | null {
+  if (dates.length === 0) return null
+  const todayIso = new Date().toISOString().slice(0, 10)
+  return dates.includes(todayIso) ? todayIso : dates[dates.length - 1]
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -53,6 +65,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   foodCatalog: [],
   dates: [],
   selectedDate: null,
+  pinnedDate: null,
   visibleMacros: new Set(MACRO_KEYS),
   sheetLinkId: null,
   loadController: null,
@@ -193,12 +206,23 @@ export const useAppStore = create<AppState>((set, get) => ({
       foodCatalog: [],
       dates: [],
       selectedDate: null,
+      pinnedDate: null,
       sheetLinkId: null,
       loadController: null,
     })
   },
 
-  setSelectedDate: (date) => set({ selectedDate: date }),
+  // A plain date change (stepping with the arrows, the native date picker, "jump to latest")
+  // only pins the "other date" chip the first time it moves away from today/latest — once
+  // pinned, further plain changes leave that chip alone. A *deliberate* jump (jumpToDate,
+  // e.g. clicking a point on the Timeline chart) always re-pins it to wherever you jumped.
+  setSelectedDate: (date) => {
+    set((state) => ({
+      selectedDate: date,
+      pinnedDate:
+        state.pinnedDate === null && date !== getDefaultSelectedDate(state.dates) ? date : state.pinnedDate,
+    }))
+  },
 
   stepDate: (direction) => {
     const { dates, selectedDate } = get()
@@ -206,8 +230,22 @@ export const useAppStore = create<AppState>((set, get) => ({
     const idx = dates.indexOf(selectedDate)
     const nextIdx = idx + direction
     if (nextIdx < 0 || nextIdx >= dates.length) return
-    set({ selectedDate: dates[nextIdx] })
+    get().setSelectedDate(dates[nextIdx])
   },
+
+  // A deliberate jump re-pins the chip to wherever it lands — unless that's today/latest
+  // itself, in which case there's no "other date" to jump back to, so the chip goes away.
+  jumpToDate: (date) => {
+    const defaultDate = getDefaultSelectedDate(get().dates)
+    set({ selectedDate: date, pinnedDate: date === defaultDate ? null : date })
+  },
+
+  goToToday: () => {
+    const target = getDefaultSelectedDate(get().dates)
+    if (target) set({ selectedDate: target })
+  },
+
+  clearPinnedDate: () => set({ pinnedDate: null }),
 
   toggleMacro: (macro) => {
     const next = new Set(get().visibleMacros)
@@ -256,6 +294,7 @@ function applyResult(
     goalsByDate: result.goalsByDate,
     foodCatalog: result.foodCatalog,
     dates,
-    selectedDate: dates[dates.length - 1] ?? null,
+    selectedDate: getDefaultSelectedDate(dates),
+    pinnedDate: null,
   })
 }

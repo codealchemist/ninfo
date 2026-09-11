@@ -1,10 +1,12 @@
 import Papa from 'papaparse'
 import {
   describeSheetContentForDiagnostics,
+  HeaderNotFoundError,
   makeYearInferrer,
   parseFechaCell,
   parseNumber,
 } from '../../utils/sheetDates'
+import i18n from '../../i18n'
 
 export interface BiaEntry {
   date: string // ISO yyyy-mm-dd
@@ -36,9 +38,8 @@ export function parseBioimpedanciaCsv(csvText: string, today: Date = new Date())
 
   const headerIdx = rows.findIndex((r) => r[0]?.trim() === 'Fecha' && r[2]?.trim() === 'Peso')
   if (headerIdx === -1) {
-    throw new Error(
-      'Could not find the Bioimpedancia header row (expected Fecha/Peso columns).' +
-        describeSheetContentForDiagnostics(rows)
+    throw new HeaderNotFoundError(
+      i18n.t('errors.bioimpedanciaHeaderNotFound') + describeSheetContentForDiagnostics(rows)
     )
   }
 

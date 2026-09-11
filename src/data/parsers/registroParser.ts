@@ -2,10 +2,12 @@ import Papa from 'papaparse'
 import type { MacroTotals, MealItem } from '../types'
 import {
   describeSheetContentForDiagnostics,
+  HeaderNotFoundError,
   makeYearInferrer,
   parseFechaCell,
   parseNumber,
 } from '../../utils/sheetDates'
+import i18n from '../../i18n'
 
 function parseHoraCell(raw: string): string {
   const trimmed = raw.trim()
@@ -34,9 +36,8 @@ export function parseRegistroCsv(csvText: string, today: Date = new Date()): Par
     (r) => r[1]?.trim() === 'Fecha' && r[2]?.trim() === 'Hora' && r[3]?.trim() === 'Alimento'
   )
   if (headerIdx === -1) {
-    throw new Error(
-      'Could not find the Registro header row (expected Fecha/Hora/Alimento columns).' +
-        describeSheetContentForDiagnostics(rows)
+    throw new HeaderNotFoundError(
+      i18n.t('errors.registroHeaderNotFound') + describeSheetContentForDiagnostics(rows)
     )
   }
 

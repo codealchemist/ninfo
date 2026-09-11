@@ -14,12 +14,24 @@
   --macro-fiber: #577590;
   --macro-calories: #9b5de5;
 
+  /* Same hues, ~35% darker — the "second lap" overlay on a goal ring once a macro passes
+     100% of its target. Not redefined per theme: the base macro colors above are already
+     theme-invariant (see the dark-mode blocks below), so a fixed darken reads consistently
+     in both. */
+  --macro-protein-over: #924f3e;
+  --macro-carbs-over: #28634a;
+  --macro-fat-over: #9d7322;
+  --macro-fiber-over: #394c5e;
+  --macro-calories-over: #653c95;
+
   --fat-saturated: #c0392b;
   --fat-unsaturated: #3d9970;
   --fat-omega6: #f2994a;
   --fat-omega3: #2f80ed;
   --warning-amber: #e08e0b;
   --warning-red: #c0392b;
+  --warning-red-light: #d9584a;
+  --info-blue: #2f80ed;
   --row-highlight: #eab308;
 }
 
@@ -141,6 +153,28 @@ button {
   flex-shrink: 0;
   margin-top: 2px;
   color: var(--accent);
+}
+
+.welcome-links {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.welcome-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.welcome-link:hover {
+  color: var(--accent);
+  background: var(--bg);
 }
 
 .option-card {
@@ -468,6 +502,48 @@ button {
   color: var(--text);
 }
 
+.date-chip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--ring-track);
+  white-space: nowrap;
+}
+
+.date-chip-label {
+  border: none;
+  background: none;
+  padding: 2px 6px;
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.date-chip-label:hover {
+  background: var(--bg);
+}
+
+.date-chip-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.date-chip-close:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
 .link-button {
   display: flex;
   align-items: center;
@@ -604,6 +680,117 @@ button {
   font-size: 15px;
 }
 
+.day-summary-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.day-summary-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.day-summary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+/* Kept in the DOM (needed for html-to-image to measure/render it) but shoved off-screen —
+   never shown on the page itself, only ever captured as an image. */
+.day-summary-share-offscreen {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  pointer-events: none;
+}
+
+.day-summary-share {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  width: 480px;
+  height: 640px;
+  padding: 24px 32px;
+  box-sizing: border-box;
+  background: var(--surface);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.day-summary-share-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.day-summary-share-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.day-summary-share-date {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.day-summary-share-rings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+}
+
+.day-summary-share-deltas {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+  justify-content: center;
+}
+
+.day-summary-share-sources {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.day-summary-share-sources-heading {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.day-summary-share-sources-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.day-summary-share-source {
+  font-size: 12.5px;
+  color: var(--text);
+  max-width: 380px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .day-summary-header {
   display: flex;
   align-items: center;
@@ -657,36 +844,81 @@ button {
   align-items: center;
   gap: 2px;
   width: 90px;
+  cursor: default;
 }
 
 .progress-ring-value {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   fill: var(--text);
 }
 .progress-ring-unit {
-  font-size: 9px;
+  font-size: 10px;
   fill: var(--text-muted);
 }
 .progress-ring-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 2px;
 }
 .progress-ring-goal {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 .progress-ring-goal--over {
-  color: #c0392b;
+  color: var(--warning-red-light);
 }
 
 .progress-ring-diff {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 .progress-ring-diff--over {
-  color: #c0392b;
+  color: var(--warning-red-light);
+}
+
+.progress-ring-dial {
+  position: relative;
+  width: 86px;
+  height: 86px;
+}
+
+.progress-ring-badge {
+  position: absolute;
+  top: 0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid currentColor;
+}
+.progress-ring-badge--over {
+  right: 0;
+  color: var(--warning-red-light);
+}
+.progress-ring-badge--under {
+  left: 0;
+  color: var(--info-blue);
+}
+
+.progress-ring-badge-value {
+  display: none;
+  white-space: nowrap;
+}
+.progress-ring-dial:hover .progress-ring-badge-pct {
+  display: none;
+}
+.progress-ring-dial:hover .progress-ring-badge-value {
+  display: inline;
+}
+
+.progress-ring-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
 .delta-row {
@@ -698,12 +930,36 @@ button {
   padding-top: 12px;
 }
 
+.day-summary-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.day-summary-footer .delta-row {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+.day-summary-median-hint {
+  margin: 0;
+}
+
 .delta-chip {
   font-size: 11.5px;
   color: var(--text-muted);
   background: var(--bg);
   border-radius: 999px;
   padding: 4px 10px;
+}
+.delta-chip--over {
+  color: var(--warning-red-light);
+}
+.delta-chip--under {
+  color: var(--info-blue);
 }
 
 .bia-header {
@@ -858,6 +1114,14 @@ button {
 
 .bia-toggle-option--active {
   color: var(--accent-contrast);
+}
+
+/* This toggle's options ("Yesterday"/"Week"/"Month") vary a lot in length — force them to an
+   equal width (wide enough for the longest) so the sliding thumb's 1/N-width math still lines
+   up with each button, instead of assuming they're naturally the same size like %/kg are. */
+.day-summary-comparison-toggle .bia-toggle-option {
+  min-width: 74px;
+  text-align: center;
 }
 
 .bia-chart-container {
@@ -1590,6 +1854,13 @@ button {
     justify-content: center;
     gap: 12px;
     width: 100%;
+  }
+  .day-summary-card {
+    flex-direction: column;
+  }
+  .day-summary-actions {
+    flex-direction: row;
+    align-self: flex-end;
   }
   .day-summary-body {
     flex-direction: column;
