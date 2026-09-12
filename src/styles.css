@@ -888,6 +888,78 @@ button {
   gap: 4px;
 }
 
+.warnings-button:not(:disabled) {
+  color: var(--warning-amber);
+}
+
+.day-summary-warnings-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.day-summary-warnings-header {
+  display: flex;
+  align-items: center;
+}
+.day-summary-warnings-header .day-summary-footer-title {
+  flex: 1;
+  text-align: center;
+}
+
+/* Shared with the meal-card warnings back-face (see WarningStampList). */
+.warning-stamp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* A little card per warning — the hexagon floats top-left so the description wraps beside it
+   like a newspaper paragraph, then continues full width once it clears the hexagon. */
+.warning-stamp-row {
+  display: flow-root;
+  width: 100%;
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.warning-stamp-hex {
+  float: left;
+  margin: 0 14px 6px 0;
+  width: 66px;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  background: #000;
+  color: #fff;
+  clip-path: polygon(
+    30% 0%,
+    70% 0%,
+    100% 30%,
+    100% 70%,
+    70% 100%,
+    30% 100%,
+    0% 70%,
+    0% 30%
+  );
+  font-size: 9.5px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.warning-stamp-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
 .day-summary-card--placeholder {
   display: flex;
   flex-direction: column;
@@ -1255,6 +1327,7 @@ button {
 .day-summary-footer-top {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
 }
@@ -1279,7 +1352,6 @@ button {
   flex-direction: column;
   gap: 6px;
   width: 100%;
-  max-width: 280px;
 }
 .day-summary-source-item {
   display: flex;
@@ -1726,14 +1798,6 @@ button {
   flex: 1 1 auto;
 }
 
-.meal-card-warnings {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding-top: 2px;
-  flex: 0 0 auto;
-}
-
 .nutrition-label-hint {
   margin-left: auto;
   font-size: 10.5px;
@@ -1799,53 +1863,6 @@ button {
 .fat-legend-value {
   font-weight: 600;
   color: var(--text);
-}
-
-.warning-icon-wrap {
-  position: relative;
-}
-
-.warning-icon {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #fff;
-}
-
-.warning-icon--amber {
-  background: var(--warning-amber);
-}
-.warning-icon--red {
-  background: var(--warning-red);
-}
-
-.warning-tooltip {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: -8px;
-  width: min(190px, 65vw);
-  background: var(--text);
-  color: var(--bg);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 11px;
-  line-height: 1.4;
-  z-index: 20;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-}
-
-.warning-tooltip strong {
-  display: block;
-  margin-bottom: 3px;
-  font-size: 11.5px;
-}
-.warning-tooltip p {
-  margin: 0;
 }
 
 .fat-section-hint {
@@ -1925,8 +1942,12 @@ button {
   flex-shrink: 0;
 }
 
+.meal-warnings-content {
+  padding: 12px;
+}
+
 .icon-button--ghost {
-  width: 22px;
+  width: 42px;
   height: 22px;
   border: none;
   background: none;
@@ -2313,9 +2334,8 @@ button {
     width: 100%;
   }
   /* Only one column shows at a time on mobile (see the tabs above) — let it use the full
-     width instead of the desktop cap meant to keep two side-by-side columns compact. */
-  .delta-table,
-  .day-summary-sources-list {
+     width instead of the desktop cap meant to keep the vs. column compact. */
+  .delta-table {
     max-width: none;
   }
 

@@ -1,17 +1,29 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Calendar, Check, ChevronDown, ChevronsRight, Copy, Eye, EyeOff, Image as ImageIcon, ListChecks } from 'lucide-react'
+import {
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronsRight,
+  Copy,
+  Eye,
+  EyeOff,
+  Image as ImageIcon,
+  ListChecks,
+  TriangleAlert,
+} from 'lucide-react'
 import { MACRO_KEYS, MACRO_UNITS, type LipidTotals, type MacroTotals, type Meal } from '../../data/types'
 import { analyzeFat } from '../../data/lipidAnalysis'
 import { analyzeGlycemicRisk } from '../../data/glycemicRisk'
 import { generateDayReview } from '../../data/dayReview'
 import { formatDayFoodListAsText, formatDaySummaryAsText } from '../../data/dayText'
 import { topSourcesByMacro } from '../../data/aggregate/dailyTotals'
+import { buildWarningStamps } from '../../data/warningStamps'
 import { copyElementAsImage, copyTextToClipboard } from '../../utils/clipboard'
 import GoalProgressRing from './GoalProgressRing'
 import DaySummaryShareCard from './DaySummaryShareCard'
-import MealCardWarnings from '../meals/MealCardWarnings'
 import ToggleSwitch from '../common/ToggleSwitch'
+import WarningStampList from '../common/WarningStampList'
 import { useAppStore } from '../../store/appStore'
 
 function formatDateHeading(iso: string, locale: string): string {
@@ -62,6 +74,7 @@ export default function DaySummaryCard({
   const [showRingDetails, setShowRingDetails] = useState(false)
   const [comparisonMode, setComparisonMode] = useState<ComparisonMode>('yesterday')
   const [activeTab, setActiveTab] = useState<MobileTab>('summary')
+  const [showWarnings, setShowWarnings] = useState(false)
   const shareCardRef = useRef<HTMLDivElement>(null)
   const [foodListCopyState, setFoodListCopyState] = useState<CopyState>('idle')
   const [summaryTextCopyState, setSummaryTextCopyState] = useState<CopyState>('idle')
@@ -70,6 +83,17 @@ export default function DaySummaryCard({
   const fatBreakdown = analyzeFat(lipids, totals.fat)
   const glycemicRisk = analyzeGlycemicRisk(totals)
   const reviewText = generateDayReview(totals, goals)
+  const dayWarnings = buildWarningStamps(fatBreakdown, glycemicRisk, t, 'today')
+  const hasWarnings = dayWarnings.length > 0
+
+  useEffect(() => {
+    if (!showWarnings) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowWarnings(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showWarnings])
 
   const comparisonTotals: Record<ComparisonMode, MacroTotals | null> = {
     yesterday: prevDayTotals,
@@ -185,12 +209,29 @@ export default function DaySummaryCard({
                 <ChevronsRight size={16} />
               </button>
             )}
-            <MealCardWarnings fat={fatBreakdown} glycemic={glycemicRisk} />
+            <button
+              className="icon-button icon-button--ghost warnings-button"
+              onClick={() => setShowWarnings((s) => !s)}
+              disabled={!hasWarnings}
+              aria-label={t('today.warningsButtonAria')}
+              title={t('today.warningsButtonAria')}
+            >
+              <TriangleAlert size={16} />
+            </button>
             <div className="day-summary-header-buttons">{actionButtons}</div>
           </div>
         </div>
 
-        {!collapsed && (
+        {!collapsed && showWarnings && (
+          <div className="day-summary-warnings-view">
+            <div className="day-summary-warnings-header">
+              <span className="day-summary-footer-title">{t('today.warningsTitle')}</span>
+            </div>
+            <WarningStampList warnings={dayWarnings} />
+          </div>
+        )}
+
+        {!collapsed && !showWarnings && (
           <>
             <div className="day-summary-tabbar">
               <button
