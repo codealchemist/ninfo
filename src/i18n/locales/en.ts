@@ -11,7 +11,8 @@ export const en = {
     cancel: 'Cancel',
     save: 'Save',
     copyLink: 'Copy link',
-    loadingYourData: 'Loading your data…'
+    loadingYourData: 'Loading your data…',
+    refreshingData: 'Refreshing…'
   },
 
   welcome: {
@@ -69,7 +70,7 @@ export const en = {
       google: 'Live'
     },
     nav: {
-      today: 'Today',
+      today: 'Latest',
       timeline: 'Timeline',
       bia: 'BIA'
     },
@@ -94,7 +95,8 @@ export const en = {
   dateNavigator: {
     previousDay: 'Previous day',
     nextDay: 'Next day',
-    jumpToLatest: 'Jump to latest'
+    jumpToLatest: 'Jump to latest',
+    pickDate: 'Pick a date'
   },
 
   shareQr: {
@@ -103,7 +105,11 @@ export const en = {
   },
 
   today: {
-    summaryHeading: "Today's summary",
+    tabSummary: 'Summary',
+    tabVs: 'vs.',
+    tabSources: 'Sources',
+    macroNutrientsTitle: 'Macro nutrients',
+    currentDayVsTitle: 'Current day vs.',
     vsYesterday: 'vs. yesterday',
     vsWeek: 'vs. week',
     vsMonth: 'vs. month',

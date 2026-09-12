@@ -29,11 +29,16 @@ export default function MealTimelineStrip({ meals }: Props) {
       scrollSyncRef.current = false
       return
     }
-    cardRefs.current[focusedIndex]?.scrollIntoView({
-      behavior: 'smooth',
-      inline: 'center',
-      block: 'nearest',
-    })
+    const strip = stripRef.current
+    const card = cardRefs.current[focusedIndex]
+    if (!strip || !card) return
+    // Scroll the strip's own scrollLeft directly rather than card.scrollIntoView(), which
+    // would also let the browser scroll the page vertically to bring the card into view —
+    // exactly what caused the page to load pre-scrolled past the summary panel.
+    const stripRect = strip.getBoundingClientRect()
+    const cardRect = card.getBoundingClientRect()
+    const delta = cardRect.left + cardRect.width / 2 - (stripRect.left + stripRect.width / 2)
+    strip.scrollTo({ left: strip.scrollLeft + delta, behavior: 'smooth' })
   }, [focusedIndex])
 
   useEffect(() => {
@@ -84,7 +89,7 @@ export default function MealTimelineStrip({ meals }: Props) {
 
   // Left/right arrow keys step between meals, matching the on-screen chevrons, and Enter flips
   // the focused card — all ignored while the user is typing into a form control (e.g. the date
-  // picker), and shift+arrow is left alone entirely so DateNavigator can handle day navigation.
+  // picker), and shift+arrow is left alone entirely so DaySummarySwiper can handle day navigation.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null

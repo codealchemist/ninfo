@@ -6,7 +6,11 @@ export default function LoadingModal() {
   const { t } = useTranslation()
   const status = useAppStore((s) => s.status)
   const error = useAppStore((s) => s.error)
+  const meta = useAppStore((s) => s.meta)
   const cancelLoad = useAppStore((s) => s.cancelLoad)
+  // A refresh re-loads an already-loaded dataset in place, rather than the first load of one —
+  // worth a distinct message since the user is still looking at (now stale) data underneath.
+  const isRefresh = meta !== null
 
   if (status !== 'loading' && status !== 'error') return null
 
@@ -16,7 +20,7 @@ export default function LoadingModal() {
         {status === 'loading' ? (
           <>
             <LoaderCircle size={32} className="spin" />
-            <p>{t('common.loadingYourData')}</p>
+            <p>{t(isRefresh ? 'common.refreshingData' : 'common.loadingYourData')}</p>
             <button onClick={cancelLoad}>
               {t('common.cancel')}
             </button>

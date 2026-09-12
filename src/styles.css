@@ -450,7 +450,37 @@ button {
 .top-bar-mobile-row {
   display: none;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
+}
+
+.top-bar-mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.top-bar-mobile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.mobile-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.mobile-nav-icon.active {
+  background: var(--ring-track);
+  color: var(--text);
 }
 
 .hamburger-button {
@@ -720,27 +750,6 @@ button {
   cursor: not-allowed;
 }
 
-.date-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.date-nav-input {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 4px 8px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 13px;
-}
-
-.date-nav-label {
-  font-size: 13px;
-  color: var(--text-muted);
-  min-width: 90px;
-}
-
 .macro-chips {
   display: flex;
   gap: 6px;
@@ -784,7 +793,7 @@ button {
 }
 
 .dashboard-main {
-  padding: 24px 32px;
+  padding: 12px;
   max-width: min(1200px, 94vw);
   margin: 0 auto;
   display: flex;
@@ -795,7 +804,7 @@ button {
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
 }
 
 .card {
@@ -810,6 +819,49 @@ button {
   font-size: 15px;
 }
 
+.day-summary-swipe-viewport {
+  position: relative;
+  overflow: hidden;
+  /* Horizontal swipe only — tells the browser not to hand vertical touch movement here to
+     page scroll, so the drag handling in DaySummarySwiper.tsx owns it instead. */
+  touch-action: pan-x;
+}
+
+.day-summary-swipe-slot {
+  width: 100%;
+}
+.day-summary-swipe-slot--current {
+  position: relative;
+  z-index: 1;
+}
+.day-summary-swipe-slot--peek {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+.day-summary-swipe-slot--settling {
+  transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.day-summary-nav-arrow {
+  position: absolute;
+  top: 66%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.day-summary-nav-arrow--prev {
+  left: 6px;
+}
+.day-summary-nav-arrow--next {
+  right: 6px;
+}
+
 .day-summary-card {
   display: flex;
   align-items: flex-start;
@@ -821,11 +873,64 @@ button {
   min-width: 0;
 }
 
+/* Desktop shows these in the panel header instead (.day-summary-header-buttons) — this
+   bottom-right column is mobile-only, where header space is tighter. */
 .day-summary-actions {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 6px;
   flex: 0 0 auto;
+}
+
+.day-summary-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.day-summary-card--placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  min-height: 260px;
+}
+
+.day-summary-placeholder-date {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.day-summary-placeholder-rings {
+  display: flex;
+  gap: 16px;
+}
+
+.day-summary-placeholder-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--ring-track);
+  animation: day-summary-placeholder-pulse 1.2s ease-in-out infinite;
+}
+.day-summary-placeholder-ring:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.day-summary-placeholder-ring:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes day-summary-placeholder-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Kept in the DOM (needed for html-to-image to measure/render it) but shoved off-screen —
@@ -926,7 +1031,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-bottom: 14px;
 }
 
@@ -943,6 +1048,46 @@ button {
   padding: 0;
   cursor: pointer;
   color: inherit;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* Collapsed or not, the header always stays on one line — the date truncates instead of
+   wrapping, so the action icons never get pushed off or onto a second row. */
+.day-summary-date-heading {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.day-summary-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.day-summary-date-picker {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.day-summary-date-picker-icon {
+  pointer-events: none;
+  color: var(--text);
+}
+.day-summary-date-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .day-summary-body {
@@ -1056,19 +1201,56 @@ button {
   padding-top: 12px;
 }
 
-.day-summary-footer {
+/* Tabs are mobile-only (see the Mobile section) — on desktop the tab bar stays hidden and
+   every .day-summary-panel is shown at once, laid out as summary-on-top / vs+sources side by
+   side below. */
+.day-summary-tabbar {
+  display: none;
+}
+.day-summary-panel {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 10px;
+}
+.day-summary-tab {
+  flex: 1;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 7px 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.day-summary-tab:focus {
+  outline: none;
+}
+.day-summary-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.day-summary-tab--active {
+  background: var(--ring-track);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.day-summary-footer {
+  display: flex;
+  align-items: center;
+  gap: 32px;
   margin-top: 16px;
   border-top: 1px solid var(--border);
-  padding-top: 12px;
+  padding-top: 16px;
 }
-.day-summary-footer .delta-row {
-  margin-top: 0;
-  border-top: none;
-  padding-top: 0;
+.day-summary-footer-half {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
 .day-summary-footer-top {
   display: flex;
@@ -1076,9 +1258,81 @@ button {
   flex-wrap: wrap;
   gap: 10px;
 }
+.day-summary-footer-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+/* The Summary panel's own title is mobile-only — desktop already reads clearly without one
+   (see the Mobile section for where this turns back on). */
+.day-summary-body-title {
+  display: none;
+}
 .day-summary-median-hint {
   margin: 0;
   color: color-mix(in srgb, var(--text-muted) 60%, var(--text) 40%);
+}
+
+.day-summary-sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 280px;
+}
+.day-summary-source-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12.5px;
+}
+.day-summary-source-macro {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.day-summary-source-detail {
+  color: var(--text-muted);
+}
+
+.delta-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  max-width: 280px;
+}
+.delta-table-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12.5px;
+  padding: 3px 0;
+}
+.delta-table-label {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-muted);
+}
+.delta-table-grams {
+  min-width: 64px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.delta-table-pct {
+  min-width: 52px;
+  text-align: right;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.delta-table-row--over .delta-table-grams,
+.delta-table-row--over .delta-table-pct {
+  color: var(--warning-red-light);
+}
+.delta-table-row--under .delta-table-grams,
+.delta-table-row--under .delta-table-pct {
+  color: var(--info-blue);
 }
 
 .delta-chip {
@@ -1931,12 +2185,19 @@ button {
 
 @media (max-width: 640px) {
   .dashboard-main {
-    padding: 12px;
-    gap: 14px;
+    padding: 12px 0;
+    gap: 0;
   }
 
   .card {
     padding: 14px 16px;
+  }
+
+  .welcome {
+    padding: 0;
+  }
+  .welcome-card {
+    border-radius: 0;
   }
 
   .top-bar-row,
@@ -1950,14 +2211,7 @@ button {
   .hamburger-button {
     display: flex;
   }
-  .top-bar-mobile-row .date-nav {
-    flex: 1;
-  }
-
-  .brand-name {
-    display: none;
-  }
-  .brand-version {
+  .top-bar .brand-version {
     display: none;
   }
 
@@ -1973,14 +2227,6 @@ button {
   }
   .link-button span {
     display: none;
-  }
-
-  .date-nav {
-    flex-wrap: wrap;
-    row-gap: 6px;
-  }
-  .date-nav-label {
-    min-width: 0;
   }
 
   /* Bigger touch targets */
@@ -2000,10 +2246,19 @@ button {
   }
   .day-summary-card {
     flex-direction: column;
+    /* The base rule's align-items: flex-start doesn't stretch children to full width in a
+       column layout — .day-summary-main would otherwise shrink-wrap to whichever tab's
+       content happens to be narrowest (e.g. the vs./sources panels vs. the wider rings row),
+       making the tab bar above it narrower too since it shares that width. */
+    align-items: stretch;
   }
   .day-summary-actions {
+    display: flex;
     flex-direction: row;
-    align-self: flex-end;
+    align-self: center;
+  }
+  .day-summary-header-buttons {
+    display: none;
   }
   .day-summary-body {
     flex-direction: column;
@@ -2015,7 +2270,53 @@ button {
   }
   .day-summary-footer-top {
     flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  /* All three panel titles read the same way: full width, centered text — matching what the
+     Summary panel's "Macro nutrients" already does. Desktop leaves this alone since the vs.
+     panel's title shares a row with the toggle/hint there instead of getting its own line. */
+  .day-summary-footer-title {
+    width: 100%;
+    text-align: center;
+  }
+  /* Tabs replace the desktop's "everything at once" layout — only the active panel shows. */
+  .day-summary-tabbar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .day-summary-panel {
+    display: none;
+  }
+  .day-summary-panel.day-summary-panel--active {
+    display: flex;
+    flex-direction: column;
+  }
+  /* Each panel's own title sits where the nav arrows center on mobile (see
+     DaySummarySwiper) — the Summary panel doesn't have one on desktop, where the arrows
+     align with the footer's divider line instead. */
+  .day-summary-body-title {
+    display: flex;
+    justify-content: center;
+  }
+  .day-summary-footer {
+    flex-direction: column;
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+    gap: 0;
+  }
+  .day-summary-footer-half {
     align-items: flex-start;
+    flex: 0 0 auto;
+    width: 100%;
+  }
+  /* Only one column shows at a time on mobile (see the tabs above) — let it use the full
+     width instead of the desktop cap meant to keep two side-by-side columns compact. */
+  .delta-table,
+  .day-summary-sources-list {
+    max-width: none;
   }
 
   .meal-card-flip {

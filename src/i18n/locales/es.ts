@@ -13,7 +13,8 @@ export const es: typeof en = {
     cancel: 'Cancelar',
     save: 'Guardar',
     copyLink: 'Copiar enlace',
-    loadingYourData: 'Cargando tus datos…'
+    loadingYourData: 'Cargando tus datos…',
+    refreshingData: 'Actualizando…'
   },
 
   welcome: {
@@ -72,7 +73,7 @@ export const es: typeof en = {
       google: 'En vivo'
     },
     nav: {
-      today: 'Hoy',
+      today: 'Reciente',
       timeline: 'Cronología',
       bia: 'BIA'
     },
@@ -100,7 +101,8 @@ export const es: typeof en = {
   dateNavigator: {
     previousDay: 'Día anterior',
     nextDay: 'Día siguiente',
-    jumpToLatest: 'Ir al más reciente'
+    jumpToLatest: 'Ir al más reciente',
+    pickDate: 'Elegir fecha'
   },
 
   shareQr: {
@@ -109,7 +111,11 @@ export const es: typeof en = {
   },
 
   today: {
-    summaryHeading: 'Resumen de hoy',
+    tabSummary: 'Resumen',
+    tabVs: 'vs.',
+    tabSources: 'Fuentes',
+    macroNutrientsTitle: 'Macronutrientes',
+    currentDayVsTitle: 'Día actual vs.',
     vsYesterday: 'vs. ayer',
     vsWeek: 'vs. semana',
     vsMonth: 'vs. mes',
