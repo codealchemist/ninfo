@@ -133,6 +133,26 @@ export const es: typeof en = {
     hideRingDetailsTitle: 'Ocultar el objetivo y la diferencia de cada macro',
     topSources: 'Principales fuentes',
     topSourceLine: '{{food}} — {{amount}} ({{pct}}%)',
+    warningsButtonAria: 'Mostrar advertencias nutricionales',
+    warningsTitle: 'Advertencias',
+    warnings: {
+      saturatedFat: {
+        stamp: 'Grasa saturada alta',
+        body: 'La grasa saturada ({{grams}}g) es el {{pct}}% de la grasa total de hoy — por encima del {{threshold}}% considerado comúnmente como un límite saludable.'
+      },
+      omegaImbalance: {
+        stamp: 'Desequilibrio Ω-6/3',
+        body: 'La proporción Ω-6:Ω-3 de hoy es {{ratio}}, por encima del {{threshold}}:1 citado comúnmente como límite saludable. Las dietas muy inclinadas hacia Ω-6 se asocian con más inflamación.'
+      },
+      transFat: {
+        stamp: 'Grasa trans',
+        body: 'Hoy incluye {{grams}}g de grasa trans/"Tóx". Las guías consideran insegura cualquier cantidad de grasa trans.'
+      },
+      glucoseSpike: {
+        stamp: 'Riesgo de pico de glucosa',
+        body: 'Hoy el {{pct}}% de las calorías provienen de carbohidratos, con muy poca proteína o grasa (menos de {{minProtein}}g / {{minFat}}g) para frenar la absorción. Días así pueden disparar el azúcar en sangre.'
+      }
+    },
     copyFoodListAria: 'Copiar lista de alimentos',
     copyFoodListTitle: 'Copiar la lista de alimentos del día como texto',
     copySummaryTextAria: 'Copiar el resumen del día como texto',
@@ -239,24 +259,24 @@ export const es: typeof en = {
       prevMeal: 'Comida anterior',
       nextMeal: 'Siguiente comida'
     },
+    warningsButtonAria: 'Mostrar advertencias nutricionales',
+    warningsTitle: 'Advertencias',
     warnings: {
       saturatedFat: {
-        label: 'Grasa saturada alta',
+        stamp: 'Grasa saturada alta',
         body: 'La grasa saturada ({{grams}}g) representa el {{pct}}% de la grasa total de esta comida — por encima del {{threshold}}% que se suele citar como límite saludable.'
       },
       omegaImbalance: {
-        label: 'Desequilibrio omega-6 a omega-3',
-        heading: 'Desequilibrio Ω-6:Ω-3',
+        stamp: 'Desequilibrio Ω-6/3',
         undefinedRatio: 'indefinida (sin Ω-3)',
         body: 'La proporción es {{ratio}}, por encima de {{threshold}}:1, la cifra que suele citarse como límite saludable. Las dietas muy escoradas hacia Ω-6 se asocian con más inflamación.'
       },
       transFat: {
-        label: 'Contiene grasas trans',
-        heading: 'Presencia de grasas trans',
+        stamp: 'Grasa trans',
         body: 'Esta comida tiene {{grams}}g de grasas trans/"Tóx". Las recomendaciones consideran insegura cualquier cantidad de grasas trans.'
       },
       glucoseSpike: {
-        label: 'Riesgo de pico de glucosa',
+        stamp: 'Riesgo de pico de glucosa',
         body: 'Esta comida obtiene el {{pct}}% de sus calorías de carbohidratos, con muy poca proteína o grasa (menos de {{minProtein}}g / {{minFat}}g) para frenar la absorción. Las comidas con tantos carbohidratos pueden disparar la glucosa en sangre.'
       }
     },

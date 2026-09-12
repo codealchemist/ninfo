@@ -127,6 +127,26 @@ export const en = {
     hideRingDetailsTitle: 'Hide goal and difference for each macro',
     topSources: 'Top sources',
     topSourceLine: '{{food}} — {{amount}} ({{pct}}%)',
+    warningsButtonAria: 'Show nutrition warnings',
+    warningsTitle: 'Warnings',
+    warnings: {
+      saturatedFat: {
+        stamp: 'High saturated fat',
+        body: "Saturated fat ({{grams}}g) is {{pct}}% of today's total fat — above the {{threshold}}% commonly considered a healthy upper bound."
+      },
+      omegaImbalance: {
+        stamp: 'Omega-6/3 imbalance',
+        body: "Today's Ω-6:Ω-3 ratio is {{ratio}}, above the {{threshold}}:1 commonly cited as a healthy upper bound. Diets skewed heavily toward Ω-6 are linked to more inflammation."
+      },
+      transFat: {
+        stamp: 'Trans fat',
+        body: 'Today includes {{grams}}g of trans/"Tóx" fat. Guidance treats any amount of trans fat as unsafe.'
+      },
+      glucoseSpike: {
+        stamp: 'Glucose spike risk',
+        body: "Today gets {{pct}}% of its calories from carbs, with too little protein or fat (under {{minProtein}}g / {{minFat}}g) to slow absorption. Carb-heavy days like this can spike blood sugar."
+      }
+    },
     copyFoodListAria: 'Copy food list',
     copyFoodListTitle: "Copy the day's food list as text",
     copySummaryTextAria: 'Copy day summary as text',
@@ -231,24 +251,24 @@ export const en = {
       prevMeal: 'Previous meal',
       nextMeal: 'Next meal'
     },
+    warningsButtonAria: 'Show nutrition warnings',
+    warningsTitle: 'Warnings',
     warnings: {
       saturatedFat: {
-        label: 'High saturated fat',
+        stamp: 'High saturated fat',
         body: "Saturated fat ({{grams}}g) is {{pct}}% of this meal's total fat — above the {{threshold}}% commonly cited as a healthy upper bound."
       },
       omegaImbalance: {
-        label: 'Omega-6 to omega-3 imbalance',
-        heading: 'Ω-6:Ω-3 imbalance',
+        stamp: 'Omega-6/3 imbalance',
         undefinedRatio: 'undefined (no Ω-3)',
         body: 'Ratio is {{ratio}}, above the {{threshold}}:1 commonly cited as a healthy upper bound. Diets skewed heavily toward Ω-6 are linked to more inflammation.'
       },
       transFat: {
-        label: 'Contains trans fat',
-        heading: 'Trans fat present',
+        stamp: 'Trans fat',
         body: 'This meal has {{grams}}g of trans/"Tóx" fat. Guidance treats any amount of trans fat as unsafe.'
       },
       glucoseSpike: {
-        label: 'Glucose spike risk',
+        stamp: 'Glucose spike risk',
         body: 'This meal gets {{pct}}% of its calories from carbs, with too little protein or fat (under {{minProtein}}g / {{minFat}}g) to slow absorption. Carb-heavy meals like this can spike blood sugar.'
       }
     },

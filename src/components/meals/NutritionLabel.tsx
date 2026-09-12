@@ -1,19 +1,20 @@
 import { forwardRef, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Copy, Image as ImageIcon } from 'lucide-react'
+import { Check, Copy, Image as ImageIcon, TriangleAlert } from 'lucide-react'
 import type { Meal } from '../../data/types'
 import { analyzeFat } from '../../data/lipidAnalysis'
 import { analyzeGlycemicRisk } from '../../data/glycemicRisk'
+import { buildWarningStamps } from '../../data/warningStamps'
 import {
   formatMealDateLabel,
   formatNutritionLabelAsText
 } from '../../data/mealText'
 import { copyElementAsImage, copyTextToClipboard } from '../../utils/clipboard'
 import FatSection from './FatSection'
-import MealCardWarnings from './MealCardWarnings'
 
 interface Props {
   meal: Meal
+  onShowWarnings: () => void
 }
 
 const round = (n: number) => Math.round(n * 10) / 10
@@ -22,11 +23,12 @@ type CopyState = 'idle' | 'copied' | 'failed'
 
 /** Renders a meal's aggregate macros as a classic "Nutrition Facts" style label. */
 const NutritionLabel = forwardRef<HTMLDivElement, Props>(
-  function NutritionLabel({ meal }, ref) {
+  function NutritionLabel({ meal, onShowWarnings }, ref) {
     const { t } = useTranslation()
     const { totals, lipids } = meal
     const fatBreakdown = analyzeFat(lipids, totals.fat)
     const glycemicRisk = analyzeGlycemicRisk(totals)
+    const warnings = buildWarningStamps(fatBreakdown, glycemicRisk, t, 'meals')
     // Scoped narrower than `ref` — captures just the label content for the image export,
     // excluding the copy/maximize action buttons below it.
     const contentRef = useRef<HTMLDivElement>(null)
@@ -63,7 +65,18 @@ const NutritionLabel = forwardRef<HTMLDivElement, Props>(
                 {formatMealDateLabel(meal.date)} · {meal.time}
               </div>
             </div>
-            <MealCardWarnings fat={fatBreakdown} glycemic={glycemicRisk} />
+            <button
+              className="icon-button icon-button--ghost warnings-button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onShowWarnings()
+              }}
+              disabled={warnings.length === 0}
+              aria-label={t('meals.warningsButtonAria')}
+              title={t('meals.warningsButtonAria')}
+            >
+              <TriangleAlert size={16} />
+            </button>
           </div>
           <div className='nutrition-label-rule nutrition-label-rule--thick' />
           <div className='nutrition-label-calories'>
