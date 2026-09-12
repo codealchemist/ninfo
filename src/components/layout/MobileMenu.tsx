@@ -9,7 +9,6 @@ import {
   Download,
   LayoutDashboard,
   QrCode as QrCodeIcon,
-  RefreshCw,
   RotateCcw,
   Salad,
   Share2,
@@ -32,12 +31,10 @@ interface MobileMenuProps {
   onClose: () => void
   meta: DatasetMeta | null
   modeLabels: Record<string, string>
-  refreshing: boolean
   pinnedDate: string | null
   onGoToChipDate: () => void
   onRemoveDateChip: () => void
   onGoToday: () => void
-  onRefreshSheet: () => void
   onShare: () => void
   onShareAsQr: () => void
   shared: boolean
@@ -49,12 +46,10 @@ export default function MobileMenu({
   onClose,
   meta,
   modeLabels,
-  refreshing,
   pinnedDate,
   onGoToChipDate,
   onRemoveDateChip,
   onGoToday,
-  onRefreshSheet,
   onShare,
   onShareAsQr,
   shared,
@@ -148,9 +143,6 @@ export default function MobileMenu({
 
         {meta?.mode === 'sheet-link' && (
           <div className="mobile-menu-section mobile-menu-actions">
-            <button className="link-button" onClick={onRefreshSheet} disabled={refreshing} title={t('topBar.refreshTitle')}>
-              <RefreshCw size={14} className={refreshing ? 'spin' : undefined} /> <span>{t('topBar.refresh')}</span>
-            </button>
             <button className="link-button" onClick={onShare} title={t('topBar.shareTitle')}>
               {shared ? <Check size={14} /> : <Share2 size={14} />} <span>{shared ? t('topBar.shareCopied') : t('topBar.share')}</span>
             </button>

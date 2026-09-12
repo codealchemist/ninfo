@@ -7,7 +7,6 @@ import { getSheetLink } from '../../db/sheetLinkStorage'
 import { buildShareableAppUrl } from '../../utils/googleSheetUrl'
 import { copyTextToClipboard } from '../../utils/clipboard'
 import { setLanguage, type SupportedLanguage } from '../../i18n'
-import DateNavigator from './DateNavigator'
 import MacroFilterChips from './MacroFilterChips'
 import MobileMenu from './MobileMenu'
 import ShareQrModal from '../common/ShareQrModal'
@@ -76,10 +75,53 @@ export default function TopBar() {
   return (
     <header className="top-bar">
       <div className="top-bar-mobile-row">
-        <button className="hamburger-button" onClick={() => setMenuOpen(true)} aria-label={t('mobileMenu.openAria')}>
-          <Menu size={20} />
-        </button>
-        <DateNavigator />
+        <div className="top-bar-mobile-brand">
+          <button className="hamburger-button" onClick={() => setMenuOpen(true)} aria-label={t('mobileMenu.openAria')}>
+            <Menu size={20} />
+          </button>
+          <Link to="/" className="brand-link" title={t('topBar.backToWelcome')}>
+            <Salad size={20} />
+            <span className="brand-name">Ninfo</span>
+          </Link>
+        </div>
+        <div className="top-bar-mobile-actions">
+          <NavLink
+            to="/app/today"
+            onClick={() => goToToday()}
+            className={({ isActive }) => 'mobile-nav-icon' + (isActive ? ' active' : '')}
+            aria-label={t('topBar.nav.today')}
+            title={t('topBar.nav.today')}
+          >
+            <LayoutDashboard size={18} />
+          </NavLink>
+          <NavLink
+            to="/app/timeline"
+            className={({ isActive }) => 'mobile-nav-icon' + (isActive ? ' active' : '')}
+            aria-label={t('topBar.nav.timeline')}
+            title={t('topBar.nav.timeline')}
+          >
+            <CalendarRange size={18} />
+          </NavLink>
+          <NavLink
+            to="/app/bia"
+            className={({ isActive }) => 'mobile-nav-icon' + (isActive ? ' active' : '')}
+            aria-label={t('topBar.nav.bia')}
+            title={t('topBar.nav.bia')}
+          >
+            <Activity size={18} />
+          </NavLink>
+          {meta?.mode === 'sheet-link' && (
+            <button
+              className="icon-button icon-button--ghost"
+              onClick={() => refreshSheetLink()}
+              disabled={status === 'loading'}
+              aria-label={t('topBar.refreshTitle')}
+              title={t('topBar.refreshTitle')}
+            >
+              <RefreshCw size={16} className={status === 'loading' ? 'spin' : undefined} />
+            </button>
+          )}
+        </div>
       </div>
       <div className="top-bar-row">
         <div className="brand">
@@ -156,7 +198,6 @@ export default function TopBar() {
         </button>
       </div>
       <div className="top-bar-row top-bar-row--secondary">
-        <DateNavigator />
         <MacroFilterChips />
       </div>
       {qrUrl && <ShareQrModal url={qrUrl} onClose={() => setQrUrl(null)} />}
@@ -165,12 +206,10 @@ export default function TopBar() {
         onClose={() => setMenuOpen(false)}
         meta={meta}
         modeLabels={modeLabels}
-        refreshing={status === 'loading'}
         pinnedDate={pinnedDate}
         onGoToChipDate={handleGoToChipDate}
         onRemoveDateChip={handleRemoveDateChip}
         onGoToday={goToToday}
-        onRefreshSheet={() => refreshSheetLink()}
         onShare={handleShare}
         onShareAsQr={handleShareAsQr}
         shared={shared}

@@ -1,20 +1,11 @@
 import { useMemo } from 'react'
 import { useAppStore } from '../store/appStore'
-import {
-  dailyLipids,
-  dailyTotals,
-  groupIntoMeals,
-  itemsForDate,
-  medianTotals,
-  trailingDates,
-} from '../data/aggregate/dailyTotals'
-import DaySummaryCard from '../components/summary/DaySummaryCard'
+import { groupIntoMeals, itemsForDate } from '../data/aggregate/dailyTotals'
+import DaySummarySwiper from '../components/summary/DaySummarySwiper'
 import MealTimelineStrip from '../components/meals/MealTimelineStrip'
 
 export default function Today() {
   const meals = useAppStore((s) => s.meals)
-  const goalsByDate = useAppStore((s) => s.goalsByDate)
-  const dates = useAppStore((s) => s.dates)
   const selectedDate = useAppStore((s) => s.selectedDate)
 
   const dayMeals = useMemo(() => {
@@ -22,47 +13,11 @@ export default function Today() {
     return groupIntoMeals(itemsForDate(meals, selectedDate))
   }, [meals, selectedDate])
 
-  const totals = useMemo(
-    () => (selectedDate ? dailyTotals(meals, selectedDate) : null),
-    [meals, selectedDate]
-  )
-
-  const lipids = useMemo(
-    () => (selectedDate ? dailyLipids(meals, selectedDate) : null),
-    [meals, selectedDate]
-  )
-
-  const prevDayTotals = useMemo(() => {
-    if (!selectedDate) return null
-    const idx = dates.indexOf(selectedDate)
-    if (idx <= 0) return null
-    return dailyTotals(meals, dates[idx - 1])
-  }, [meals, dates, selectedDate])
-
-  const weekMedianTotals = useMemo(() => {
-    if (!selectedDate) return null
-    return medianTotals(meals, trailingDates(dates, selectedDate, 7))
-  }, [meals, dates, selectedDate])
-
-  const monthMedianTotals = useMemo(() => {
-    if (!selectedDate) return null
-    return medianTotals(meals, trailingDates(dates, selectedDate, 30))
-  }, [meals, dates, selectedDate])
-
-  if (!selectedDate || !totals || !lipids) return null
+  if (!selectedDate) return null
 
   return (
     <div className="page today-page">
-      <DaySummaryCard
-        date={selectedDate}
-        meals={dayMeals}
-        totals={totals}
-        lipids={lipids}
-        goals={goalsByDate[selectedDate] ?? null}
-        prevDayTotals={prevDayTotals}
-        weekMedianTotals={weekMedianTotals}
-        monthMedianTotals={monthMedianTotals}
-      />
+      <DaySummarySwiper />
       <MealTimelineStrip meals={dayMeals} />
     </div>
   )
