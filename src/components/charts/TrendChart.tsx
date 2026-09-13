@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   CategoryScale,
@@ -27,7 +28,7 @@ interface Props {
 
 /** A single-metric trend line — the generic version of BiaTrendChart, for simpler one-metric
  * series (weight, daily liquid intake) that don't need its unit/diff toggles. */
-export default function TrendChart({ points, label, unit, color }: Props) {
+const TrendChart = forwardRef<HTMLDivElement, Props>(function TrendChart({ points, label, unit, color }, ref) {
   const { i18n } = useTranslation()
   const labels = points.map((p) =>
     new Date(p.date + 'T00:00:00').toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
@@ -60,8 +61,10 @@ export default function TrendChart({ points, label, unit, color }: Props) {
   }
 
   return (
-    <div className="bia-chart-container">
+    <div className="bia-chart-container" ref={ref}>
       <Line data={data} options={options} />
     </div>
   )
-}
+})
+
+export default TrendChart

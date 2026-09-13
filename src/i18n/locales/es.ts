@@ -172,6 +172,8 @@ export const es: typeof en = {
     hint: 'Haz clic en un día para ver sus detalles.',
     copyImageAria: 'Copiar gráfico como imagen',
     copyImageTitle: 'Copiar el gráfico como imagen',
+    copyMedianImageAria: 'Copiar mediana de macros como imagen',
+    copyMedianImageTitle: 'Copiar la mediana de macros como imagen',
     exitFullscreen: 'Salir de pantalla completa',
     viewFullscreen: 'Ver en pantalla completa',
     all: 'Todo',
@@ -212,6 +214,8 @@ export const es: typeof en = {
     latestMeasurement: 'Última medición: {{date}}',
     vsPrevious: 'vs. anterior',
     trends: 'Tendencias',
+    copyTrendsImageAria: 'Copiar tendencias como imagen',
+    copyTrendsImageTitle: 'Copiar las tendencias como imagen',
     notEnoughForDiff:
       'Aún no hay suficientes mediciones para calcular una diferencia.',
     history: 'Historial',
@@ -300,6 +304,8 @@ export const es: typeof en = {
     needsLinkedSheet:
       'Este reporte lee la pestaña "Líquido" de una hoja de Google vinculada. ',
     refreshTitle: 'Volver a obtener los registros más recientes',
+    copySummaryImageAria: 'Copiar resumen de líquidos como imagen',
+    copySummaryImageTitle: 'Copiar el resumen de líquidos como imagen',
     loading: 'Cargando registros…',
     noMeasurements: 'Aún no hay registros en la pestaña Líquido.',
     latestDay: 'Último día: {{date}} — {{total}} ml',

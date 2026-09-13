@@ -21,6 +21,8 @@ interface Props {
   goals: MacroTotals | null
   comparisonTotals: MacroTotals | null
   comparisonLabel: string
+  dailyWaterMl: number | null
+  dailyWaterGoalMl: number | null
 }
 
 /**
@@ -32,7 +34,7 @@ interface Props {
  * here is what gives the image its context once it's out of the app.
  */
 const DaySummaryShareCard = forwardRef<HTMLDivElement, Props>(function DaySummaryShareCard(
-  { date, meals, macros, totals, goals, comparisonTotals, comparisonLabel },
+  { date, meals, macros, totals, goals, comparisonTotals, comparisonLabel, dailyWaterMl, dailyWaterGoalMl },
   ref
 ) {
   const { t, i18n } = useTranslation()
@@ -64,6 +66,15 @@ const DaySummaryShareCard = forwardRef<HTMLDivElement, Props>(function DaySummar
             colorVar={COLOR_VARS[macro]}
           />
         ))}
+        {dailyWaterMl != null && (
+          <GoalProgressRing
+            label={t('today.waterIntake')}
+            value={dailyWaterMl}
+            goal={dailyWaterGoalMl}
+            unit="ml"
+            colorVar="--water-blue"
+          />
+        )}
       </div>
       {comparisonTotals && (
         <div className="delta-row day-summary-share-deltas">

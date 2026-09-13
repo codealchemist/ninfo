@@ -365,6 +365,8 @@ export default function DaySummaryCard({
           goals={goals}
           comparisonTotals={activeComparison}
           comparisonLabel={t(comparisonLabelKey[comparisonMode])}
+          dailyWaterMl={dailyWaterMl}
+          dailyWaterGoalMl={dailyWaterGoalMl}
         />
       </div>
     </section>
