@@ -1,4 +1,4 @@
-import { forwardRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   CategoryScale,
@@ -8,6 +8,7 @@ import {
   LineElement,
   PointElement,
   Tooltip,
+  type ActiveElement,
   type ChartData,
   type ChartOptions,
 } from 'chart.js'
@@ -27,13 +28,32 @@ const COLORS: Record<MacroKey, string> = {
 interface Props {
   days: DailyAggregate[]
   onDayClick?: (date: string) => void
+  /** An index to force-highlight and show the tooltip for, driven by the mobile scrubber
+   * (see Timeline.tsx) rather than the chart's own hover/touch handling — null hides it. */
+  activeIndex?: number | null
 }
 
 const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimelineChart(
-  { days, onDayClick },
+  { days, onDayClick, activeIndex = null },
   ref
 ) {
   const { t, i18n } = useTranslation()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const chartInstanceRef = useRef<ChartJS<'line'> | null>(null)
+
+  useImperativeHandle(ref, () => containerRef.current as HTMLDivElement)
+
+  useEffect(() => {
+    const chart = chartInstanceRef.current
+    if (!chart) return
+    const active: ActiveElement[] =
+      activeIndex === null || activeIndex < 0 || activeIndex >= days.length
+        ? []
+        : chart.data.datasets.map((_, datasetIndex) => ({ datasetIndex, index: activeIndex }) as ActiveElement)
+    chart.setActiveElements(active)
+    chart.tooltip?.setActiveElements(active, { x: 0, y: 0 })
+    chart.update()
+  }, [activeIndex, days.length])
   const labels = days.map((d) =>
     new Date(d.date + 'T00:00:00').toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
   )
@@ -65,6 +85,11 @@ const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimel
     responsive: true,
     maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
+    // Touch drags are handled by the mobile scrubber instead (see Timeline.tsx) — leaving
+    // touchstart/touchmove wired here would pop the built-in tooltip on every finger graze of
+    // the chart, defeating the scrubber's "only show the reference while touching the slider"
+    // behavior. A tap's synthesized click event still fires, so onDayClick keeps working.
+    events: ['mousemove', 'mouseout', 'click'],
     onHover: (event, _elements, chart) => {
       const target = event.native?.target as HTMLElement | undefined
       if (target) target.style.cursor = onDayClick && days.length > 0 ? 'pointer' : 'default'
@@ -91,8 +116,8 @@ const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimel
   }
 
   return (
-    <div className="chart-container" ref={ref}>
-      <Line data={data} options={options} />
+    <div className="chart-container" ref={containerRef}>
+      <Line ref={chartInstanceRef} data={data} options={options} />
     </div>
   )
 })

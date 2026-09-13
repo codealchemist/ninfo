@@ -145,7 +145,7 @@ export const en = {
       },
       glucoseSpike: {
         stamp: 'Glucose spike risk',
-        body: "Today gets {{pct}}% of its calories from carbs, with too little protein or fat (under {{minProtein}}g / {{minFat}}g) to slow absorption. Carb-heavy days like this can spike blood sugar."
+        body: 'Today gets {{pct}}% of its calories from carbs, with too little protein or fat (under {{minProtein}}g / {{minFat}}g) to slow absorption. Carb-heavy days like this can spike blood sugar.'
       }
     },
     copyFoodListAria: 'Copy food list',
@@ -167,7 +167,23 @@ export const en = {
     exitFullscreen: 'Exit fullscreen',
     viewFullscreen: 'View fullscreen',
     all: 'All',
-    rangeDays: '{{count}}d'
+    rangeDays: '{{count}}d',
+    medianTitle: 'Median macros',
+    medianHint: 'Median value for the selected range',
+    scrubberAria: 'Scrub through the timeline',
+    linkRangeTitle: 'Sync range with the timeline chart',
+    unlinkRangeTitle: 'Use an independent range for this panel',
+    skipLastDay: 'Skip last day',
+    skipLastDayTitle: 'Skip the last day, which may still be incomplete',
+    searchFoodPlaceholder: 'Search a food…',
+    clearFoodFilter: 'Clear food filter',
+    foodFilterHint: 'Showing "{{food}}" only. Click a day to open its details.',
+    metrics: {
+      foodGrams: 'Food intake',
+      foodGramsFor: '"{{food}}" per day',
+      fasting: 'Fasting time',
+      water: 'Water intake'
+    }
   },
 
   bia: {
@@ -247,7 +263,8 @@ export const en = {
 
   weight: {
     title: 'Weight',
-    needsLinkedSheet: 'This report reads the "Peso" tab from a linked Google Sheet. ',
+    needsLinkedSheet:
+      'This report reads the "Peso" tab from a linked Google Sheet. ',
     refreshTitle: 'Re-fetch the latest measurements',
     loading: 'Loading measurements…',
     noMeasurements: 'No measurements found in the Peso tab yet.',
@@ -268,7 +285,8 @@ export const en = {
 
   liquid: {
     title: 'Liquids',
-    needsLinkedSheet: 'This report reads the "Líquido" tab from a linked Google Sheet. ',
+    needsLinkedSheet:
+      'This report reads the "Líquido" tab from a linked Google Sheet. ',
     refreshTitle: 'Re-fetch the latest entries',
     loading: 'Loading entries…',
     noMeasurements: 'No entries found in the Líquido tab yet.',

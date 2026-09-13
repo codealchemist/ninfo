@@ -2,24 +2,110 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Check, Image as ImageIcon, Maximize2, Minimize2 } from 'lucide-react'
+import { Check, Image as ImageIcon, Link2, Maximize2, Minimize2 } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
-import { aggregateByDay } from '../data/aggregate/dailyTotals'
+import { aggregateByDay, dailyTotals, groupIntoMeals, medianTotals } from '../data/aggregate/dailyTotals'
+import { MACRO_KEYS, MACRO_UNITS } from '../data/types'
 import { copyElementAsImage } from '../utils/clipboard'
+import { getSheetLink } from '../db/sheetLinkStorage'
+import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
+import { LiquidoSource } from '../data/sources/LiquidoSource'
+import type { LiquidEntry } from '../data/parsers/liquidoParser'
+import { amountOfLiquid, normalizeLiquidKey } from '../data/liquidUtils'
 import MacroTimelineChart from '../components/charts/MacroTimelineChart'
+import TimelineScrubber from '../components/charts/TimelineScrubber'
+import FoodSearchInput from '../components/charts/FoodSearchInput'
+import GoalProgressRing from '../components/summary/GoalProgressRing'
 
 const RANGES = [7, 30, 90, 0] as const // 0 = all
+
+const COLOR_VARS: Record<string, string> = {
+  protein: '--macro-protein',
+  carbs: '--macro-carbs',
+  fat: '--macro-fat',
+  fiber: '--macro-fiber',
+  calories: '--macro-calories',
+}
+
+function median(values: number[]): number {
+  if (values.length === 0) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+}
+
+/** "02:40" -> 160. Null if missing/unparsable (e.g. the very first logged day, which has no
+ * previous meal to measure a fast from). */
+function parseFastingMinutes(value: string | null): number | null {
+  if (!value) return null
+  const [h, m] = value.split(':').map(Number)
+  if (Number.isNaN(h) || Number.isNaN(m)) return null
+  return h * 60 + m
+}
+
+function formatFastingMinutes(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60)
+  const m = Math.round(totalMinutes % 60)
+  return `${h}h ${m}m`
+}
 
 export default function Timeline() {
   const { t } = useTranslation()
   const meals = useAppStore((s) => s.meals)
   const goalsByDate = useAppStore((s) => s.goalsByDate)
+  const foodCatalog = useAppStore((s) => s.foodCatalog)
   const jumpToDate = useAppStore((s) => s.jumpToDate)
+  const sheetLinkId = useAppStore((s) => s.sheetLinkId)
   const [range, setRange] = useState<number>(30)
   const chartRef = useRef<HTMLDivElement>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const [fullscreen, setFullscreen] = useState(false)
+  const [scrubIndex, setScrubIndex] = useState<number | null>(null)
+  const [scrubbing, setScrubbing] = useState(false)
+  const [medianRange, setMedianRange] = useState<number>(30)
+  const [medianLinked, setMedianLinked] = useState(true)
+  const [skipLastDay, setSkipLastDay] = useState(false)
+  const [liquidEntries, setLiquidEntries] = useState<LiquidEntry[]>([])
+  const [selectedFood, setSelectedFood] = useState<string | null>(null)
   const navigate = useNavigate()
+
+  const foodNames = useMemo(
+    () => Array.from(new Set(foodCatalog.map((f) => f.food))).sort((a, b) => a.localeCompare(b)),
+    [foodCatalog]
+  )
+
+  // When a food is selected, every macro figure below is that food's contribution only — the
+  // same dates as the unfiltered view (so zero-days still show as zero, not a gap), just with
+  // totals restricted to this one food's items.
+  const filteredMeals = useMemo(
+    () => (selectedFood ? meals.filter((m) => m.food === selectedFood) : null),
+    [meals, selectedFood]
+  )
+
+  // Water intake is a bonus stat alongside the macro medians — loaded quietly from the same
+  // linked sheet's "Líquido" tab (if any) with no dedicated error UI, since the rest of the
+  // panel is still useful without it.
+  useEffect(() => {
+    const spreadsheetId = sheetLinkId
+      ? parseGoogleSheetUrl(getSheetLink(sheetLinkId)?.url ?? '')?.spreadsheetId ?? null
+      : null
+    if (!spreadsheetId) {
+      setLiquidEntries([])
+      return
+    }
+    let cancelled = false
+    new LiquidoSource(spreadsheetId)
+      .load()
+      .then((result) => {
+        if (!cancelled) setLiquidEntries(result)
+      })
+      .catch(() => {
+        if (!cancelled) setLiquidEntries([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [sheetLinkId])
 
   useEffect(() => {
     if (!fullscreen) return
@@ -37,6 +123,88 @@ export default function Timeline() {
 
   const allDays = useMemo(() => aggregateByDay(meals, goalsByDate), [meals, goalsByDate])
   const days = range === 0 ? allDays : allDays.slice(-range)
+
+  // The chart's own dates/labels stay anchored to the full log; only the plotted totals swap to
+  // the selected food's per-day contribution (defaulting to zero on days it wasn't eaten).
+  const displayDays = useMemo(
+    () => (filteredMeals ? days.map((d) => ({ ...d, totals: dailyTotals(filteredMeals, d.date) })) : days),
+    [days, filteredMeals]
+  )
+
+  // The scrubber's index is only meaningful for the currently displayed range — reset it
+  // whenever that range changes so a stale position from a longer range can't linger.
+  useEffect(() => {
+    setScrubIndex(null)
+    setScrubbing(false)
+  }, [range])
+
+  // The median panel has its own range, independent of the chart's — except while linked, when
+  // it just follows the chart's range instead of being set directly.
+  useEffect(() => {
+    if (medianLinked) setMedianRange(range)
+  }, [range, medianLinked])
+
+  const medianDays = medianRange === 0 ? allDays : allDays.slice(-medianRange)
+  // The most recent day is often still in progress (today isn't over yet) — skipping it is an
+  // explicit opt-in rather than the default, since most of the time it's a full logged day.
+  const effectiveMedianDays = skipLastDay ? medianDays.slice(0, -1) : medianDays
+  const medians = useMemo(
+    () => medianTotals(filteredMeals ?? meals, effectiveMedianDays.map((d) => d.date)),
+    [meals, filteredMeals, effectiveMedianDays]
+  )
+  const medianLatestGoals =
+    effectiveMedianDays.length > 0 ? effectiveMedianDays[effectiveMedianDays.length - 1].goals : null
+
+  // Grams/day for the selected food when filtering, otherwise total food weight across everything.
+  const medianGrams = useMemo(() => {
+    if (effectiveMedianDays.length === 0) return null
+    const gramsByDate = new Map<string, number>()
+    for (const item of filteredMeals ?? meals) {
+      gramsByDate.set(item.date, (gramsByDate.get(item.date) ?? 0) + item.grams)
+    }
+    return median(effectiveMedianDays.map((d) => gramsByDate.get(d.date) ?? 0))
+  }, [meals, filteredMeals, effectiveMedianDays])
+
+  // The daily fast is measured from the gap before each day's first meal (the overnight fast),
+  // not every inter-meal gap — that's the one meaningful "how long was today's fast" number.
+  const medianFastingMinutes = useMemo(() => {
+    const firstMealByDate = new Map<string, string | null>()
+    for (const meal of groupIntoMeals(meals)) {
+      if (!firstMealByDate.has(meal.date)) firstMealByDate.set(meal.date, meal.items[0]?.fastingSincePrev ?? null)
+    }
+    const values = effectiveMedianDays
+      .map((d) => parseFastingMinutes(firstMealByDate.get(d.date) ?? null))
+      .filter((v): v is number => v !== null)
+    return values.length > 0 ? median(values) : null
+  }, [meals, effectiveMedianDays])
+
+  const medianWaterMl = useMemo(() => {
+    if (effectiveMedianDays.length === 0 || liquidEntries.length === 0) return null
+    const waterByDate = new Map<string, number>()
+    for (const e of liquidEntries) {
+      if (normalizeLiquidKey(e.liquidType) !== 'agua') continue
+      waterByDate.set(e.date, (waterByDate.get(e.date) ?? 0) + amountOfLiquid(e))
+    }
+    return median(effectiveMedianDays.map((d) => waterByDate.get(d.date) ?? 0))
+  }, [liquidEntries, effectiveMedianDays])
+
+  const handleScrub = (index: number | null, active: boolean) => {
+    setScrubIndex(index)
+    setScrubbing(active)
+  }
+
+  const handleMedianRangeSelect = (r: number) => {
+    setMedianLinked(false)
+    setMedianRange(r)
+  }
+
+  const handleToggleMedianLink = () => {
+    setMedianLinked((linked) => {
+      const next = !linked
+      if (next) setMedianRange(range)
+      return next
+    })
+  }
 
   const handleCopyImage = async () => {
     if (!chartRef.current) return
@@ -77,14 +245,102 @@ export default function Timeline() {
           </button>
         </div>
       </div>
-      <p className="hint">{t('timeline.hint')}</p>
-      <MacroTimelineChart ref={chartRef} days={days} onDayClick={handleDayClick} />
+      <div className="timeline-search-row">
+        <FoodSearchInput foods={foodNames} selectedFood={selectedFood} onSelect={setSelectedFood} />
+      </div>
+      <p className="hint">
+        {selectedFood ? t('timeline.foodFilterHint', { food: selectedFood }) : t('timeline.hint')}
+      </p>
+      <MacroTimelineChart
+        ref={chartRef}
+        days={displayDays}
+        onDayClick={handleDayClick}
+        activeIndex={scrubbing ? scrubIndex : null}
+      />
+      <TimelineScrubber count={displayDays.length} index={scrubIndex} onScrub={handleScrub} />
     </>
   )
 
   return (
     <div className="page">
       <section className="card">{!fullscreen && content}</section>
+
+      {medians && (
+        <section className="card">
+          <div className="timeline-header">
+            <h2>{t('timeline.medianTitle')}</h2>
+            <div className="range-buttons">
+              <label className="skip-last-day-toggle" title={t('timeline.skipLastDayTitle')}>
+                <input type="checkbox" checked={skipLastDay} onChange={(e) => setSkipLastDay(e.target.checked)} />
+                <span>{t('timeline.skipLastDay')}</span>
+              </label>
+              {RANGES.map((r) => (
+                <button
+                  key={r}
+                  className={'range-button' + (medianRange === r ? ' range-button--active' : '')}
+                  onClick={() => handleMedianRangeSelect(r)}
+                >
+                  {r === 0 ? t('timeline.all') : t('timeline.rangeDays', { count: r })}
+                </button>
+              ))}
+              <button
+                className={'icon-button icon-button--ghost' + (medianLinked ? ' icon-button--active' : '')}
+                onClick={handleToggleMedianLink}
+                aria-pressed={medianLinked}
+                aria-label={medianLinked ? t('timeline.unlinkRangeTitle') : t('timeline.linkRangeTitle')}
+                title={medianLinked ? t('timeline.unlinkRangeTitle') : t('timeline.linkRangeTitle')}
+              >
+                <Link2 size={14} />
+              </button>
+            </div>
+          </div>
+          <p className="hint">
+            {t('timeline.medianHint')}
+            {medianRange !== 0 && ` (${t('timeline.rangeDays', { count: medianRange })})`}
+          </p>
+          <div className="median-panel-row">
+            <div className="progress-ring-row median-panel-rings">
+              {MACRO_KEYS.map((macro) => (
+                <GoalProgressRing
+                  key={macro}
+                  label={t(`common.macros.${macro}`)}
+                  value={medians[macro]}
+                  // A whole-day macro goal doesn't mean anything against one food's
+                  // contribution, so the ring just shows the raw median with no fill/goal.
+                  goal={selectedFood ? null : medianLatestGoals ? medianLatestGoals[macro] : null}
+                  unit={MACRO_UNITS[macro]}
+                  colorVar={COLOR_VARS[macro]}
+                />
+              ))}
+            </div>
+            <div className="bia-stat-row median-panel-stats">
+              <div className="bia-stat">
+                <span className="bia-stat-value">
+                  {medianGrams !== null ? Math.round(medianGrams).toLocaleString() : '—'}
+                  <span className="bia-stat-unit">g</span>
+                </span>
+                <span className="bia-stat-label">
+                  {selectedFood ? t('timeline.metrics.foodGramsFor', { food: selectedFood }) : t('timeline.metrics.foodGrams')}
+                </span>
+              </div>
+              <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
+                <span className="bia-stat-value">
+                  {medianFastingMinutes !== null ? formatFastingMinutes(medianFastingMinutes) : '—'}
+                </span>
+                <span className="bia-stat-label">{t('timeline.metrics.fasting')}</span>
+              </div>
+              <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
+                <span className="bia-stat-value">
+                  {medianWaterMl !== null ? Math.round(medianWaterMl).toLocaleString() : '—'}
+                  <span className="bia-stat-unit">ml</span>
+                </span>
+                <span className="bia-stat-label">{t('timeline.metrics.water')}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {fullscreen &&
         createPortal(
           <div className="timeline-modal-backdrop" onClick={() => setFullscreen(false)}>

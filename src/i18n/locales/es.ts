@@ -88,8 +88,8 @@ export const es: typeof en = {
     shareCopied: '¡Copiado!',
     qrTitle:
       'Mostrar un código QR que abra esta hoja de cálculo directamente en Ninfo',
-    qrCode: 'Código QR',
-    startOver: 'Empezar de nuevo',
+    qrCode: 'QR',
+    startOver: 'Reiniciar',
     clearDateAria: 'Volver a hoy'
   },
 
@@ -123,7 +123,8 @@ export const es: typeof en = {
     compareYesterday: 'Ayer',
     compareWeek: 'Semana',
     compareMonth: 'Mes',
-    medianHint: 'Los valores semanales y mensuales son la mediana de ese período, no un solo día ni un promedio.',
+    medianHint:
+      'Los valores semanales y mensuales son la mediana de ese período, no un solo día ni un promedio.',
     vsGoal: 'vs objetivo',
     pctOver: '+{{pct}}%',
     pctMissing: '-{{pct}}%',
@@ -173,7 +174,23 @@ export const es: typeof en = {
     exitFullscreen: 'Salir de pantalla completa',
     viewFullscreen: 'Ver en pantalla completa',
     all: 'Todo',
-    rangeDays: '{{count}}d'
+    rangeDays: '{{count}}d',
+    medianTitle: 'Mediana de macros',
+    medianHint: 'Valor mediano del período seleccionado',
+    scrubberAria: 'Desplázate por la cronología',
+    linkRangeTitle: 'Sincronizar el rango con el gráfico de cronología',
+    unlinkRangeTitle: 'Usar un rango independiente para este panel',
+    skipLastDay: 'Omitir último día',
+    skipLastDayTitle: 'Omitir el último día, que puede estar incompleto',
+    searchFoodPlaceholder: 'Buscar un alimento…',
+    clearFoodFilter: 'Quitar filtro de alimento',
+    foodFilterHint: 'Mostrando solo "{{food}}". Haz clic en un día para ver sus detalles.',
+    metrics: {
+      foodGrams: 'Consumo de comida',
+      foodGramsFor: '"{{food}}" por día',
+      fasting: 'Tiempo de ayuno',
+      water: 'Consumo de agua'
+    }
   },
 
   bia: {
@@ -255,7 +272,8 @@ export const es: typeof en = {
 
   weight: {
     title: 'Peso',
-    needsLinkedSheet: 'Este reporte lee la pestaña "Peso" de una hoja de Google vinculada. ',
+    needsLinkedSheet:
+      'Este reporte lee la pestaña "Peso" de una hoja de Google vinculada. ',
     refreshTitle: 'Volver a obtener las mediciones más recientes',
     loading: 'Cargando mediciones…',
     noMeasurements: 'Aún no hay mediciones en la pestaña Peso.',
@@ -276,7 +294,8 @@ export const es: typeof en = {
 
   liquid: {
     title: 'Líquidos',
-    needsLinkedSheet: 'Este reporte lee la pestaña "Líquido" de una hoja de Google vinculada. ',
+    needsLinkedSheet:
+      'Este reporte lee la pestaña "Líquido" de una hoja de Google vinculada. ',
     refreshTitle: 'Volver a obtener los registros más recientes',
     loading: 'Cargando registros…',
     noMeasurements: 'Aún no hay registros en la pestaña Líquido.',
