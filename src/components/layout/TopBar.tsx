@@ -6,6 +6,7 @@ import {
   Check,
   CalendarRange,
   Droplet,
+  FileDown,
   LayoutDashboard,
   Menu,
   QrCode as QrCodeIcon,
@@ -198,6 +199,9 @@ export default function TopBar() {
           </NavLink>
           <NavLink to="/app/liquids" className={({ isActive }) => (isActive ? 'active' : '')}>
             <Droplet size={16} /> <span>{t('topBar.nav.liquids')}</span>
+          </NavLink>
+          <NavLink to="/app/report" className={({ isActive }) => (isActive ? 'active' : '')}>
+            <FileDown size={16} /> <span>{t('topBar.nav.report')}</span>
           </NavLink>
         </nav>
         {meta?.mode === 'sheet-link' && (

@@ -74,7 +74,8 @@ export const en = {
       timeline: 'Timeline',
       bia: 'BIA',
       weight: 'Weight',
-      liquids: 'Liquids'
+      liquids: 'Liquids',
+      report: 'Report'
     },
     refreshTitle: 'Re-fetch the latest data from the linked sheet',
     refresh: 'Refresh',
@@ -313,6 +314,18 @@ export const en = {
       type: 'Type',
       amount: 'Amount'
     }
+  },
+
+  report: {
+    title: 'Global report',
+    description: 'Generate a single-page PDF covering your overall trends — the median-macros summary, and body composition, weight, and liquid intake, where a linked sheet provides them.',
+    generateButton: 'Download PDF report',
+    generating: 'Generating…',
+    generateFailed: 'Could not generate the report. Please try again.',
+    generatedAt: 'Generated {{date}}',
+    biaTitle: 'BIA',
+    medianRangeHint: 'Median across the last {{count}} logged days',
+    noData: 'No meals logged yet.'
   },
 
   meals: {

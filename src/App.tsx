@@ -6,6 +6,7 @@ import Timeline from './routes/Timeline'
 import Bia from './routes/Bia'
 import Weight from './routes/Weight'
 import Liquids from './routes/Liquids'
+import Report from './routes/Report'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="bia" element={<Bia />} />
         <Route path="weight" element={<Weight />} />
         <Route path="liquids" element={<Liquids />} />
+        <Route path="report" element={<Report />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
