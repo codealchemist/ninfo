@@ -72,7 +72,9 @@ export const en = {
     nav: {
       today: 'Latest',
       timeline: 'Timeline',
-      bia: 'BIA'
+      bia: 'BIA',
+      weight: 'Weight',
+      liquids: 'Liquids'
     },
     refreshTitle: 'Re-fetch the latest data from the linked sheet',
     refresh: 'Refresh',
@@ -243,6 +245,49 @@ export const en = {
     }
   },
 
+  weight: {
+    title: 'Weight',
+    needsLinkedSheet: 'This report reads the "Peso" tab from a linked Google Sheet. ',
+    refreshTitle: 'Re-fetch the latest measurements',
+    loading: 'Loading measurements…',
+    noMeasurements: 'No measurements found in the Peso tab yet.',
+    latestMeasurement: 'Latest measurement: {{date}}',
+    metrics: {
+      weight: 'Weight',
+      median: 'Median',
+      max: 'Max',
+      min: 'Min'
+    },
+    periods: {
+      oneMonth: 'vs. 1 month ago',
+      threeMonths: 'vs. 3 months ago',
+      sixMonths: 'vs. 6 months ago',
+      oneYear: 'vs. 1 year ago'
+    }
+  },
+
+  liquid: {
+    title: 'Liquids',
+    needsLinkedSheet: 'This report reads the "Líquido" tab from a linked Google Sheet. ',
+    refreshTitle: 'Re-fetch the latest entries',
+    loading: 'Loading entries…',
+    noMeasurements: 'No entries found in the Líquido tab yet.',
+    latestDay: 'Latest day: {{date}}',
+    sources: 'Sources',
+    metrics: {
+      dailyTotal: 'Daily total',
+      median: 'Median',
+      max: 'Max',
+      min: 'Min'
+    },
+    table: {
+      time: 'Time',
+      duration: 'Duration',
+      type: 'Type',
+      amount: 'Amount'
+    }
+  },
+
   meals: {
     timelineStrip: {
       empty: 'No meals logged for this day.',
@@ -325,6 +370,10 @@ export const en = {
       'Could not find the Registro header row (expected Fecha/Hora/Alimento columns).',
     bioimpedanciaHeaderNotFound:
       'Could not find the Bioimpedancia header row (expected Fecha/Peso columns).',
+    pesoHeaderNotFound:
+      'Could not find the Peso header row (expected Fecha/Peso columns).',
+    liquidoHeaderNotFound:
+      'Could not find the Líquido header row (expected Fecha/.../Líquido columns).',
     fileEmpty: ' The file appears to be empty.',
     foundInstead:
       ' Found instead: "{{preview}}" — check that this is the right tab.',
@@ -332,10 +381,16 @@ export const en = {
       'Make sure the sheet is shared as "Anyone with the link can view", and that the link was copied while the "Registro" tab was open (Share → Copy link, from within that tab) — otherwise the link points at whichever tab is first, not necessarily Registro.',
     shareHintBioimpedancia:
       'Make sure the sheet is shared as "Anyone with the link can view", and that it has a "Bioimpedancia" tab with Fecha/Peso columns.',
+    shareHintPeso:
+      'Make sure the sheet is shared as "Anyone with the link can view", and that it has a "Peso" tab with Fecha/Peso columns.',
+    shareHintLiquido:
+      'Make sure the sheet is shared as "Anyone with the link can view", and that it has a "Líquido" tab with Fecha/Líquido columns.',
     notGoogleSheetLink:
       "That doesn't look like a Google Sheets link. Copy it from the address bar or via Share → Copy link.",
     couldNotReachSheet: "Couldn't reach that spreadsheet.",
     couldNotReachBioimpedancia: "Couldn't reach the Bioimpedancia tab.",
+    couldNotReachPeso: "Couldn't reach the Peso tab.",
+    couldNotReachLiquido: "Couldn't reach the Líquido tab.",
     signInPage:
       'Google returned a sign-in page instead of your spreadsheet — this sheet isn\'t actually shared as "Anyone with the link can view" yet (File → Share → General access).',
     httpError: 'Google Sheets returned an error ({{status}}).',
