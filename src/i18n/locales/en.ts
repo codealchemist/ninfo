@@ -165,6 +165,8 @@ export const en = {
     hint: 'Click a day to open its details.',
     copyImageAria: 'Copy chart as image',
     copyImageTitle: 'Copy chart as an image',
+    copyMedianImageAria: 'Copy median macros as image',
+    copyMedianImageTitle: 'Copy the median macros as an image',
     exitFullscreen: 'Exit fullscreen',
     viewFullscreen: 'View fullscreen',
     all: 'All',
@@ -204,6 +206,8 @@ export const en = {
     latestMeasurement: 'Latest measurement: {{date}}',
     vsPrevious: 'vs. previous',
     trends: 'Trends',
+    copyTrendsImageAria: 'Copy trends as image',
+    copyTrendsImageTitle: 'Copy the trends as an image',
     notEnoughForDiff: 'Not enough measurements yet for a diff.',
     history: 'History',
     table: {
@@ -291,6 +295,8 @@ export const en = {
     needsLinkedSheet:
       'This report reads the "Líquido" tab from a linked Google Sheet. ',
     refreshTitle: 'Re-fetch the latest entries',
+    copySummaryImageAria: 'Copy liquids summary as image',
+    copySummaryImageTitle: 'Copy the liquids summary as an image',
     loading: 'Loading entries…',
     noMeasurements: 'No entries found in the Líquido tab yet.',
     latestDay: 'Latest day: {{date}} — {{total}} ml',

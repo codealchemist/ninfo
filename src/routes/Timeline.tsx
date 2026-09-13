@@ -2,11 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Check, Image as ImageIcon, Link2, Maximize2, Minimize2 } from 'lucide-react'
+import { Link2, Maximize2, Minimize2 } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { aggregateByDay, dailyTotals, groupIntoMeals, medianTotals } from '../data/aggregate/dailyTotals'
 import { MACRO_KEYS, MACRO_UNITS } from '../data/types'
-import { copyElementAsImage } from '../utils/clipboard'
 import { getSheetLink } from '../db/sheetLinkStorage'
 import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { LiquidoSource } from '../data/sources/LiquidoSource'
@@ -18,6 +17,7 @@ import MacroTimelineChart from '../components/charts/MacroTimelineChart'
 import TimelineScrubber from '../components/charts/TimelineScrubber'
 import FoodSearchInput from '../components/charts/FoodSearchInput'
 import GoalProgressRing from '../components/summary/GoalProgressRing'
+import CopyImageButton from '../components/common/CopyImageButton'
 
 const RANGES = [7, 30, 90, 0] as const // 0 = all
 
@@ -60,7 +60,7 @@ export default function Timeline() {
   const sheetLinkId = useAppStore((s) => s.sheetLinkId)
   const [range, setRange] = useState<number>(30)
   const chartRef = useRef<HTMLDivElement>(null)
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const medianPanelRef = useRef<HTMLDivElement>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const [scrubIndex, setScrubIndex] = useState<number | null>(null)
   const [scrubbing, setScrubbing] = useState(false)
@@ -229,13 +229,6 @@ export default function Timeline() {
     })
   }
 
-  const handleCopyImage = async () => {
-    if (!chartRef.current) return
-    const ok = await copyElementAsImage(chartRef.current)
-    setCopyState(ok ? 'copied' : 'failed')
-    setTimeout(() => setCopyState('idle'), 1500)
-  }
-
   const content = (
     <>
       <div className="timeline-header">
@@ -250,14 +243,11 @@ export default function Timeline() {
               {r === 0 ? t('timeline.all') : t('timeline.rangeDays', { count: r })}
             </button>
           ))}
-          <button
-            className="icon-button icon-button--ghost"
-            onClick={handleCopyImage}
-            aria-label={t('timeline.copyImageAria')}
+          <CopyImageButton
+            targetRef={chartRef}
+            ariaLabel={t('timeline.copyImageAria')}
             title={t('timeline.copyImageTitle')}
-          >
-            {copyState === 'copied' ? <Check size={14} /> : <ImageIcon size={14} />}
-          </button>
+          />
           <button
             className="icon-button icon-button--ghost"
             onClick={() => setFullscreen((f) => !f)}
@@ -315,13 +305,18 @@ export default function Timeline() {
               >
                 <Link2 size={14} />
               </button>
+              <CopyImageButton
+                targetRef={medianPanelRef}
+                ariaLabel={t('timeline.copyMedianImageAria')}
+                title={t('timeline.copyMedianImageTitle')}
+              />
             </div>
           </div>
           <p className="hint">
             {t('timeline.medianHint')}
             {medianRange !== 0 && ` (${t('timeline.rangeDays', { count: medianRange })})`}
           </p>
-          <div className="median-panel-row">
+          <div className="median-panel-row" ref={medianPanelRef}>
             <div className="progress-ring-row median-panel-rings">
               {MACRO_KEYS.map((macro) => (
                 <GoalProgressRing

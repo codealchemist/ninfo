@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Info, LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
@@ -9,6 +9,7 @@ import { BioimpedanciaSource } from '../data/sources/BioimpedanciaSource'
 import type { BiaEntry } from '../data/parsers/bioimpedanciaParser'
 import BiaTrendChart from '../components/charts/BiaTrendChart'
 import BiaGlossaryModal from '../components/common/BiaGlossaryModal'
+import CopyImageButton from '../components/common/CopyImageButton'
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
@@ -44,6 +45,7 @@ export default function Bia() {
   const [chartUnits, setChartUnits] = useState<Record<string, 'pct' | 'kg'>>({})
   const [chartDiff, setChartDiff] = useState<Record<string, boolean>>({})
   const [showGlossary, setShowGlossary] = useState(false)
+  const trendsRef = useRef<HTMLDivElement>(null)
 
   const unitToggleOptions = [
     { value: 'pct', label: t('bia.unitToggle.pct') },
@@ -172,8 +174,15 @@ export default function Bia() {
 
       {entries.length > 1 && (
         <section className="card">
-          <h2>{t('bia.trends')}</h2>
-          <div className="bia-chart-grid">
+          <div className="bia-header">
+            <h2>{t('bia.trends')}</h2>
+            <CopyImageButton
+              targetRef={trendsRef}
+              ariaLabel={t('bia.copyTrendsImageAria')}
+              title={t('bia.copyTrendsImageTitle')}
+            />
+          </div>
+          <div className="bia-chart-grid" ref={trendsRef}>
             {METRICS.map((m) => {
               const diff = chartDiff[m.key] ?? false
               const diffToggle = {

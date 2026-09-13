@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
@@ -11,6 +11,7 @@ import { amountOfLiquid, dailyTotalMlByDate, normalizeLiquidKey } from '../data/
 import TrendChart from '../components/charts/TrendChart'
 import LiquidHistoryList from '../components/liquids/LiquidHistoryList'
 import LiquidShareGauge from '../components/liquids/LiquidShareGauge'
+import CopyImageButton from '../components/common/CopyImageButton'
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
@@ -83,6 +84,8 @@ export default function Liquids() {
   const [entries, setEntries] = useState<LiquidEntry[]>([])
   const [range, setRange] = useState<number>(30)
   const [gaugesOpen, setGaugesOpen] = useState(true)
+  const summaryRef = useRef<HTMLDivElement>(null)
+  const trendsRef = useRef<HTMLDivElement>(null)
 
   const spreadsheetId = sheetLinkId
     ? parseGoogleSheetUrl(getSheetLink(sheetLinkId)?.url ?? '')?.spreadsheetId ?? null
@@ -156,6 +159,11 @@ export default function Liquids() {
                 </button>
               ))}
             </div>
+            <CopyImageButton
+              targetRef={summaryRef}
+              ariaLabel={t('liquid.copySummaryImageAria')}
+              title={t('liquid.copySummaryImageTitle')}
+            />
             <button className="link-button" onClick={load} disabled={status === 'loading'} title={t('liquid.refreshTitle')}>
               <RefreshCw size={14} className={status === 'loading' ? 'spin' : undefined} /> <span>{t('bia.refresh')}</span>
             </button>
@@ -178,7 +186,7 @@ export default function Liquids() {
 
         {latest && (
           <>
-            <div className="liquid-summary-row">
+            <div className="liquid-summary-row" ref={summaryRef}>
               <div className="liquid-summary-stats">
                 <div className="bia-stat-row">
                   <div className="bia-stat">
@@ -259,8 +267,16 @@ export default function Liquids() {
 
       {totals.length > 1 && (
         <section className="card">
-          <h2>{t('bia.trends')}</h2>
+          <div className="bia-header">
+            <h2>{t('bia.trends')}</h2>
+            <CopyImageButton
+              targetRef={trendsRef}
+              ariaLabel={t('bia.copyTrendsImageAria')}
+              title={t('bia.copyTrendsImageTitle')}
+            />
+          </div>
           <TrendChart
+            ref={trendsRef}
             points={totals.map((d) => ({ date: d.date, value: d.totalMl }))}
             label={t('liquid.metrics.dailyTotal')}
             unit="ml"

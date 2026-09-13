@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
@@ -9,6 +9,7 @@ import { PesoSource } from '../data/sources/PesoSource'
 import type { WeightEntry } from '../data/parsers/pesoParser'
 import TrendChart from '../components/charts/TrendChart'
 import WeightHistoryList from '../components/weight/WeightHistoryList'
+import CopyImageButton from '../components/common/CopyImageButton'
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
@@ -67,6 +68,7 @@ export default function Weight() {
   const [error, setError] = useState<string | null>(null)
   const [entries, setEntries] = useState<WeightEntry[]>([])
   const [range, setRange] = useState<number>(30)
+  const trendsRef = useRef<HTMLDivElement>(null)
 
   const spreadsheetId = sheetLinkId
     ? parseGoogleSheetUrl(getSheetLink(sheetLinkId)?.url ?? '')?.spreadsheetId ?? null
@@ -231,8 +233,15 @@ export default function Weight() {
 
       {filteredEntries.length > 1 && (
         <section className="card">
-          <h2>{t('bia.trends')}</h2>
-          <TrendChart points={points} label={t('weight.metrics.weight')} unit="kg" color="#577590" />
+          <div className="bia-header">
+            <h2>{t('bia.trends')}</h2>
+            <CopyImageButton
+              targetRef={trendsRef}
+              ariaLabel={t('bia.copyTrendsImageAria')}
+              title={t('bia.copyTrendsImageTitle')}
+            />
+          </div>
+          <TrendChart ref={trendsRef} points={points} label={t('weight.metrics.weight')} unit="kg" color="#577590" />
         </section>
       )}
 
