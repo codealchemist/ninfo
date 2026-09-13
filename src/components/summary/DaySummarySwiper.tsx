@@ -3,6 +3,15 @@ import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 import { buildDaySummaryData, type DaySummaryData } from '../../data/aggregate/daySummary'
+import { getSheetLink } from '../../db/sheetLinkStorage'
+import { parseGoogleSheetUrl } from '../../utils/googleSheetUrl'
+import { LiquidoSource } from '../../data/sources/LiquidoSource'
+import type { LiquidEntry } from '../../data/parsers/liquidoParser'
+import { dailyTotalMlByDate } from '../../data/liquidUtils'
+import { PesoSource } from '../../data/sources/PesoSource'
+import type { WeightEntry } from '../../data/parsers/pesoParser'
+import { getCachedLatestWeight, setCachedLatestWeight } from '../../db/latestWeightCache'
+import { getCachedLatestWater, setCachedLatestWater } from '../../db/latestWaterCache'
 import DaySummaryCard from './DaySummaryCard'
 import DaySummaryCardPlaceholder from './DaySummaryCardPlaceholder'
 
@@ -25,6 +34,19 @@ const CACHE_SIZE = 2
 // Matches the margin-bottom reserved below the title (desktop) / tab bar (mobile) in
 // styles.css, so the nav arrows land centered in that gap instead of over either row.
 const NAV_ARROW_GAP = 46
+// Common daily water intake guideline, applied to body weight to get a personal goal.
+const WATER_ML_PER_KG = 35
+
+/** Last weigh-in at or before the given date, from an ascending-by-date list — so a past day's
+ * water goal reflects the weight known at the time, not today's. */
+function weightAtOrBefore(sortedEntries: WeightEntry[], date: string): WeightEntry | null {
+  let result: WeightEntry | null = null
+  for (const e of sortedEntries) {
+    if (e.date <= date) result = e
+    else break
+  }
+  return result
+}
 
 export default function DaySummarySwiper() {
   const { t } = useTranslation()
@@ -34,11 +56,85 @@ export default function DaySummarySwiper() {
   const selectedDate = useAppStore((s) => s.selectedDate)
   const setSelectedDate = useAppStore((s) => s.setSelectedDate)
   const stepDate = useAppStore((s) => s.stepDate)
+  const sheetLinkId = useAppStore((s) => s.sheetLinkId)
 
   const currentData = useMemo(
     () => (selectedDate ? buildDaySummaryData({ meals, goalsByDate, dates, date: selectedDate }) : null),
     [meals, goalsByDate, dates, selectedDate]
   )
+
+  // Water intake and its goal alongside each day's macros — loaded once here (not per-card)
+  // from the same linked sheet's "Líquido"/"Peso" tabs, if any, with no dedicated error UI
+  // since the rest of the day summary is still useful without them.
+  const [liquidEntries, setLiquidEntries] = useState<LiquidEntry[]>([])
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([])
+  useEffect(() => {
+    const spreadsheetId = sheetLinkId
+      ? parseGoogleSheetUrl(getSheetLink(sheetLinkId)?.url ?? '')?.spreadsheetId ?? null
+      : null
+    if (!spreadsheetId) {
+      setLiquidEntries([])
+      setWeightEntries([])
+      return
+    }
+    let cancelled = false
+
+    // Seed with the last cached weight/water immediately, so the ring doesn't wait on fresh
+    // "Peso"/"Líquido" tab fetches every time this page is visited — refined below once the
+    // real loads resolve (and kept as a fallback if either happens to fail).
+    const cachedWeight = getCachedLatestWeight(spreadsheetId)
+    if (cachedWeight) setWeightEntries([{ date: cachedWeight.date, weightKg: cachedWeight.weightKg, notes: null }])
+    const cachedWater = getCachedLatestWater(spreadsheetId)
+    if (cachedWater) {
+      setLiquidEntries([
+        {
+          date: cachedWater.date,
+          startTime: null,
+          endTime: null,
+          duration: null,
+          liquidType: 'Agua',
+          amountMl: cachedWater.totalMl,
+          realAmountMl: cachedWater.totalMl,
+          dailyTotalMl: cachedWater.totalMl,
+          notes: null,
+        },
+      ])
+    }
+
+    new LiquidoSource(spreadsheetId)
+      .load()
+      .then((result) => {
+        if (cancelled) return
+        setLiquidEntries(result)
+        const byDate = dailyTotalMlByDate(result)
+        const latestDate = [...byDate.keys()].sort().pop()
+        if (latestDate) setCachedLatestWater(spreadsheetId, { date: latestDate, totalMl: byDate.get(latestDate)! })
+      })
+      .catch(() => {
+        if (!cancelled && !cachedWater) setLiquidEntries([])
+      })
+    new PesoSource(spreadsheetId)
+      .load()
+      .then((result) => {
+        if (cancelled) return
+        setWeightEntries(result)
+        const latest = result[result.length - 1]
+        if (latest) setCachedLatestWeight(spreadsheetId, { date: latest.date, weightKg: latest.weightKg })
+      })
+      .catch(() => {
+        if (!cancelled && !cachedWeight) setWeightEntries([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [sheetLinkId])
+
+  const waterGoalMlForDate = (date: string): number | null => {
+    const entry = weightAtOrBefore(weightEntries, date)
+    return entry ? entry.weightKg * WATER_ML_PER_KG : null
+  }
+
+  const waterByDate = useMemo(() => dailyTotalMlByDate(liquidEntries), [liquidEntries])
 
   const [dragX, setDragX] = useState(0)
   const [peek, setPeek] = useState<PeekState | null>(null)
@@ -297,11 +393,25 @@ export default function DaySummarySwiper() {
   return (
     <div className="day-summary-swipe-viewport" ref={viewportRef}>
       <div className={slotClass + ' day-summary-swipe-slot--current'} style={{ transform: `translateX(${dragX}px)` }}>
-        <DaySummaryCard date={selectedDate} {...currentData} />
+        <DaySummaryCard
+          date={selectedDate}
+          {...currentData}
+          dailyWaterMl={waterByDate.get(selectedDate) ?? null}
+          dailyWaterGoalMl={waterGoalMlForDate(selectedDate)}
+        />
       </div>
       {peek && (
         <div className={slotClass + ' day-summary-swipe-slot--peek'} style={{ transform: `translateX(${peekBase + dragX}px)` }}>
-          {peek.data ? <DaySummaryCard date={peek.date} {...peek.data} /> : <DaySummaryCardPlaceholder date={peek.date} />}
+          {peek.data ? (
+            <DaySummaryCard
+              date={peek.date}
+              {...peek.data}
+              dailyWaterMl={waterByDate.get(peek.date) ?? null}
+              dailyWaterGoalMl={waterGoalMlForDate(peek.date)}
+            />
+          ) : (
+            <DaySummaryCardPlaceholder date={peek.date} />
+          )}
         </div>
       )}
       <button

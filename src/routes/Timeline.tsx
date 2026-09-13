@@ -11,7 +11,7 @@ import { getSheetLink } from '../db/sheetLinkStorage'
 import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { LiquidoSource } from '../data/sources/LiquidoSource'
 import type { LiquidEntry } from '../data/parsers/liquidoParser'
-import { amountOfLiquid, normalizeLiquidKey } from '../data/liquidUtils'
+import { dailyTotalMlByDate } from '../data/liquidUtils'
 import { PesoSource } from '../data/sources/PesoSource'
 import type { WeightEntry } from '../data/parsers/pesoParser'
 import MacroTimelineChart from '../components/charts/MacroTimelineChart'
@@ -192,11 +192,7 @@ export default function Timeline() {
 
   const medianWaterMl = useMemo(() => {
     if (effectiveMedianDays.length === 0 || liquidEntries.length === 0) return null
-    const waterByDate = new Map<string, number>()
-    for (const e of liquidEntries) {
-      if (normalizeLiquidKey(e.liquidType) !== 'agua') continue
-      waterByDate.set(e.date, (waterByDate.get(e.date) ?? 0) + amountOfLiquid(e))
-    }
+    const waterByDate = dailyTotalMlByDate(liquidEntries)
     return median(effectiveMedianDays.map((d) => waterByDate.get(d.date) ?? 0))
   }, [liquidEntries, effectiveMedianDays])
 

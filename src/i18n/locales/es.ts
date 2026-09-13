@@ -163,7 +163,8 @@ export const es: typeof en = {
     copySummaryImageTitle: 'Copiar el resumen del día como imagen',
     foodLogTitle: 'Registro de alimentos — {{date}}',
     summaryTitle: 'Resumen del día — {{date}}',
-    ofGoal: '/ {{goal}}{{unit}} objetivo'
+    ofGoal: '/ {{goal}}{{unit}} objetivo',
+    waterIntake: 'Consumo de agua'
   },
 
   timeline: {
@@ -301,7 +302,7 @@ export const es: typeof en = {
     refreshTitle: 'Volver a obtener los registros más recientes',
     loading: 'Cargando registros…',
     noMeasurements: 'Aún no hay registros en la pestaña Líquido.',
-    latestDay: 'Último día: {{date}}',
+    latestDay: 'Último día: {{date}} — {{total}} ml',
     sources: 'Fuentes',
     metrics: {
       dailyTotal: 'Total diario',

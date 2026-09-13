@@ -52,6 +52,13 @@ interface Props {
   prevDayTotals: MacroTotals | null
   weekMedianTotals: MacroTotals | null
   monthMedianTotals: MacroTotals | null
+  /** Total water intake for this date, from the linked sheet's "Líquido" tab — null when no
+   * linked sheet/tab is available, in which case the ring is simply omitted. */
+  dailyWaterMl?: number | null
+  /** Water intake goal for this date (35ml per kg of the last known weight at/before this
+   * date) — null when no weight measurement is available yet, in which case the ring shows
+   * the raw total with no goal fill. */
+  dailyWaterGoalMl?: number | null
 }
 
 export default function DaySummaryCard({
@@ -63,6 +70,8 @@ export default function DaySummaryCard({
   prevDayTotals,
   weekMedianTotals,
   monthMedianTotals,
+  dailyWaterMl = null,
+  dailyWaterGoalMl = null,
 }: Props) {
   const { t, i18n } = useTranslation()
   const dates = useAppStore((s) => s.dates)
@@ -268,6 +277,16 @@ export default function DaySummaryCard({
                       showDetails={showRingDetails}
                     />
                   ))}
+                  {dailyWaterMl != null && (
+                    <GoalProgressRing
+                      label={t('today.waterIntake')}
+                      value={dailyWaterMl}
+                      goal={dailyWaterGoalMl}
+                      unit="ml"
+                      colorVar="--water-blue"
+                      showDetails={showRingDetails}
+                    />
+                  )}
                 </div>
                 <p className="day-review-text">{reviewText}</p>
               </div>
