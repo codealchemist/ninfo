@@ -156,7 +156,8 @@ export const en = {
     copySummaryImageTitle: 'Copy the day summary as an image',
     foodLogTitle: 'Food log — {{date}}',
     summaryTitle: 'Day summary — {{date}}',
-    ofGoal: '/ {{goal}}{{unit}} goal'
+    ofGoal: '/ {{goal}}{{unit}} goal',
+    waterIntake: 'Water intake'
   },
 
   timeline: {
@@ -292,7 +293,7 @@ export const en = {
     refreshTitle: 'Re-fetch the latest entries',
     loading: 'Loading entries…',
     noMeasurements: 'No entries found in the Líquido tab yet.',
-    latestDay: 'Latest day: {{date}}',
+    latestDay: 'Latest day: {{date}} — {{total}} ml',
     sources: 'Sources',
     metrics: {
       dailyTotal: 'Daily total',

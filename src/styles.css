@@ -1119,15 +1119,24 @@ button {
 
 .day-summary-body {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
-  flex-wrap: wrap;
+  /* No wrap on desktop — the review text stays a column to the right of the rings even as
+     more rings (e.g. water intake) are added; the rings row below shrinks/wraps internally
+     first instead of pushing the text underneath. Mobile stacks both into one column instead. */
+  flex-wrap: nowrap;
+}
+
+.day-summary-body .progress-ring-row {
+  flex: 1;
+  min-width: 0;
 }
 
 .day-review-text {
-  min-width: 200px;
-  max-width: 460px;
+  min-width: 160px;
+  max-width: 420px;
+  flex-shrink: 0;
   margin: 0;
   color: var(--text-muted);
   font-size: 13.5px;
@@ -2522,8 +2531,12 @@ button {
     align-items: stretch;
     gap: 14px;
   }
+  .day-summary-body .progress-ring-row {
+    flex: none;
+  }
   .day-review-text {
     min-width: 0;
+    flex-shrink: 1;
   }
   .day-summary-footer-top {
     flex-direction: column;

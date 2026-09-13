@@ -7,7 +7,7 @@ import { getSheetLink } from '../db/sheetLinkStorage'
 import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { LiquidoSource } from '../data/sources/LiquidoSource'
 import type { LiquidEntry } from '../data/parsers/liquidoParser'
-import { amountOfLiquid, normalizeLiquidKey } from '../data/liquidUtils'
+import { amountOfLiquid, dailyTotalMlByDate, normalizeLiquidKey } from '../data/liquidUtils'
 import TrendChart from '../components/charts/TrendChart'
 import LiquidHistoryList from '../components/liquids/LiquidHistoryList'
 import LiquidShareGauge from '../components/liquids/LiquidShareGauge'
@@ -55,11 +55,7 @@ function min(values: number[]): number {
 }
 
 function dailyTotals(entries: LiquidEntry[]): Array<{ date: string; totalMl: number }> {
-  const byDate = new Map<string, number>()
-  for (const e of entries) {
-    byDate.set(e.date, (byDate.get(e.date) ?? 0) + amountOfLiquid(e))
-  }
-  return Array.from(byDate.entries())
+  return Array.from(dailyTotalMlByDate(entries).entries())
     .map(([date, totalMl]) => ({ date, totalMl }))
     .sort((a, b) => a.date.localeCompare(b.date))
 }
@@ -187,13 +183,6 @@ export default function Liquids() {
                 <div className="bia-stat-row">
                   <div className="bia-stat">
                     <span className="bia-stat-value">
-                      {fmt(latest.totalMl)}
-                      <span className="bia-stat-unit">ml</span>
-                    </span>
-                    <span className="bia-stat-label">{t('liquid.metrics.dailyTotal')}</span>
-                  </div>
-                  <div className="bia-stat">
-                    <span className="bia-stat-value">
                       {fmt(medianMl)}
                       <span className="bia-stat-unit">ml</span>
                     </span>
@@ -230,6 +219,7 @@ export default function Liquids() {
                       month: 'short',
                       day: 'numeric',
                     }),
+                    total: fmt(latest.totalMl),
                   })}
                 </p>
                 {previous && (

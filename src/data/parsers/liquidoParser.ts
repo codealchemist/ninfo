@@ -16,6 +16,10 @@ export interface LiquidEntry {
   liquidType: string
   amountMl: number
   realAmountMl: number
+  /** The sheet's own "Total diario" rollup (column I) — present only on whichever row the
+   * sheet's formula places it for a given date (typically its last row), null everywhere else.
+   * Preferred over summing entries client-side when available — see liquidUtils.dailyTotalMlByDate. */
+  dailyTotalMl: number | null
   notes: string | null
 }
 
@@ -26,9 +30,7 @@ export interface LiquidEntry {
  *   A Fecha | B Hora inicio | C Hora fin | D Duración | E Líquido | F Cantidad |
  *   G Cantidad real | H ml/h | I Total diario | J Notes
  *
- * The sheet's own "ml/h" and "Total diario" columns are trend/rollup helpers for the
- * spreadsheet itself and aren't parsed — daily totals are computed from individual entries
- * once loaded instead (same approach as the day-summary macro totals).
+ * The sheet's own "ml/h" column is a trend helper for the spreadsheet itself and isn't parsed.
  *
  * This tab has a summary row above the real header (Tiempo/ML-per-hora/TOTAL HOY), which
  * throws off the gviz endpoint's own header auto-detection (see LiquidoSource — it's fetched
@@ -61,6 +63,8 @@ export function parseLiquidoCsv(csvText: string, today: Date = new Date()): Liqu
     if (!parsedFecha) continue
     const date = inferYear(parsedFecha.monthAbbr, parsedFecha.day)
 
+    const dailyTotalRaw = row[8]?.trim()
+
     entries.push({
       date,
       startTime: row[1]?.trim() || null,
@@ -69,6 +73,7 @@ export function parseLiquidoCsv(csvText: string, today: Date = new Date()): Liqu
       liquidType,
       amountMl: parseNumber(row[5]),
       realAmountMl: parseNumber(row[6]),
+      dailyTotalMl: dailyTotalRaw ? parseNumber(dailyTotalRaw) : null,
       notes: row[9]?.trim() || null,
     })
   }
