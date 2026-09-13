@@ -77,7 +77,8 @@ export const es: typeof en = {
       timeline: 'Cronología',
       bia: 'BIA',
       weight: 'Peso',
-      liquids: 'Líquidos'
+      liquids: 'Líquidos',
+      report: 'Reporte'
     },
     refreshTitle:
       'Volver a obtener los datos más recientes de la hoja vinculada',
@@ -322,6 +323,18 @@ export const es: typeof en = {
       type: 'Tipo',
       amount: 'Cantidad'
     }
+  },
+
+  report: {
+    title: 'Reporte global',
+    description: 'Genera un PDF de una sola página con tus tendencias generales: el resumen de mediana de macros y la composición corporal, peso y consumo de líquidos, donde una hoja vinculada los proporcione.',
+    generateButton: 'Descargar reporte en PDF',
+    generating: 'Generando…',
+    generateFailed: 'No se pudo generar el reporte. Inténtalo de nuevo.',
+    generatedAt: 'Generado el {{date}}',
+    biaTitle: 'BIA',
+    medianRangeHint: 'Mediana de los últimos {{count}} días registrados',
+    noData: 'Aún no hay comidas registradas.'
   },
 
   meals: {

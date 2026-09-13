@@ -8,6 +8,7 @@ import {
   CalendarRange,
   Download,
   Droplet,
+  FileDown,
   LayoutDashboard,
   QrCode as QrCodeIcon,
   RotateCcw,
@@ -126,6 +127,9 @@ export default function MobileMenu({
           </NavLink>
           <NavLink to="/app/liquids" onClick={onClose} className={({ isActive }) => (isActive ? 'active' : '')}>
             <Droplet size={16} /> <span>{t('topBar.nav.liquids')}</span>
+          </NavLink>
+          <NavLink to="/app/report" onClick={onClose} className={({ isActive }) => (isActive ? 'active' : '')}>
+            <FileDown size={16} /> <span>{t('topBar.nav.report')}</span>
           </NavLink>
         </div>
 
