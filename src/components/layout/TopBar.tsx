@@ -1,7 +1,21 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Activity, Check, CalendarRange, LayoutDashboard, Menu, QrCode as QrCodeIcon, RefreshCw, RotateCcw, Salad, Share2, X } from 'lucide-react'
+import {
+  Activity,
+  Check,
+  CalendarRange,
+  Droplet,
+  LayoutDashboard,
+  Menu,
+  QrCode as QrCodeIcon,
+  RefreshCw,
+  RotateCcw,
+  Salad,
+  Scale,
+  Share2,
+  X,
+} from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
 import { getSheetLink } from '../../db/sheetLinkStorage'
 import { buildShareableAppUrl } from '../../utils/googleSheetUrl'
@@ -109,6 +123,22 @@ export default function TopBar() {
           >
             <Activity size={18} />
           </NavLink>
+          <NavLink
+            to="/app/weight"
+            className={({ isActive }) => 'mobile-nav-icon' + (isActive ? ' active' : '')}
+            aria-label={t('topBar.nav.weight')}
+            title={t('topBar.nav.weight')}
+          >
+            <Scale size={18} />
+          </NavLink>
+          <NavLink
+            to="/app/liquids"
+            className={({ isActive }) => 'mobile-nav-icon' + (isActive ? ' active' : '')}
+            aria-label={t('topBar.nav.liquids')}
+            title={t('topBar.nav.liquids')}
+          >
+            <Droplet size={18} />
+          </NavLink>
           {meta?.mode === 'sheet-link' && (
             <button
               className="icon-button icon-button--ghost"
@@ -162,6 +192,12 @@ export default function TopBar() {
           </NavLink>
           <NavLink to="/app/bia" className={({ isActive }) => (isActive ? 'active' : '')}>
             <Activity size={16} /> <span>{t('topBar.nav.bia')}</span>
+          </NavLink>
+          <NavLink to="/app/weight" className={({ isActive }) => (isActive ? 'active' : '')}>
+            <Scale size={16} /> <span>{t('topBar.nav.weight')}</span>
+          </NavLink>
+          <NavLink to="/app/liquids" className={({ isActive }) => (isActive ? 'active' : '')}>
+            <Droplet size={16} /> <span>{t('topBar.nav.liquids')}</span>
           </NavLink>
         </nav>
         {meta?.mode === 'sheet-link' && (

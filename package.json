@@ -41,12 +41,14 @@
     "react-dom": "^18.3.1",
     "react-i18next": "^17.0.13",
     "react-router-dom": "^6.26.2",
+    "react-window": "^2.3.1",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@types/papaparse": "^5.3.14",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
+    "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^4.3.1",
     "typescript": "^5.5.4",
     "vite": "^5.4.3"

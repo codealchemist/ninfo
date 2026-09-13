@@ -75,7 +75,9 @@ export const es: typeof en = {
     nav: {
       today: 'Reciente',
       timeline: 'Cronología',
-      bia: 'BIA'
+      bia: 'BIA',
+      weight: 'Peso',
+      liquids: 'Líquidos'
     },
     refreshTitle:
       'Volver a obtener los datos más recientes de la hoja vinculada',
@@ -251,6 +253,49 @@ export const es: typeof en = {
     }
   },
 
+  weight: {
+    title: 'Peso',
+    needsLinkedSheet: 'Este reporte lee la pestaña "Peso" de una hoja de Google vinculada. ',
+    refreshTitle: 'Volver a obtener las mediciones más recientes',
+    loading: 'Cargando mediciones…',
+    noMeasurements: 'Aún no hay mediciones en la pestaña Peso.',
+    latestMeasurement: 'Última medición: {{date}}',
+    metrics: {
+      weight: 'Peso',
+      median: 'Mediana',
+      max: 'Máx',
+      min: 'Mín'
+    },
+    periods: {
+      oneMonth: 'vs. hace 1 mes',
+      threeMonths: 'vs. hace 3 meses',
+      sixMonths: 'vs. hace 6 meses',
+      oneYear: 'vs. hace 1 año'
+    }
+  },
+
+  liquid: {
+    title: 'Líquidos',
+    needsLinkedSheet: 'Este reporte lee la pestaña "Líquido" de una hoja de Google vinculada. ',
+    refreshTitle: 'Volver a obtener los registros más recientes',
+    loading: 'Cargando registros…',
+    noMeasurements: 'Aún no hay registros en la pestaña Líquido.',
+    latestDay: 'Último día: {{date}}',
+    sources: 'Fuentes',
+    metrics: {
+      dailyTotal: 'Total diario',
+      median: 'Mediana',
+      max: 'Máx',
+      min: 'Mín'
+    },
+    table: {
+      time: 'Hora',
+      duration: 'Duración',
+      type: 'Tipo',
+      amount: 'Cantidad'
+    }
+  },
+
   meals: {
     timelineStrip: {
       empty: 'No hay comidas registradas este día.',
@@ -336,6 +381,10 @@ export const es: typeof en = {
       'No se encontró la fila de encabezado de Registro (se esperaban las columnas Fecha/Hora/Alimento).',
     bioimpedanciaHeaderNotFound:
       'No se encontró la fila de encabezado de Bioimpedancia (se esperaban las columnas Fecha/Peso).',
+    pesoHeaderNotFound:
+      'No se encontró la fila de encabezado de Peso (se esperaban las columnas Fecha/Peso).',
+    liquidoHeaderNotFound:
+      'No se encontró la fila de encabezado de Líquido (se esperaban las columnas Fecha/.../Líquido).',
     fileEmpty: ' El archivo parece estar vacío.',
     foundInstead:
       ' Se encontró en su lugar: "{{preview}}" — comprueba que esta sea la pestaña correcta.',
@@ -343,11 +392,17 @@ export const es: typeof en = {
       'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede verla", y de que el enlace se haya copiado con la pestaña "Registro" abierta (Compartir → Copiar enlace, desde esa pestaña) — de lo contrario, el enlace apunta a la primera pestaña, que no siempre es Registro.',
     shareHintBioimpedancia:
       'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede verla" y de que tenga una pestaña "Bioimpedancia" con columnas Fecha/Peso.',
+    shareHintPeso:
+      'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede verla" y de que tenga una pestaña "Peso" con columnas Fecha/Peso.',
+    shareHintLiquido:
+      'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede verla" y de que tenga una pestaña "Líquido" con columnas Fecha/Líquido.',
     notGoogleSheetLink:
       'Eso no parece un enlace de Google Sheets. Cópialo desde la barra de direcciones o mediante Compartir → Copiar enlace.',
     couldNotReachSheet: 'No se pudo acceder a esa hoja de cálculo.',
     couldNotReachBioimpedancia:
       'No se pudo acceder a la pestaña Bioimpedancia.',
+    couldNotReachPeso: 'No se pudo acceder a la pestaña Peso.',
+    couldNotReachLiquido: 'No se pudo acceder a la pestaña Líquido.',
     signInPage:
       'Google devolvió una página de inicio de sesión en lugar de tu hoja de cálculo — esta hoja aún no está compartida como "Cualquier persona con el enlace puede verla" (Archivo → Compartir → Acceso general).',
     httpError: 'Google Sheets devolvió un error ({{status}}).',

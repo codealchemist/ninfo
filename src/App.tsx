@@ -4,6 +4,8 @@ import DashboardLayout from './routes/DashboardLayout'
 import Today from './routes/Today'
 import Timeline from './routes/Timeline'
 import Bia from './routes/Bia'
+import Weight from './routes/Weight'
+import Liquids from './routes/Liquids'
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
         <Route path="today" element={<Today />} />
         <Route path="timeline" element={<Timeline />} />
         <Route path="bia" element={<Bia />} />
+        <Route path="weight" element={<Weight />} />
+        <Route path="liquids" element={<Liquids />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

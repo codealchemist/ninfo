@@ -7,10 +7,12 @@ import {
   Check,
   CalendarRange,
   Download,
+  Droplet,
   LayoutDashboard,
   QrCode as QrCodeIcon,
   RotateCcw,
   Salad,
+  Scale,
   Share2,
   X,
 } from 'lucide-react'
@@ -118,6 +120,12 @@ export default function MobileMenu({
           </NavLink>
           <NavLink to="/app/bia" onClick={onClose} className={({ isActive }) => (isActive ? 'active' : '')}>
             <Activity size={16} /> <span>{t('topBar.nav.bia')}</span>
+          </NavLink>
+          <NavLink to="/app/weight" onClick={onClose} className={({ isActive }) => (isActive ? 'active' : '')}>
+            <Scale size={16} /> <span>{t('topBar.nav.weight')}</span>
+          </NavLink>
+          <NavLink to="/app/liquids" onClick={onClose} className={({ isActive }) => (isActive ? 'active' : '')}>
+            <Droplet size={16} /> <span>{t('topBar.nav.liquids')}</span>
           </NavLink>
         </div>
 
