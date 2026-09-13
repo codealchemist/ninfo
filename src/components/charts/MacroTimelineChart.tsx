@@ -26,12 +26,11 @@ const COLORS: Record<MacroKey, string> = {
 
 interface Props {
   days: DailyAggregate[]
-  visibleMacros: Set<MacroKey>
   onDayClick?: (date: string) => void
 }
 
 const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimelineChart(
-  { days, visibleMacros, onDayClick },
+  { days, onDayClick },
   ref
 ) {
   const { t, i18n } = useTranslation()
@@ -40,29 +39,25 @@ const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimel
   )
 
   const gramKeys: MacroKey[] = ['protein', 'carbs', 'fat', 'fiber']
-  const datasets = gramKeys
-    .filter((k) => visibleMacros.has(k))
-    .map((k) => ({
-      label: t(`common.macros.${k}`),
-      data: days.map((d) => d.totals[k]),
-      borderColor: COLORS[k],
-      backgroundColor: COLORS[k],
-      yAxisID: 'grams',
-      tension: 0.3,
-      pointRadius: 2,
-    }))
+  const datasets = gramKeys.map((k) => ({
+    label: t(`common.macros.${k}`),
+    data: days.map((d) => d.totals[k]),
+    borderColor: COLORS[k],
+    backgroundColor: COLORS[k],
+    yAxisID: 'grams',
+    tension: 0.3,
+    pointRadius: 2,
+  }))
 
-  if (visibleMacros.has('calories')) {
-    datasets.push({
-      label: t('common.macros.calories'),
-      data: days.map((d) => d.totals.calories),
-      borderColor: COLORS.calories,
-      backgroundColor: COLORS.calories,
-      yAxisID: 'calories',
-      tension: 0.3,
-      pointRadius: 2,
-    })
-  }
+  datasets.push({
+    label: t('common.macros.calories'),
+    data: days.map((d) => d.totals.calories),
+    borderColor: COLORS.calories,
+    backgroundColor: COLORS.calories,
+    yAxisID: 'calories',
+    tension: 0.3,
+    pointRadius: 2,
+  })
 
   const data: ChartData<'line'> = { labels, datasets }
 

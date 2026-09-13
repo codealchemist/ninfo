@@ -18,7 +18,6 @@ import type { DatasetMeta } from '../../data/types'
 import { setLanguage, type SupportedLanguage } from '../../i18n'
 import { useAppStore } from '../../store/appStore'
 import { useInstallPrompt } from '../../hooks/useInstallPrompt'
-import MacroFilterChips from './MacroFilterChips'
 import ToggleSwitch from '../common/ToggleSwitch'
 
 const LANGUAGE_OPTIONS = [
@@ -151,11 +150,6 @@ export default function MobileMenu({
             </button>
           </div>
         )}
-
-        <div className="mobile-menu-section">
-          <p className="mobile-menu-label">{t('mobileMenu.macrosLabel')}</p>
-          <MacroFilterChips />
-        </div>
 
         {canInstall && (
           <div className="mobile-menu-section">

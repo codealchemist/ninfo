@@ -93,7 +93,6 @@ export const es: typeof en = {
 
   mobileMenu: {
     openAria: 'Menú',
-    macrosLabel: 'Macros mostrados',
     installApp: 'Instalar app',
     installAppTitle: 'Instalar Ninfo en este dispositivo'
   },
@@ -166,7 +165,7 @@ export const es: typeof en = {
 
   timeline: {
     title: 'Cronología de macronutrientes',
-    hint: 'Usa los chips de macros en la barra superior para filtrar qué nutrientes se muestran. Haz clic en un día para ver sus detalles.',
+    hint: 'Haz clic en un día para ver sus detalles.',
     copyImageAria: 'Copiar gráfico como imagen',
     copyImageTitle: 'Copiar el gráfico como imagen',
     exitFullscreen: 'Salir de pantalla completa',

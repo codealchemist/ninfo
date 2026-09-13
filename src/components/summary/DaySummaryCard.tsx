@@ -65,11 +65,10 @@ export default function DaySummaryCard({
   monthMedianTotals,
 }: Props) {
   const { t, i18n } = useTranslation()
-  const visibleMacros = useAppStore((s) => s.visibleMacros)
   const dates = useAppStore((s) => s.dates)
   const setSelectedDate = useAppStore((s) => s.setSelectedDate)
   const lastDate = dates[dates.length - 1]
-  const macros = MACRO_KEYS.filter((m) => visibleMacros.has(m))
+  const macros = [...MACRO_KEYS]
   const [collapsed, setCollapsed] = useState(false)
   const [showRingDetails, setShowRingDetails] = useState(false)
   const [comparisonMode, setComparisonMode] = useState<ComparisonMode>('yesterday')
