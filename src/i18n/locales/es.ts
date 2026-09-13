@@ -188,6 +188,8 @@ export const es: typeof en = {
     metrics: {
       foodGrams: 'Consumo de comida',
       foodGramsFor: '"{{food}}" por día',
+      proteinPerKg: 'Proteína/kg',
+      proteinPerKgTitle: 'Proteína mediana por día, por kg de peso corporal mediano, para este período',
       fasting: 'Tiempo de ayuno',
       water: 'Consumo de agua'
     }

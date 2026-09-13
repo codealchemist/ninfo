@@ -181,6 +181,8 @@ export const en = {
     metrics: {
       foodGrams: 'Food intake',
       foodGramsFor: '"{{food}}" per day',
+      proteinPerKg: 'Protein/kg',
+      proteinPerKgTitle: 'Median protein per day, per kg of median body weight, for this period',
       fasting: 'Fasting time',
       water: 'Water intake'
     }
