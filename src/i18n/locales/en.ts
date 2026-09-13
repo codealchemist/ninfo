@@ -87,7 +87,6 @@ export const en = {
 
   mobileMenu: {
     openAria: 'Menu',
-    macrosLabel: 'Macros shown',
     installApp: 'Install app',
     installAppTitle: 'Install Ninfo on this device'
   },
@@ -160,7 +159,7 @@ export const en = {
 
   timeline: {
     title: 'Macro-nutrient timeline',
-    hint: 'Use the macro chips in the top bar to filter which nutrients are plotted. Click a day to open its details.',
+    hint: 'Click a day to open its details.',
     copyImageAria: 'Copy chart as image',
     copyImageTitle: 'Copy chart as an image',
     exitFullscreen: 'Exit fullscreen',

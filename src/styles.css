@@ -441,12 +441,6 @@ button {
   padding: 10px 20px;
 }
 
-.top-bar-row--secondary {
-  border-top: 1px solid var(--border);
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
 .top-bar-mobile-row {
   display: none;
   align-items: center;
@@ -715,14 +709,6 @@ button {
   display: inline;
 }
 
-.mobile-menu-label {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--text-muted);
-}
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -748,48 +734,6 @@ button {
 .icon-button:disabled {
   opacity: 0.35;
   cursor: not-allowed;
-}
-
-.macro-chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.chip {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-muted);
-  border-radius: 999px;
-  padding: 4px 12px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.chip--active.chip--protein {
-  background: var(--macro-protein);
-  color: #fff;
-  border-color: var(--macro-protein);
-}
-.chip--active.chip--carbs {
-  background: var(--macro-carbs);
-  color: #fff;
-  border-color: var(--macro-carbs);
-}
-.chip--active.chip--fat {
-  background: var(--macro-fat);
-  color: #241a00;
-  border-color: var(--macro-fat);
-}
-.chip--active.chip--fiber {
-  background: var(--macro-fiber);
-  color: #fff;
-  border-color: var(--macro-fiber);
-}
-.chip--active.chip--calories {
-  background: var(--macro-calories);
-  color: #fff;
-  border-color: var(--macro-calories);
 }
 
 .dashboard-main {
@@ -2221,8 +2165,7 @@ button {
     border-radius: 0;
   }
 
-  .top-bar-row,
-  .top-bar-row--secondary {
+  .top-bar-row {
     display: none;
   }
   .top-bar-mobile-row {

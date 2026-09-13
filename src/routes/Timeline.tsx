@@ -14,7 +14,6 @@ export default function Timeline() {
   const { t } = useTranslation()
   const meals = useAppStore((s) => s.meals)
   const goalsByDate = useAppStore((s) => s.goalsByDate)
-  const visibleMacros = useAppStore((s) => s.visibleMacros)
   const jumpToDate = useAppStore((s) => s.jumpToDate)
   const [range, setRange] = useState<number>(30)
   const chartRef = useRef<HTMLDivElement>(null)
@@ -79,12 +78,7 @@ export default function Timeline() {
         </div>
       </div>
       <p className="hint">{t('timeline.hint')}</p>
-      <MacroTimelineChart
-        ref={chartRef}
-        days={days}
-        visibleMacros={visibleMacros}
-        onDayClick={handleDayClick}
-      />
+      <MacroTimelineChart ref={chartRef} days={days} onDayClick={handleDayClick} />
     </>
   )
 

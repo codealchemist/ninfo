@@ -11,8 +11,7 @@ import { DemoSource } from '../data/sources/DemoSource'
 import { UploadedCsvSource } from '../data/sources/UploadedCsvSource'
 import { GoogleSheetLinkSource } from '../data/sources/GoogleSheetLinkSource'
 import { sortedDates } from '../data/aggregate/dailyTotals'
-import type { DatasetMeta, FoodCatalogItem, MacroKey, MacroTotals, MealItem } from '../data/types'
-import { MACRO_KEYS } from '../data/types'
+import type { DatasetMeta, FoodCatalogItem, MacroTotals, MealItem } from '../data/types'
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
@@ -27,7 +26,6 @@ interface AppState {
   selectedDate: string | null
   /** The date shown on the top bar's "other date" chip, if any — see jumpToDate/setSelectedDate. */
   pinnedDate: string | null
-  visibleMacros: Set<MacroKey>
   sheetLinkId: string | null
   loadController: AbortController | null
 
@@ -46,7 +44,6 @@ interface AppState {
   jumpToDate: (date: string) => void
   goToToday: () => void
   clearPinnedDate: () => void
-  toggleMacro: (macro: MacroKey) => void
 }
 
 /** Today's real calendar date if it has data, otherwise the most recent date that does. */
@@ -66,7 +63,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   dates: [],
   selectedDate: null,
   pinnedDate: null,
-  visibleMacros: new Set(MACRO_KEYS),
   sheetLinkId: null,
   loadController: null,
 
@@ -246,13 +242,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   clearPinnedDate: () => set({ pinnedDate: null }),
-
-  toggleMacro: (macro) => {
-    const next = new Set(get().visibleMacros)
-    if (next.has(macro)) next.delete(macro)
-    else next.add(macro)
-    set({ visibleMacros: next })
-  },
 }))
 
 type Setter = (partial: Partial<AppState>) => void

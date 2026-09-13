@@ -7,7 +7,6 @@ import { getSheetLink } from '../../db/sheetLinkStorage'
 import { buildShareableAppUrl } from '../../utils/googleSheetUrl'
 import { copyTextToClipboard } from '../../utils/clipboard'
 import { setLanguage, type SupportedLanguage } from '../../i18n'
-import MacroFilterChips from './MacroFilterChips'
 import MobileMenu from './MobileMenu'
 import ShareQrModal from '../common/ShareQrModal'
 import ToggleSwitch from '../common/ToggleSwitch'
@@ -196,9 +195,6 @@ export default function TopBar() {
         <button className="link-button" onClick={reset} title={t('topBar.startOver')}>
           <RotateCcw size={14} /> <span>{t('topBar.startOver')}</span>
         </button>
-      </div>
-      <div className="top-bar-row top-bar-row--secondary">
-        <MacroFilterChips />
       </div>
       {qrUrl && <ShareQrModal url={qrUrl} onClose={() => setQrUrl(null)} />}
       <MobileMenu
