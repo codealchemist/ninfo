@@ -12,6 +12,8 @@ import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { LiquidoSource } from '../data/sources/LiquidoSource'
 import type { LiquidEntry } from '../data/parsers/liquidoParser'
 import { amountOfLiquid, normalizeLiquidKey } from '../data/liquidUtils'
+import { PesoSource } from '../data/sources/PesoSource'
+import type { WeightEntry } from '../data/parsers/pesoParser'
 import MacroTimelineChart from '../components/charts/MacroTimelineChart'
 import TimelineScrubber from '../components/charts/TimelineScrubber'
 import FoodSearchInput from '../components/charts/FoodSearchInput'
@@ -66,6 +68,7 @@ export default function Timeline() {
   const [medianLinked, setMedianLinked] = useState(true)
   const [skipLastDay, setSkipLastDay] = useState(false)
   const [liquidEntries, setLiquidEntries] = useState<LiquidEntry[]>([])
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([])
   const [selectedFood, setSelectedFood] = useState<string | null>(null)
   const navigate = useNavigate()
 
@@ -82,15 +85,16 @@ export default function Timeline() {
     [meals, selectedFood]
   )
 
-  // Water intake is a bonus stat alongside the macro medians — loaded quietly from the same
-  // linked sheet's "Líquido" tab (if any) with no dedicated error UI, since the rest of the
-  // panel is still useful without it.
+  // Water intake and the protein/kg ratio are bonus stats alongside the macro medians — loaded
+  // quietly from the same linked sheet's "Líquido"/"Peso" tabs (if any) with no dedicated error
+  // UI, since the rest of the panel is still useful without them.
   useEffect(() => {
     const spreadsheetId = sheetLinkId
       ? parseGoogleSheetUrl(getSheetLink(sheetLinkId)?.url ?? '')?.spreadsheetId ?? null
       : null
     if (!spreadsheetId) {
       setLiquidEntries([])
+      setWeightEntries([])
       return
     }
     let cancelled = false
@@ -101,6 +105,14 @@ export default function Timeline() {
       })
       .catch(() => {
         if (!cancelled) setLiquidEntries([])
+      })
+    new PesoSource(spreadsheetId)
+      .load()
+      .then((result) => {
+        if (!cancelled) setWeightEntries(result)
+      })
+      .catch(() => {
+        if (!cancelled) setWeightEntries([])
       })
     return () => {
       cancelled = true
@@ -187,6 +199,21 @@ export default function Timeline() {
     }
     return median(effectiveMedianDays.map((d) => waterByDate.get(d.date) ?? 0))
   }, [liquidEntries, effectiveMedianDays])
+
+  // Weigh-ins rarely land on the exact same dates as logged meals, so this medians over every
+  // weigh-in that falls within the period's date span rather than requiring an exact date match.
+  const medianWeightKg = useMemo(() => {
+    if (effectiveMedianDays.length === 0 || weightEntries.length === 0) return null
+    const minDate = effectiveMedianDays[0].date
+    const maxDate = effectiveMedianDays[effectiveMedianDays.length - 1].date
+    const inRange = weightEntries.filter((e) => e.date >= minDate && e.date <= maxDate)
+    return inRange.length > 0 ? median(inRange.map((e) => e.weightKg)) : null
+  }, [weightEntries, effectiveMedianDays])
+
+  const medianProteinPerKg = useMemo(() => {
+    if (!medians || !medianWeightKg) return null
+    return medians.protein / medianWeightKg
+  }, [medians, medianWeightKg])
 
   const handleScrub = (index: number | null, active: boolean) => {
     setScrubIndex(index)
@@ -321,6 +348,15 @@ export default function Timeline() {
                 </span>
                 <span className="bia-stat-label">
                   {selectedFood ? t('timeline.metrics.foodGramsFor', { food: selectedFood }) : t('timeline.metrics.foodGrams')}
+                </span>
+              </div>
+              <div className="bia-stat">
+                <span className="bia-stat-value">
+                  {medianProteinPerKg !== null ? medianProteinPerKg.toFixed(1) : '—'}
+                  <span className="bia-stat-unit">g/kg</span>
+                </span>
+                <span className="bia-stat-label" title={t('timeline.metrics.proteinPerKgTitle')}>
+                  {t('timeline.metrics.proteinPerKg')}
                 </span>
               </div>
               <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
