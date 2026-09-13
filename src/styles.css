@@ -740,6 +740,12 @@ button {
   cursor: not-allowed;
 }
 
+.icon-button--active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
 .dashboard-main {
   padding: 12px;
   max-width: min(1200px, 94vw);
@@ -1444,6 +1450,35 @@ button {
 
 .liquid-gauges-toggle {
   display: none;
+}
+
+.skip-last-day-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: fit-content;
+}
+.skip-last-day-toggle input {
+  cursor: pointer;
+}
+
+.median-panel-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.median-panel-rings {
+  flex: 1;
+}
+
+.median-panel-stats {
+  flex-shrink: 0;
 }
 
 .bia-stat {
@@ -2170,6 +2205,7 @@ button {
 .range-buttons {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
@@ -2189,6 +2225,100 @@ button {
   border-color: var(--accent);
 }
 
+.timeline-search-row {
+  margin-top: 10px;
+}
+
+.food-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: var(--surface);
+}
+
+.food-search-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.food-search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+
+.food-search--selected {
+  border-color: var(--accent);
+}
+
+.food-search-selected-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.food-search-clear {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+}
+.food-search-clear:hover {
+  color: var(--text);
+}
+
+.food-search-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.food-search-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.food-search-option:hover {
+  background: var(--ring-track);
+}
+
 .hint {
   font-size: 12px;
   color: var(--text-muted);
@@ -2199,6 +2329,12 @@ button {
   height: 340px;
 }
 
+/* Mobile-only touch scrubber (see TimelineScrubber) — desktop already gets the chart's own
+   hover tooltip from a mouse, so this stays hidden there. */
+.timeline-scrubber {
+  display: none;
+}
+
 .timeline-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -2206,17 +2342,32 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
   z-index: 1000;
 }
 
+/* Edge-to-edge: fullscreen exists to give the chart as much room as possible, so there's no
+   outer gap (unlike other modals) and the card's own padding is trimmed to a minimal border
+   rather than the standard .card spacing. */
 .timeline-modal {
-  width: 94vw;
-  height: 94vh;
-  height: 94dvh;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  padding: 10px;
+  border-radius: 0;
+}
+
+.timeline-modal h2 {
+  margin: 0 0 6px;
+}
+
+.timeline-modal .timeline-search-row {
+  margin-top: 6px;
+}
+
+.timeline-modal .hint {
+  margin: 4px 0;
 }
 
 .timeline-modal .chart-container {
@@ -2251,6 +2402,10 @@ button {
 /* Mobile */
 
 @media (max-width: 640px) {
+  .food-search {
+    max-width: none;
+  }
+
   .dashboard-main {
     padding: 12px 0;
     gap: 0;
@@ -2313,6 +2468,13 @@ button {
   .liquid-summary-row {
     flex-direction: column;
     align-items: stretch;
+  }
+  .median-panel-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .median-panel-stats {
+    margin-top: 16px;
   }
   .liquid-summary-gauges {
     margin-top: 0;
@@ -2418,6 +2580,33 @@ button {
 
   .chart-container {
     height: 280px;
+  }
+
+  .timeline-scrubber {
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 32px;
+    margin-top: 4px;
+    touch-action: none;
+  }
+  .timeline-scrubber-track {
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--ring-track);
+  }
+  .timeline-scrubber-dot {
+    position: absolute;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    margin-left: -9px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--surface);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    transform: translateY(-50%);
   }
 
   .meal-items-modal-backdrop {

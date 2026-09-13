@@ -7,6 +7,7 @@ import { getSheetLink } from '../db/sheetLinkStorage'
 import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { LiquidoSource } from '../data/sources/LiquidoSource'
 import type { LiquidEntry } from '../data/parsers/liquidoParser'
+import { amountOfLiquid, normalizeLiquidKey } from '../data/liquidUtils'
 import TrendChart from '../components/charts/TrendChart'
 import LiquidHistoryList from '../components/liquids/LiquidHistoryList'
 import LiquidShareGauge from '../components/liquids/LiquidShareGauge'
@@ -25,14 +26,6 @@ const LIQUID_COLORS: Record<string, string> = {
   mate: '#3d9970',
 }
 const FALLBACK_PALETTE = ['#9b5de5', '#577590', '#f2b134', '#e07a5f', '#c0392b']
-
-function normalizeLiquidKey(type: string): string {
-  return type
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-    .trim()
-}
 
 function colorForLiquidType(type: string, fallbackIndex: number): string {
   return LIQUID_COLORS[normalizeLiquidKey(type)] ?? FALLBACK_PALETTE[fallbackIndex % FALLBACK_PALETTE.length]
@@ -61,15 +54,10 @@ function min(values: number[]): number {
   return values.length === 0 ? 0 : Math.min(...values)
 }
 
-/** Real (measured) amount when logged, falling back to the nominal amount otherwise. */
-function amountOf(entry: LiquidEntry): number {
-  return entry.realAmountMl || entry.amountMl
-}
-
 function dailyTotals(entries: LiquidEntry[]): Array<{ date: string; totalMl: number }> {
   const byDate = new Map<string, number>()
   for (const e of entries) {
-    byDate.set(e.date, (byDate.get(e.date) ?? 0) + amountOf(e))
+    byDate.set(e.date, (byDate.get(e.date) ?? 0) + amountOfLiquid(e))
   }
   return Array.from(byDate.entries())
     .map(([date, totalMl]) => ({ date, totalMl }))
@@ -82,7 +70,7 @@ function liquidShares(entries: LiquidEntry[]): Array<{ type: string; pct: number
   const byType = new Map<string, number>()
   let grandTotal = 0
   for (const e of entries) {
-    const amount = amountOf(e)
+    const amount = amountOfLiquid(e)
     byType.set(e.liquidType, (byType.get(e.liquidType) ?? 0) + amount)
     grandTotal += amount
   }
