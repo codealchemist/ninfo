@@ -342,21 +342,21 @@ export default function Timeline() {
             </div>
             <div className="bia-stat-row median-panel-stats">
               <div className="bia-stat">
+                <span className="bia-stat-value" style={{ color: `var(${COLOR_VARS.protein})` }}>
+                  {medianProteinPerKg !== null ? medianProteinPerKg.toFixed(1) : '—'}
+                  <span className="bia-stat-unit">g/kg</span>
+                </span>
+                <span className="bia-stat-label" title={t('timeline.metrics.proteinPerKgTitle')}>
+                  {t('timeline.metrics.proteinPerKg')}
+                </span>
+              </div>
+              <div className="bia-stat">
                 <span className="bia-stat-value">
                   {medianGrams !== null ? Math.round(medianGrams).toLocaleString() : '—'}
                   <span className="bia-stat-unit">g</span>
                 </span>
                 <span className="bia-stat-label">
                   {selectedFood ? t('timeline.metrics.foodGramsFor', { food: selectedFood }) : t('timeline.metrics.foodGrams')}
-                </span>
-              </div>
-              <div className="bia-stat">
-                <span className="bia-stat-value">
-                  {medianProteinPerKg !== null ? medianProteinPerKg.toFixed(1) : '—'}
-                  <span className="bia-stat-unit">g/kg</span>
-                </span>
-                <span className="bia-stat-label" title={t('timeline.metrics.proteinPerKgTitle')}>
-                  {t('timeline.metrics.proteinPerKg')}
                 </span>
               </div>
               <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
@@ -366,7 +366,7 @@ export default function Timeline() {
                 <span className="bia-stat-label">{t('timeline.metrics.fasting')}</span>
               </div>
               <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
-                <span className="bia-stat-value">
+                <span className="bia-stat-value" style={{ color: 'var(--water-blue)' }}>
                   {medianWaterMl !== null ? Math.round(medianWaterMl).toLocaleString() : '—'}
                   <span className="bia-stat-unit">ml</span>
                 </span>
