@@ -14,6 +14,7 @@ import {
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import type { DailyAggregate, MacroKey } from '../../data/types'
+import { useOrientationChange } from '../../hooks/useOrientationChange'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend)
 
@@ -42,6 +43,13 @@ const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimel
   const chartInstanceRef = useRef<ChartJS<'line'> | null>(null)
 
   useImperativeHandle(ref, () => containerRef.current as HTMLDivElement)
+
+  // chart.js's own ResizeObserver usually catches container size changes, but rotating a mobile
+  // device (including while this chart is showing inside Timeline's fullscreen view) can leave a
+  // stale canvas size behind — force a resize explicitly rather than relying on that alone.
+  useOrientationChange(() => {
+    chartInstanceRef.current?.resize()
+  })
 
   useEffect(() => {
     const chart = chartInstanceRef.current

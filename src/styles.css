@@ -2486,6 +2486,13 @@ button {
   .median-panel-stats {
     margin-top: 16px;
   }
+  /* Give the toggle its own full-width line right under the "Median macros" title instead of
+     letting it wrap in among the (much narrower) range/link/copy controls. */
+  .skip-last-day-toggle {
+    width: 100%;
+    margin-right: 0;
+    order: -1;
+  }
   .liquid-summary-gauges {
     margin-top: 0;
   }
