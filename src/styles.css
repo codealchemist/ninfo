@@ -1610,6 +1610,7 @@ button {
 }
 
 .bia-chart-container {
+  position: relative;
   height: 180px;
 }
 
@@ -2336,6 +2337,7 @@ button {
 }
 
 .chart-container {
+  position: relative;
   height: 340px;
 }
 
