@@ -2371,6 +2371,7 @@ button {
   flex-direction: column;
   padding: 10px;
   border-radius: 0;
+  overflow: hidden;
 }
 
 .timeline-modal h2 {
