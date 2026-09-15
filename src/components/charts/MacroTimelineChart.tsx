@@ -51,6 +51,18 @@ const MacroTimelineChart = forwardRef<HTMLDivElement, Props>(function MacroTimel
     chartInstanceRef.current?.resize()
   })
 
+  // Entering Timeline's fullscreen mode mounts a brand new chart instance (it lives in a portal,
+  // separate from the inline one) at the same moment the surrounding flex layout is still
+  // settling into its final size — e.g. when fullscreen was itself just triggered by rotating the
+  // device, so there's no earlier orientationchange for this new instance to have caught. Chart.js
+  // measures its container on first mount too, but can catch it mid-reflow; forcing another
+  // resize right after paint corrects it against the now-stable layout.
+  useEffect(() => {
+    chartInstanceRef.current?.resize()
+    const id = requestAnimationFrame(() => chartInstanceRef.current?.resize())
+    return () => cancelAnimationFrame(id)
+  }, [])
+
   useEffect(() => {
     const chart = chartInstanceRef.current
     if (!chart) return
