@@ -128,6 +128,18 @@ export default function Timeline() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [fullscreen])
 
+  // Rotating a phone to landscape is a physical cue that the user wants a bigger view of the
+  // chart — open fullscreen for them instead of waiting for a manual tap. `orientationchange`
+  // only fires on devices that actually have an orientation sensor, so a desktop window resize
+  // (which is very often landscape-shaped) never triggers this.
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      if (window.matchMedia('(orientation: landscape)').matches) setFullscreen(true)
+    }
+    window.addEventListener('orientationchange', handleOrientationChange)
+    return () => window.removeEventListener('orientationchange', handleOrientationChange)
+  }, [])
+
   const handleDayClick = (date: string) => {
     jumpToDate(date)
     navigate('/app/today')
