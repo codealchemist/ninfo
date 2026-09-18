@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { Link2, Maximize2, Minimize2 } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { aggregateByDay, dailyTotals, groupIntoMeals, medianTotals } from '../data/aggregate/dailyTotals'
-import { MACRO_KEYS, MACRO_UNITS } from '../data/types'
+import { MACRO_VIEWS, macroViewRing, type MacroView } from '../data/aggregate/macroView'
+import { MACRO_KEYS, type MacroKey } from '../data/types'
 import { getSheetLink } from '../db/sheetLinkStorage'
 import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { LiquidoSource } from '../data/sources/LiquidoSource'
@@ -66,6 +67,7 @@ export default function Timeline() {
   const [scrubbing, setScrubbing] = useState(false)
   const [medianRange, setMedianRange] = useState<number>(30)
   const [medianLinked, setMedianLinked] = useState(true)
+  const [medianView, setMedianView] = useState<MacroView>('macros')
   const [skipLastDay, setSkipLastDay] = useState(false)
   const [liquidEntries, setLiquidEntries] = useState<LiquidEntry[]>([])
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([])
@@ -218,10 +220,15 @@ export default function Timeline() {
     return inRange.length > 0 ? median(inRange.map((e) => e.weightKg)) : null
   }, [weightEntries, effectiveMedianDays])
 
-  const medianProteinPerKg = useMemo(() => {
-    if (!medians || !medianWeightKg) return null
-    return medians.protein / medianWeightKg
-  }, [medians, medianWeightKg])
+  const medianRingProps = (macro: MacroKey) =>
+    macroViewRing(
+      medianView,
+      macro,
+      medians ? medians[macro] : 0,
+      selectedFood ? null : medianLatestGoals ? medianLatestGoals[macro] : null,
+      medians ? medians.calories : null,
+      medianWeightKg
+    )
 
   const handleScrub = (index: number | null, active: boolean) => {
     setScrubIndex(index)
@@ -324,35 +331,45 @@ export default function Timeline() {
               />
             </div>
           </div>
+          <div className="macro-view-tabs" role="tablist" aria-label={t('timeline.medianView.ariaLabel')}>
+            {MACRO_VIEWS.map((view) => (
+              <button
+                key={view}
+                className={'range-button' + (medianView === view ? ' range-button--active' : '')}
+                onClick={() => setMedianView(view)}
+                role="tab"
+                aria-selected={medianView === view}
+                title={t(`timeline.medianView.${view}Title`)}
+              >
+                {t(`timeline.medianView.${view}`)}
+              </button>
+            ))}
+          </div>
           <p className="hint">
             {t('timeline.medianHint')}
             {medianRange !== 0 && ` (${t('timeline.rangeDays', { count: medianRange })})`}
           </p>
+          {medianView === 'perKg' && !medianWeightKg && (
+            <p className="hint">{t('timeline.medianView.noWeightData')}</p>
+          )}
           <div className="median-panel-row" ref={medianPanelRef}>
             <div className="progress-ring-row median-panel-rings">
-              {MACRO_KEYS.map((macro) => (
-                <GoalProgressRing
-                  key={macro}
-                  label={t(`common.macros.${macro}`)}
-                  value={medians[macro]}
-                  // A whole-day macro goal doesn't mean anything against one food's
-                  // contribution, so the ring just shows the raw median with no fill/goal.
-                  goal={selectedFood ? null : medianLatestGoals ? medianLatestGoals[macro] : null}
-                  unit={MACRO_UNITS[macro]}
-                  colorVar={COLOR_VARS[macro]}
-                />
-              ))}
+              {MACRO_KEYS.map((macro) => {
+                const ring = medianRingProps(macro)
+                return (
+                  <GoalProgressRing
+                    key={macro}
+                    label={t(`common.macros.${macro}`)}
+                    value={ring.value}
+                    goal={ring.goal}
+                    unit={ring.unit}
+                    colorVar={COLOR_VARS[macro]}
+                    decimals={ring.decimals}
+                  />
+                )
+              })}
             </div>
             <div className="bia-stat-row median-panel-stats">
-              <div className="bia-stat">
-                <span className="bia-stat-value" style={{ color: `var(${COLOR_VARS.protein})` }}>
-                  {medianProteinPerKg !== null ? medianProteinPerKg.toFixed(1) : '—'}
-                  <span className="bia-stat-unit">g/kg</span>
-                </span>
-                <span className="bia-stat-label" title={t('timeline.metrics.proteinPerKgTitle')}>
-                  {t('timeline.metrics.proteinPerKg')}
-                </span>
-              </div>
               <div className="bia-stat">
                 <span className="bia-stat-value">
                   {medianGrams !== null ? Math.round(medianGrams).toLocaleString() : '—'}

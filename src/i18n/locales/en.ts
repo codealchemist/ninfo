@@ -111,6 +111,16 @@ export const en = {
     tabVs: 'vs.',
     tabSources: 'Sources',
     macroNutrientsTitle: 'Macro nutrients',
+    macroView: {
+      ariaLabel: 'Switch macro view',
+      macros: 'Macros',
+      macrosTitle: 'Grams for the day (kcal for calories)',
+      perKg: 'Per body weight',
+      perKgTitle: 'Grams for the day, per kg of body weight',
+      kcalPct: 'Kcal %',
+      kcalPctTitle: 'Share of the day\'s total calories that comes from that macro',
+      noWeightData: 'No body-weight data for this day.'
+    },
     currentDayVsTitle: 'Current day vs.',
     vsYesterday: 'vs. yesterday',
     vsWeek: 'vs. week',
@@ -174,6 +184,16 @@ export const en = {
     rangeDays: '{{count}}d',
     medianTitle: 'Median macros',
     medianHint: 'Median value for the selected range',
+    medianView: {
+      ariaLabel: 'Switch macro view',
+      macros: 'Macros',
+      macrosTitle: 'Median grams per day (kcal for calories)',
+      perKg: 'Per body weight',
+      perKgTitle: 'Median grams per day, per kg of median body weight for this period',
+      kcalPct: 'Kcal %',
+      kcalPctTitle: 'Share of the period\'s total median calories that comes from that macro',
+      noWeightData: 'No body-weight data for this period.'
+    },
     scrubberAria: 'Scrub through the timeline',
     linkRangeTitle: 'Sync range with the timeline chart',
     unlinkRangeTitle: 'Use an independent range for this panel',

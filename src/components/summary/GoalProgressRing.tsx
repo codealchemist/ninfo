@@ -22,10 +22,21 @@ interface Props {
   colorVar: string
   /** Label/goal/diff below the dial — always shown in the share-card export, toggleable on screen. */
   showDetails?: boolean
+  /** Decimal places for the value/goal/diff numbers (the dial and the badge % stay whole numbers). */
+  decimals?: number
 }
 
-export default function GoalProgressRing({ label, value, goal, unit, colorVar, showDetails = true }: Props) {
+export default function GoalProgressRing({
+  label,
+  value,
+  goal,
+  unit,
+  colorVar,
+  showDetails = true,
+  decimals = 0,
+}: Props) {
   const { t } = useTranslation()
+  const fmt = (n: number) => n.toFixed(decimals)
   const [showValue, setShowValue] = useState(false)
   const ratio = goal && goal > 0 ? value / goal : 0
   const innerDash = Math.min(ratio, 1) * INNER_CIRCUMFERENCE
@@ -93,7 +104,7 @@ export default function GoalProgressRing({ label, value, goal, unit, colorVar, s
             </>
           )}
           <text x="50%" y="47%" textAnchor="middle" className="progress-ring-value">
-            {Math.round(value)}
+            {fmt(value)}
           </text>
           <text x="50%" y="64%" textAnchor="middle" className="progress-ring-unit">
             {unit}
@@ -104,7 +115,7 @@ export default function GoalProgressRing({ label, value, goal, unit, colorVar, s
             {showValue ? (
               <span className="progress-ring-badge-value">
                 {diffSign}
-                {Math.round(diff!)} {unit}
+                {fmt(diff!)} {unit}
               </span>
             ) : (
               <span className="progress-ring-badge-pct">{t('today.pctMissing', { pct: pctMissing })}</span>
@@ -116,7 +127,7 @@ export default function GoalProgressRing({ label, value, goal, unit, colorVar, s
             {showValue ? (
               <span className="progress-ring-badge-value">
                 {diffSign}
-                {Math.round(diff!)} {unit}
+                {fmt(diff!)} {unit}
               </span>
             ) : (
               <span className="progress-ring-badge-pct">{t('today.pctOver', { pct: pctOver })}</span>
@@ -129,13 +140,13 @@ export default function GoalProgressRing({ label, value, goal, unit, colorVar, s
         <div className="progress-ring-details">
           {goal != null && (
             <span className={'progress-ring-goal' + (overGoal ? ' progress-ring-goal--over' : '')}>
-              {Math.round(goal)} {unit}
+              {fmt(goal)} {unit}
             </span>
           )}
           {diff != null && (
             <span className={'progress-ring-diff' + (overGoal ? ' progress-ring-diff--over' : '')}>
               {diffSign}
-              {Math.round(diff)} {unit} {t('today.vsGoal')}
+              {fmt(diff)} {unit} {t('today.vsGoal')}
             </span>
           )}
         </div>

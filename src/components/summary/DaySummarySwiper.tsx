@@ -134,6 +134,8 @@ export default function DaySummarySwiper() {
     return entry ? entry.weightKg * WATER_ML_PER_KG : null
   }
 
+  const weightKgForDate = (date: string): number | null => weightAtOrBefore(weightEntries, date)?.weightKg ?? null
+
   const waterByDate = useMemo(() => dailyTotalMlByDate(liquidEntries), [liquidEntries])
 
   const [dragX, setDragX] = useState(0)
@@ -398,6 +400,7 @@ export default function DaySummarySwiper() {
           {...currentData}
           dailyWaterMl={waterByDate.get(selectedDate) ?? null}
           dailyWaterGoalMl={waterGoalMlForDate(selectedDate)}
+          dayWeightKg={weightKgForDate(selectedDate)}
         />
       </div>
       {peek && (
@@ -408,6 +411,7 @@ export default function DaySummarySwiper() {
               {...peek.data}
               dailyWaterMl={waterByDate.get(peek.date) ?? null}
               dailyWaterGoalMl={waterGoalMlForDate(peek.date)}
+              dayWeightKg={weightKgForDate(peek.date)}
             />
           ) : (
             <DaySummaryCardPlaceholder date={peek.date} />

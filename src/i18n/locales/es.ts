@@ -117,6 +117,16 @@ export const es: typeof en = {
     tabVs: 'vs.',
     tabSources: 'Fuentes',
     macroNutrientsTitle: 'Macronutrientes',
+    macroView: {
+      ariaLabel: 'Cambiar la vista de macros',
+      macros: 'Macros',
+      macrosTitle: 'Gramos del día (kcal para calorías)',
+      perKg: 'Por peso corporal',
+      perKgTitle: 'Gramos del día, por kg de peso corporal',
+      kcalPct: 'Kcal %',
+      kcalPctTitle: 'Proporción de las calorías totales del día que aporta ese macro',
+      noWeightData: 'No hay datos de peso corporal para este día.'
+    },
     currentDayVsTitle: 'Día actual vs.',
     vsYesterday: 'vs. ayer',
     vsWeek: 'vs. semana',
@@ -181,6 +191,16 @@ export const es: typeof en = {
     rangeDays: '{{count}}d',
     medianTitle: 'Mediana de macros',
     medianHint: 'Valor mediano del período seleccionado',
+    medianView: {
+      ariaLabel: 'Cambiar la vista de macros',
+      macros: 'Macros',
+      macrosTitle: 'Gramos medianos por día (kcal para calorías)',
+      perKg: 'Por peso corporal',
+      perKgTitle: 'Gramos medianos por día, por kg de peso corporal mediano de este período',
+      kcalPct: 'Kcal %',
+      kcalPctTitle: 'Proporción de las calorías totales medianas del período que aporta ese macro',
+      noWeightData: 'No hay datos de peso corporal para este período.'
+    },
     scrubberAria: 'Desplázate por la cronología',
     linkRangeTitle: 'Sincronizar el rango con el gráfico de cronología',
     unlinkRangeTitle: 'Usar un rango independiente para este panel',

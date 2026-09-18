@@ -9,8 +9,9 @@ interface Props {
 
 /** Mobile-only touch scrubber for the timeline chart — dragging the dot moves a reference
  * tooltip across the days, since pixel-precise taps on a dense line chart are hard on a phone
- * screen. Hidden on desktop (see .timeline-scrubber in styles.css), where hovering the chart
- * directly already shows the tooltip. */
+ * screen. Hidden on desktop (see .timeline-scrubber in styles.css, shown by width on portrait
+ * phones and by height on landscape ones), where hovering the chart directly already shows the
+ * tooltip. */
 export default function TimelineScrubber({ count, index, onScrub }: Props) {
   const { t } = useTranslation()
   const trackRef = useRef<HTMLDivElement>(null)
