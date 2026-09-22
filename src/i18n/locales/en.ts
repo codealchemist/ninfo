@@ -171,6 +171,13 @@ export const en = {
     waterIntake: 'Water intake'
   },
 
+  fasting: {
+    noEntriesTodayTitle: "You haven't logged anything today yet",
+    sinceLastMeal: 'Time since your last meal',
+    lastMealLabel: '{{food}} — {{date}} at {{time}}',
+    noMealsYet: 'No meals logged yet — once you log your first one, this will track the time since.'
+  },
+
   timeline: {
     title: 'Macro-nutrient timeline',
     hint: 'Click a day to open its details.',

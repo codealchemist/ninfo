@@ -178,6 +178,13 @@ export const es: typeof en = {
     waterIntake: 'Consumo de agua'
   },
 
+  fasting: {
+    noEntriesTodayTitle: 'Todavía no registraste nada hoy',
+    sinceLastMeal: 'Tiempo desde tu última comida',
+    lastMealLabel: '{{food}} — {{date}} a las {{time}}',
+    noMealsYet: 'Aún no hay comidas registradas — en cuanto registres la primera, esto empezará a contar el tiempo desde entonces.'
+  },
+
   timeline: {
     title: 'Cronología de macronutrientes',
     hint: 'Haz clic en un día para ver sus detalles.',
