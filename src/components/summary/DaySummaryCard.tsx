@@ -529,6 +529,8 @@ export default function DaySummaryCard({
           comparisonLabel={t(comparisonLabelKey[comparisonMode])}
           dailyWaterMl={dailyWaterMl}
           dailyWaterGoalMl={dailyWaterGoalMl}
+          macroView={macroView}
+          dayWeightKg={dayWeightKg}
         />
       </div>
     </section>

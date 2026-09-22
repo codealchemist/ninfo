@@ -2,6 +2,7 @@ import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Salad } from 'lucide-react'
 import { MACRO_UNITS, type MacroKey, type MacroTotals, type Meal } from '../../data/types'
+import { macroViewRing, type MacroView } from '../../data/aggregate/macroView'
 import { topSourcesByMacro } from '../../data/aggregate/dailyTotals'
 import GoalProgressRing from './GoalProgressRing'
 
@@ -23,6 +24,10 @@ interface Props {
   comparisonLabel: string
   dailyWaterMl: number | null
   dailyWaterGoalMl: number | null
+  /** Which of the 3 macro views (grams/per body weight/kcal %) is currently selected on the
+   * live card — the export mirrors whichever one the user was looking at, not always grams. */
+  macroView: MacroView
+  dayWeightKg: number | null
 }
 
 /**
@@ -34,7 +39,19 @@ interface Props {
  * here is what gives the image its context once it's out of the app.
  */
 const DaySummaryShareCard = forwardRef<HTMLDivElement, Props>(function DaySummaryShareCard(
-  { date, meals, macros, totals, goals, comparisonTotals, comparisonLabel, dailyWaterMl, dailyWaterGoalMl },
+  {
+    date,
+    meals,
+    macros,
+    totals,
+    goals,
+    comparisonTotals,
+    comparisonLabel,
+    dailyWaterMl,
+    dailyWaterGoalMl,
+    macroView,
+    dayWeightKg,
+  },
   ref
 ) {
   const { t, i18n } = useTranslation()
@@ -55,18 +72,36 @@ const DaySummaryShareCard = forwardRef<HTMLDivElement, Props>(function DaySummar
         </div>
         <span className="day-summary-share-date">{dateLabel}</span>
       </div>
+      {/* Labels which of the 3 macro-view modes the rings below are in — this export doesn't
+          include the live card's mode tabs, so without this an exported image gives no clue
+          which one it's showing. */}
+      <p className="macro-view-title">{t(`today.macroView.${macroView}`)}</p>
+      {macroView === 'perKg' && !dayWeightKg && (
+        <p className="hint">{t('today.macroView.noWeightData')}</p>
+      )}
       <div className="day-summary-share-rings">
-        {macros.map((macro) => (
-          <GoalProgressRing
-            key={macro}
-            label={t(`common.macros.${macro}`)}
-            value={totals[macro]}
-            goal={goals ? goals[macro] : null}
-            unit={MACRO_UNITS[macro]}
-            colorVar={COLOR_VARS[macro]}
-          />
-        ))}
-        {dailyWaterMl != null && (
+        {macros.map((macro) => {
+          const ring = macroViewRing(
+            macroView,
+            macro,
+            totals[macro],
+            goals ? goals[macro] : null,
+            totals.calories,
+            dayWeightKg
+          )
+          return (
+            <GoalProgressRing
+              key={macro}
+              label={t(`common.macros.${macro}`)}
+              value={ring.value}
+              goal={ring.goal}
+              unit={ring.unit}
+              decimals={ring.decimals}
+              colorVar={COLOR_VARS[macro]}
+            />
+          )
+        })}
+        {macroView === 'macros' && dailyWaterMl != null && (
           <GoalProgressRing
             label={t('today.waterIntake')}
             value={dailyWaterMl}

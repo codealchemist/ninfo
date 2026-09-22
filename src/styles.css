@@ -1133,6 +1133,12 @@ button {
   gap: 4px;
 }
 
+/* This card already spaces its direct children with a flex gap, so the shared class's own
+   bottom margin would just double up on top of that. */
+.day-summary-share .macro-view-title {
+  margin: 0;
+}
+
 .day-summary-share-brand {
   display: flex;
   align-items: center;
@@ -1618,6 +1624,33 @@ button {
   cursor: pointer;
 }
 
+/* Labels which of the 3 macro-view modes (grams / per body weight / kcal %) the numbers below
+   are in — the mode tabs that normally convey this live outside the "copy as image" capture
+   region, so an exported image would otherwise give no clue which one it's showing. Shared by
+   Timeline's median panel and DaySummaryShareCard. */
+.macro-view-title {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Sits right above .macro-view-title, inside the same "copy as image" capture region — but
+   stays hidden on screen, where the range/link/skip-last-day controls above already show it,
+   and only turns on for the "copy as image" export (see the --compact override below), where
+   those controls live outside the captured region. */
+.median-panel-range-hint {
+  display: none;
+  margin: 0 0 6px;
+  padding-top: 8px;
+  text-align: center;
+}
+
+.median-panel-export--compact .median-panel-range-hint {
+  display: block;
+}
+
 .median-panel-row {
   display: flex;
   align-items: flex-start;
@@ -1631,6 +1664,37 @@ button {
 
 .median-panel-stats {
   flex-shrink: 0;
+}
+
+/* Forces the same compact stacked layout the max-width:640px override below gives this panel —
+   toggled on the ref'd export wrapper by CopyImageButton right before capturing it as an image
+   (see Timeline.tsx), so the exported PNG always reads like the mobile view regardless of the
+   page's actual (often much wider) viewport. The mobile media query below only kicks in because
+   a real phone's viewport is narrow; the captured node has no such constraint (its ancestor
+   `.card` is however wide the desktop window is), so this also pins an explicit phone-like
+   width — without it the ring row never runs out of room to wrap into rows. Padding-bottom
+   guarantees breathing room under the last row in the exported PNG, which (unlike the on-screen
+   panel) has no surrounding `.card` padding of its own since only this inner wrapper is captured. */
+.median-panel-export--compact {
+  width: 380px;
+  padding-bottom: 20px;
+}
+.median-panel-export--compact .median-panel-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+.median-panel-export--compact .median-panel-rings {
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+.median-panel-export--compact .median-panel-stats {
+  margin-top: 16px;
+  justify-content: center;
+}
+.median-panel-export--compact .median-panel-stats .bia-stat {
+  align-items: center;
+  text-align: center;
 }
 
 .bia-stat {
@@ -2650,6 +2714,11 @@ button {
   }
   .median-panel-stats {
     margin-top: 16px;
+    justify-content: center;
+  }
+  .median-panel-stats .bia-stat {
+    align-items: center;
+    text-align: center;
   }
   /* Give the toggle its own full-width line right under the "Median macros" title instead of
      letting it wrap in among the (much narrower) range/link/copy controls. */

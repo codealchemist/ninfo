@@ -328,6 +328,7 @@ export default function Timeline() {
                 targetRef={medianPanelRef}
                 ariaLabel={t('timeline.copyMedianImageAria')}
                 title={t('timeline.copyMedianImageTitle')}
+                forceClassName="median-panel-export--compact"
               />
             </div>
           </div>
@@ -345,52 +346,63 @@ export default function Timeline() {
               </button>
             ))}
           </div>
-          <p className="hint">
-            {t('timeline.medianHint')}
-            {medianRange !== 0 && ` (${t('timeline.rangeDays', { count: medianRange })})`}
-          </p>
-          {medianView === 'perKg' && !medianWeightKg && (
-            <p className="hint">{t('timeline.medianView.noWeightData')}</p>
-          )}
-          <div className="median-panel-row" ref={medianPanelRef}>
-            <div className="progress-ring-row median-panel-rings">
-              {MACRO_KEYS.map((macro) => {
-                const ring = medianRingProps(macro)
-                return (
-                  <GoalProgressRing
-                    key={macro}
-                    label={t(`common.macros.${macro}`)}
-                    value={ring.value}
-                    goal={ring.goal}
-                    unit={ring.unit}
-                    colorVar={COLOR_VARS[macro]}
-                    decimals={ring.decimals}
-                  />
-                )
-              })}
-            </div>
-            <div className="bia-stat-row median-panel-stats">
-              <div className="bia-stat">
-                <span className="bia-stat-value">
-                  {medianGrams !== null ? Math.round(medianGrams).toLocaleString() : '—'}
-                  <span className="bia-stat-unit">g</span>
-                </span>
-                <span className="bia-stat-label">
-                  {selectedFood ? t('timeline.metrics.foodGramsFor', { food: selectedFood }) : t('timeline.metrics.foodGrams')}
-                </span>
+          <div ref={medianPanelRef}>
+            {/* Only what's below gets captured for the "copy as image" export, and the mode
+                tabs above live outside that region — without this title, an exported image
+                gives no indication of which of the 3 modes its numbers are in. The range hint
+                (which range/skip-last-day setting the medians below were computed from) and the
+                "no weight data" hint live in here for the same reason: without them, an exported
+                image can't be told apart from one generated with a different range, and the
+                per-body-weight view with no weight on record would just be silent all-zero rings
+                with no explanation baked into the image. */}
+            <p className="hint median-panel-range-hint">
+              {t('timeline.medianHint')}
+              {medianRange !== 0 && ` (${t('timeline.rangeDays', { count: medianRange })})`}
+            </p>
+            <p className="macro-view-title">{t(`timeline.medianView.${medianView}`)}</p>
+            {medianView === 'perKg' && !medianWeightKg && (
+              <p className="hint">{t('timeline.medianView.noWeightData')}</p>
+            )}
+            <div className="median-panel-row">
+              <div className="progress-ring-row median-panel-rings">
+                {MACRO_KEYS.map((macro) => {
+                  const ring = medianRingProps(macro)
+                  return (
+                    <GoalProgressRing
+                      key={macro}
+                      label={t(`common.macros.${macro}`)}
+                      value={ring.value}
+                      goal={ring.goal}
+                      unit={ring.unit}
+                      colorVar={COLOR_VARS[macro]}
+                      decimals={ring.decimals}
+                    />
+                  )
+                })}
               </div>
-              <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
-                <span className="bia-stat-value">
-                  {medianFastingMinutes !== null ? formatFastingMinutes(medianFastingMinutes) : '—'}
-                </span>
-                <span className="bia-stat-label">{t('timeline.metrics.fasting')}</span>
-              </div>
-              <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
-                <span className="bia-stat-value" style={{ color: 'var(--water-blue)' }}>
-                  {medianWaterMl !== null ? Math.round(medianWaterMl).toLocaleString() : '—'}
-                  <span className="bia-stat-unit">ml</span>
-                </span>
-                <span className="bia-stat-label">{t('timeline.metrics.water')}</span>
+              <div className="bia-stat-row median-panel-stats">
+                <div className="bia-stat">
+                  <span className="bia-stat-value">
+                    {medianGrams !== null ? Math.round(medianGrams).toLocaleString() : '—'}
+                    <span className="bia-stat-unit">g</span>
+                  </span>
+                  <span className="bia-stat-label">
+                    {selectedFood ? t('timeline.metrics.foodGramsFor', { food: selectedFood }) : t('timeline.metrics.foodGrams')}
+                  </span>
+                </div>
+                <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
+                  <span className="bia-stat-value">
+                    {medianFastingMinutes !== null ? formatFastingMinutes(medianFastingMinutes) : '—'}
+                  </span>
+                  <span className="bia-stat-label">{t('timeline.metrics.fasting')}</span>
+                </div>
+                <div className="bia-stat" style={selectedFood ? { opacity: 0.5 } : undefined}>
+                  <span className="bia-stat-value" style={{ color: 'var(--water-blue)' }}>
+                    {medianWaterMl !== null ? Math.round(medianWaterMl).toLocaleString() : '—'}
+                    <span className="bia-stat-unit">ml</span>
+                  </span>
+                  <span className="bia-stat-label">{t('timeline.metrics.water')}</span>
+                </div>
               </div>
             </div>
           </div>
