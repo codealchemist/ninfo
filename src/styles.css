@@ -779,6 +779,7 @@ button {
    resolves the same way here — relative to this outer box, not the card's own padding. */
 .fasting-timer-viewport {
   position: relative;
+  cursor: default;
 }
 
 /* .day-summary-nav-arrow's shared top:66% is tuned for the day summary card's own proportions —
@@ -813,19 +814,6 @@ button {
   color: var(--text-muted);
 }
 
-.fasting-timer-toggle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-}
-
 .fasting-timer-card .hint {
   opacity: 1;
   margin: 0;
@@ -851,36 +839,76 @@ button {
   color: var(--text-muted);
 }
 
+.fasting-divider {
+  width: 100%;
+  max-width: 280px;
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+/* Hidden by default (desktop) — the liquids block is the last thing in its column there, with
+   nothing below to separate from. The max-width:640px override brings it back for mobile, where
+   the macros section stacks below it in the same column. */
+.fasting-divider--trailing {
+  display: none;
+}
+
+/* 3 columns — icon | gauge | an empty column matching the icon's — so the gauge (the middle
+   column) lands dead-center on the row instead of the icon+gauge pair being centered as a
+   block, which would push the gauge itself off-center. */
+.fasting-water-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 14px;
+}
+
+.fasting-water-icon {
+  grid-column: 1;
+  justify-self: end;
+  color: var(--water-blue);
+  flex-shrink: 0;
+  margin-top: -50px;
+  opacity: 0.5;
+}
+
+.fasting-water-row .progress-ring {
+  grid-column: 2;
+  justify-self: center;
+}
+
+/* Desktop: time+liquids on the left, the last day's macros on the right — stacked back to one
+   column on mobile (see the max-width:640px override below). */
+.fasting-timer-columns {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.fasting-timer-col-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.fasting-timer-col-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
 .fasting-macros-section {
   margin-top: 16px;
   width: 100%;
   max-width: 420px;
-}
-
-.fasting-macros-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 4px 0;
-  font: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-}
-
-.fasting-macros-subtitle {
-  margin: 14px 0 0;
-  font-size: 11.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--text-muted);
-  opacity: 0.7;
 }
 
 .fasting-macros-rings {
@@ -2541,6 +2569,16 @@ button {
 @media (max-width: 640px) {
   .food-search {
     max-width: none;
+  }
+
+  .fasting-timer-columns {
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .fasting-divider--trailing {
+    display: block;
   }
 
   .dashboard-main {
