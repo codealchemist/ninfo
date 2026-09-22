@@ -12,6 +12,7 @@ import { PesoSource } from '../../data/sources/PesoSource'
 import type { WeightEntry } from '../../data/parsers/pesoParser'
 import { getCachedLatestWeight, setCachedLatestWeight } from '../../db/latestWeightCache'
 import { getCachedLatestWater, setCachedLatestWater } from '../../db/latestWaterCache'
+import { todayLocalIso } from '../../utils/localDate'
 import DaySummaryCard from './DaySummaryCard'
 import DaySummaryCardPlaceholder from './DaySummaryCardPlaceholder'
 
@@ -386,7 +387,14 @@ export default function DaySummarySwiper() {
 
   const idx = dates.indexOf(selectedDate)
   const canGoPrev = idx > 0
-  const canGoNext = idx >= 0 && idx < dates.length - 1
+  // Today itself isn't a logged date until something's entered for it, but it's still a valid
+  // place to land — that's where the fasting panel lives (see Today.tsx) — so "next" from the
+  // last logged day steps there instead of dead-ending.
+  const todayIso = todayLocalIso()
+  const atLastLoggedDay = idx >= 0 && idx === dates.length - 1
+  const canStepToToday = atLastLoggedDay && !dates.includes(todayIso) && todayIso > dates[idx]
+  const canGoNext = (idx >= 0 && idx < dates.length - 1) || canStepToToday
+  const nextDate = idx < dates.length - 1 ? dates[idx + 1] : todayIso
 
   const peekWidth = viewportRef.current?.offsetWidth ?? 0
   const peekBase = peek ? (peek.direction === 'next' ? peekWidth : -peekWidth) : 0
@@ -429,7 +437,7 @@ export default function DaySummarySwiper() {
       </button>
       <button
         className="icon-button day-summary-nav-arrow day-summary-nav-arrow--next"
-        onClick={() => canGoNext && setSelectedDate(dates[idx + 1])}
+        onClick={() => canGoNext && setSelectedDate(nextDate)}
         disabled={!canGoNext}
         aria-label={t('dateNavigator.nextDay')}
         style={arrowTop !== null ? { top: `${arrowTop}px` } : undefined}

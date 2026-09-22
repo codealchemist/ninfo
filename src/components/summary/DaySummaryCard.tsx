@@ -27,6 +27,7 @@ import {
 import { analyzeFat } from '../../data/lipidAnalysis'
 import { analyzeGlycemicRisk } from '../../data/glycemicRisk'
 import { generateDayReview } from '../../data/dayReview'
+import { todayLocalIso } from '../../utils/localDate'
 import {
   formatDayFoodListAsText,
   formatDaySummaryAsText
@@ -99,6 +100,10 @@ export default function DaySummaryCard({
   const dates = useAppStore(s => s.dates)
   const setSelectedDate = useAppStore(s => s.setSelectedDate)
   const lastDate = dates[dates.length - 1]
+  // Today may not be logged yet, but it's still a valid pick — that's where the fasting panel
+  // lives (see Today.tsx) — so the picker's upper bound is today, not just the newest entry.
+  const todayIso = todayLocalIso()
+  const pickerMax = todayIso > lastDate ? todayIso : lastDate
   const macros = [...MACRO_KEYS]
   const [collapsed, setCollapsed] = useState(false)
   const [showRingDetails, setShowRingDetails] = useState(false)
@@ -259,7 +264,7 @@ export default function DaySummaryCard({
                 className='day-summary-date-input'
                 value={date}
                 min={dates[0]}
-                max={lastDate}
+                max={pickerMax}
                 onChange={e =>
                   e.target.value && setSelectedDate(e.target.value)
                 }

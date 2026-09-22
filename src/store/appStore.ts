@@ -11,6 +11,7 @@ import { DemoSource } from '../data/sources/DemoSource'
 import { UploadedCsvSource } from '../data/sources/UploadedCsvSource'
 import { GoogleSheetLinkSource } from '../data/sources/GoogleSheetLinkSource'
 import { sortedDates } from '../data/aggregate/dailyTotals'
+import { todayLocalIso } from '../utils/localDate'
 import type { DatasetMeta, FoodCatalogItem, MacroTotals, MealItem } from '../data/types'
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
@@ -46,11 +47,12 @@ interface AppState {
   clearPinnedDate: () => void
 }
 
-/** Today's real calendar date if it has data, otherwise the most recent date that does. */
+/** Today's real calendar date — whether or not it has data yet, Today.tsx always has somewhere
+ * meaningful to land there (the day summary if logged, the fasting panel if not). Only when
+ * there's no data at all (nothing to show anywhere) does this fall through to null. */
 export function getDefaultSelectedDate(dates: string[]): string | null {
   if (dates.length === 0) return null
-  const todayIso = new Date().toISOString().slice(0, 10)
-  return dates.includes(todayIso) ? todayIso : dates[dates.length - 1]
+  return todayLocalIso()
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -224,8 +226,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { dates, selectedDate } = get()
     if (!selectedDate || dates.length === 0) return
     const idx = dates.indexOf(selectedDate)
+    if (idx === -1) {
+      // The only unlogged date this ever lands on is today itself (see the "next" branch
+      // below) — stepping back from there returns to the last actual logged day.
+      if (direction < 0) get().setSelectedDate(dates[dates.length - 1])
+      return
+    }
     const nextIdx = idx + direction
-    if (nextIdx < 0 || nextIdx >= dates.length) return
+    if (nextIdx >= dates.length) {
+      const todayIso = todayLocalIso()
+      if (!dates.includes(todayIso) && todayIso > dates[idx]) get().setSelectedDate(todayIso)
+      return
+    }
+    if (nextIdx < 0) return
     get().setSelectedDate(dates[nextIdx])
   },
 

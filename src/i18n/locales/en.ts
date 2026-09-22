@@ -172,10 +172,15 @@ export const en = {
   },
 
   fasting: {
+    title: 'Currently fasting',
     noEntriesTodayTitle: "You haven't logged anything today yet",
     sinceLastMeal: 'Time since your last meal',
-    lastMealLabel: '{{food}} — {{date}} at {{time}}',
-    noMealsYet: 'No meals logged yet — once you log your first one, this will track the time since.'
+    lastMealLabel: '{{date}} at {{time}}',
+    noMealsYet: 'No meals logged yet — once you log your first one, this will track the time since.',
+    macrosSectionTitle: 'Macros',
+    macroSourceAriaLabel: 'Switch macros source',
+    lastDayTab: 'Last day',
+    lastMealTab: 'Last meal'
   },
 
   timeline: {

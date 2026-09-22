@@ -179,10 +179,15 @@ export const es: typeof en = {
   },
 
   fasting: {
+    title: 'Ayuno actual',
     noEntriesTodayTitle: 'Todavía no registraste nada hoy',
     sinceLastMeal: 'Tiempo desde tu última comida',
-    lastMealLabel: '{{food}} — {{date}} a las {{time}}',
-    noMealsYet: 'Aún no hay comidas registradas — en cuanto registres la primera, esto empezará a contar el tiempo desde entonces.'
+    lastMealLabel: '{{date}} a las {{time}}',
+    noMealsYet: 'Aún no hay comidas registradas — en cuanto registres la primera, esto empezará a contar el tiempo desde entonces.',
+    macrosSectionTitle: 'Macros',
+    macroSourceAriaLabel: 'Cambiar la fuente de macros',
+    lastDayTab: 'Día anterior',
+    lastMealTab: 'Última comida'
   },
 
   timeline: {
