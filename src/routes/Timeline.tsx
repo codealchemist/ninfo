@@ -64,7 +64,7 @@ export default function Timeline() {
   const medianPanelRef = useRef<HTMLDivElement>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const [scrubIndex, setScrubIndex] = useState<number | null>(null)
-  const [scrubbing, setScrubbing] = useState(false)
+  const [kcalLineValue, setKcalLineValue] = useState<number | null>(null)
   const [medianRange, setMedianRange] = useState<number>(30)
   const [medianLinked, setMedianLinked] = useState(true)
   const [medianView, setMedianView] = useState<MacroView>('macros')
@@ -121,14 +121,20 @@ export default function Timeline() {
     }
   }, [sheetLinkId])
 
+  // Escape dismisses the kcal line first, then the scrubbed date, and only falls through to
+  // closing fullscreen once neither is showing — otherwise a single Escape while more than one
+  // is active would jump straight past the others to closing the whole view.
   useEffect(() => {
-    if (!fullscreen) return
+    if (!fullscreen && scrubIndex === null && kcalLineValue === null) return
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setFullscreen(false)
+      if (e.key !== 'Escape') return
+      if (kcalLineValue !== null) setKcalLineValue(null)
+      else if (scrubIndex !== null) setScrubIndex(null)
+      else setFullscreen(false)
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [fullscreen])
+  }, [fullscreen, scrubIndex, kcalLineValue])
 
   // Rotating a phone to landscape is a physical cue that the user wants a bigger view of the
   // chart — open fullscreen for them instead of waiting for a manual tap. `orientationchange`
@@ -161,7 +167,6 @@ export default function Timeline() {
   // whenever that range changes so a stale position from a longer range can't linger.
   useEffect(() => {
     setScrubIndex(null)
-    setScrubbing(false)
   }, [range])
 
   // The median panel has its own range, independent of the chart's — except while linked, when
@@ -230,9 +235,15 @@ export default function Timeline() {
       medianWeightKg
     )
 
-  const handleScrub = (index: number | null, active: boolean) => {
+  const handleScrub = (index: number) => {
     setScrubIndex(index)
-    setScrubbing(active)
+  }
+
+  // The scrubbed date now stays shown after release (see the scrubber below) — this is the
+  // explicit way to clear it again, wired to both a tap on the scrubber itself and the values
+  // row's own close button (see MacroTimelineChart).
+  const handleDismissScrub = () => {
+    setScrubIndex(null)
   }
 
   const handleMedianRangeSelect = (r: number) => {
@@ -287,9 +298,17 @@ export default function Timeline() {
         ref={chartRef}
         days={displayDays}
         onDayClick={handleDayClick}
-        activeIndex={scrubbing ? scrubIndex : null}
+        activeIndex={scrubIndex}
+        onDismiss={handleDismissScrub}
+        kcalLineValue={kcalLineValue}
+        onKcalLineChange={setKcalLineValue}
       />
-      <TimelineScrubber count={displayDays.length} index={scrubIndex} onScrub={handleScrub} />
+      <TimelineScrubber
+        count={displayDays.length}
+        index={scrubIndex}
+        onScrub={handleScrub}
+        onTap={handleDismissScrub}
+      />
     </>
   )
 

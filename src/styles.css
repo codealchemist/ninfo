@@ -2549,9 +2549,83 @@ button {
   opacity: 0.5;
 }
 
+/* Wraps the canvas and its legend as one unit — MacroTimelineChart exposes this as its ref, so
+   "copy as image" (see CopyImageButton in Timeline.tsx) captures the legend along with the
+   chart, same as when the legend used to be chart.js's own canvas-drawn one. */
+.timeline-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .chart-container {
   position: relative;
   height: 340px;
+}
+
+/* An invisible strip over the calories scale's own reserved space at the right edge of the
+   chart (its tick labels and "kcal" axis title) — the actual drag handle for the kcal reference
+   line (see MacroTimelineChart's kcal-drag handling). A static width rather than one measured
+   from chart.js's own scale bounds: close enough to that scale's real width without needing to
+   track chart.js's layout in React state, and it deliberately doesn't reach into the plot area
+   so it never steals a mouse hover/click meant for the line chart itself. touch-action:none is
+   scoped to just this strip rather than the whole chart, so swiping to scroll the page still
+   works everywhere else over the chart. Its `top` comes from an inline style (MacroTimelineChart's
+   plotTop) instead, since only chart.js knows where its own legend ends once it has laid out. */
+.chart-kcal-drag-zone {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 52px;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+/* A fixed-height strip above chart.js's own original legend (swatches, wrapping, click-to-toggle
+   all untouched — see the render below), reserved at all times so the chart below never grows or
+   shrinks as this fills in and clears out while scrubbing. Each value is positioned absolutely
+   (left set inline from chart.js's own legend layout — see timelineGuidesPlugin's afterLayout)
+   directly above its matching legend swatch, rather than in its own dot-labeled row: the legend
+   right below already says which color is which. */
+.chart-values-row {
+  position: relative;
+  height: 16px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-value-item {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* Dismisses the scrubbed date (see .chart-values-row above) — the other way besides a tap on
+   the scrubber itself. Transparent background at rest so it doesn't block the "Calories" value,
+   which can land close by on a narrow chart. */
+.chart-values-row-close {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.chart-values-row-close:hover {
+  color: var(--text);
+  background: var(--ring-track);
 }
 
 /* Mobile-only touch scrubber (see TimelineScrubber) — desktop already gets the chart's own
@@ -2597,6 +2671,11 @@ button {
 
 .timeline-modal .hint {
   margin: 4px 0;
+}
+
+.timeline-modal .timeline-chart-wrapper {
+  flex: 1;
+  min-height: 0;
 }
 
 .timeline-modal .chart-container {
@@ -2837,6 +2916,10 @@ button {
     height: 280px;
   }
 
+  .chart-values-row {
+    font-size: 11px;
+  }
+
   .timeline-scrubber {
     display: flex;
     align-items: center;
@@ -2883,6 +2966,11 @@ button {
 @media (max-height: 500px) and (orientation: landscape) {
   .chart-container {
     height: 220px;
+  }
+
+  .chart-values-row {
+    flex-shrink: 0;
+    font-size: 11px;
   }
 
   .timeline-scrubber {

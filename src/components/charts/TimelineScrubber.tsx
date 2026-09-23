@@ -4,17 +4,25 @@ import { useTranslation } from 'react-i18next'
 interface Props {
   count: number
   index: number | null
-  onScrub: (index: number | null, active: boolean) => void
+  onScrub: (index: number) => void
+  /** Fired on release when the gesture barely moved — a deliberate dismiss tap rather than a
+   * drag to a date, which onScrub already handles live as it happens. */
+  onTap?: () => void
 }
+
+/** How far the pointer needs to travel before a press counts as a drag rather than a tap — a
+ * few pixels of wobble is normal even for a "still" finger/mouse press. */
+const TAP_THRESHOLD_PX = 6
 
 /** Mobile-only touch scrubber for the timeline chart — dragging the dot moves a reference
  * tooltip across the days, since pixel-precise taps on a dense line chart are hard on a phone
  * screen. Hidden on desktop (see .timeline-scrubber in styles.css, shown by width on portrait
  * phones and by height on landscape ones), where hovering the chart directly already shows the
  * tooltip. */
-export default function TimelineScrubber({ count, index, onScrub }: Props) {
+export default function TimelineScrubber({ count, index, onScrub, onTap }: Props) {
   const { t } = useTranslation()
   const trackRef = useRef<HTMLDivElement>(null)
+  const pointerDownXRef = useRef<number | null>(null)
 
   if (count <= 1) return null
 
@@ -28,16 +36,19 @@ export default function TimelineScrubber({ count, index, onScrub }: Props) {
 
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId)
-    onScrub(indexFromClientX(e.clientX), true)
+    pointerDownXRef.current = e.clientX
+    onScrub(indexFromClientX(e.clientX))
   }
 
   const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
     if (!e.currentTarget.hasPointerCapture(e.pointerId)) return
-    onScrub(indexFromClientX(e.clientX), true)
+    onScrub(indexFromClientX(e.clientX))
   }
 
-  const handlePointerUp = () => {
-    onScrub(index, false)
+  const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
+    const startX = pointerDownXRef.current
+    pointerDownXRef.current = null
+    if (startX !== null && Math.abs(e.clientX - startX) < TAP_THRESHOLD_PX) onTap?.()
   }
 
   const pct = index !== null ? (index / (count - 1)) * 100 : null
