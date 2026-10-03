@@ -64,3 +64,15 @@ export function buildShareableAppUrl(sheetUrl: string): string {
   url.searchParams.set('sheet', sheetUrl)
   return url.toString()
 }
+
+/**
+ * JSON flavor of buildSheetGvizCsvUrlByName. The CSV output only carries each cell's
+ * *formatted* text, which rounds to whatever decimals the column displays — the JSON response
+ * carries the raw value next to it, which is what the Alimentos check needs to compare (and
+ * copy back) per-gram ratios like 0.0123 exactly. `headers=1` pins row 1 as the header row
+ * rather than letting gviz guess.
+ */
+export function buildSheetGvizJsonUrlByName(spreadsheetId: string, sheetName: string): string {
+  const params = new URLSearchParams({ tqx: 'out:json', sheet: sheetName, headers: '1' })
+  return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${params.toString()}`
+}

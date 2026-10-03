@@ -5,12 +5,13 @@ import Modal from './Modal'
 import QrCode from './QrCode'
 import { copyTextToClipboard } from '../../utils/clipboard'
 
-interface ShareQrModalProps {
+interface ShareModalProps {
   url: string
   onClose: () => void
 }
 
-export default function ShareQrModal({ url, onClose }: ShareQrModalProps) {
+/** The one "Share" action: the link (with a copy button) and a QR code for the same link. */
+export default function ShareModal({ url, onClose }: ShareModalProps) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
@@ -24,20 +25,15 @@ export default function ShareQrModal({ url, onClose }: ShareQrModalProps) {
 
   return (
     <Modal onClose={onClose} className="qr-modal">
-      <h3>{t('shareQr.title')}</h3>
-      <p className="hint">{t('shareQr.hint')}</p>
+      <h3>{t('shareModal.title')}</h3>
+      <p className="hint">{t('shareModal.hint')}</p>
       <div className="qr-modal-code">
         <QrCode value={url} size={220} />
       </div>
       <div className="qr-modal-link">
         <span>{url}</span>
-        <button
-          className="icon-button icon-button--ghost"
-          onClick={handleCopy}
-          aria-label={t('common.copyLink')}
-          title={t('common.copyLink')}
-        >
-          {copied ? <Check size={14} /> : <Copy size={14} />}
+        <button className="qr-modal-copy" onClick={handleCopy} title={t('common.copyLink')}>
+          {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? t('shareModal.copied') : t('shareModal.copy')}
         </button>
       </div>
     </Modal>

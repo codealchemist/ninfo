@@ -78,18 +78,15 @@ export const es: typeof en = {
       bia: 'BIA',
       weight: 'Peso',
       liquids: 'Líquidos',
-      report: 'Reporte'
+      report: 'Reporte',
+      foodCheck: 'Revisar'
     },
     refreshTitle:
       'Volver a obtener los datos más recientes de la hoja vinculada',
     refresh: 'Actualizar',
     shareTitle:
-      'Copiar un enlace que abra esta hoja de cálculo directamente en Ninfo',
+      'Compartir un enlace o código QR que abre esta hoja de cálculo directamente en Ninfo',
     share: 'Compartir',
-    shareCopied: '¡Copiado!',
-    qrTitle:
-      'Mostrar un código QR que abra esta hoja de cálculo directamente en Ninfo',
-    qrCode: 'QR',
     startOver: 'Reiniciar',
     clearDateAria: 'Volver a hoy'
   },
@@ -107,9 +104,12 @@ export const es: typeof en = {
     pickDate: 'Elegir fecha'
   },
 
-  shareQr: {
-    title: 'Escanea para abrir esta hoja de cálculo',
-    hint: 'Apunta la cámara del teléfono al código para abrirla directamente en Ninfo.'
+  shareModal: {
+    title: 'Compartir esta hoja de cálculo',
+    hint: 'Envía el enlace, o apunta la cámara del teléfono al código, para abrirla directamente en Ninfo.',
+    copy: 'Copiar',
+    copied: '¡Copiado!',
+    qrAria: 'Código QR'
   },
 
   today: {
@@ -447,6 +447,134 @@ export const es: typeof en = {
     macroSingle: '{{macro}} está al {{pct}}% del objetivo.',
     macroLeadLag:
       '{{leadMacro}} va a la cabeza con el {{leadPct}}% del objetivo, mientras que {{lagMacro}} se queda atrás con el {{lagPct}}%.'
+  },
+
+  foodCheck: {
+    title: 'Revisar',
+    needsLinkedSheet: 'Esta revisión lee la pestaña "Alimentos" de una hoja de Google vinculada. ',
+    intro:
+      'Cada alimento de tu pestaña "Alimentos" se compara con su equivalente más cercano en los datos de referencia de laboratorio del USDA. Abajo se listan los que tienen macros o lípidos desviados más de un {{threshold}}%. Fuente:',
+    scope: {
+      label: 'Alimentos',
+      days: '{{days}} días',
+      all: 'Todos',
+      countRecent: '{{count}} de {{total}} consumidos',
+      countAll: '{{count}} alimentos'
+    },
+    updated: 'Actualizado {{date}}',
+    loading: 'Cargando la pestaña Alimentos…',
+    shareHint:
+      'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede ver" y de que tenga una pestaña "Alimentos" con una columna Alimento.',
+    refresh: 'Actualizar',
+    refreshTitle: 'Volver a leer la pestaña Alimentos y revisarla de nuevo (los datos del USDA siguen saliendo de la caché local)',
+    stop: 'Detener',
+    stopTitle: 'Dejar de buscar alimentos en el USDA',
+    resume: 'Analizar',
+    resumeTitle: 'Buscar los alimentos que todavía no tienen equivalente',
+    leftToAdjust_one: 'alimento por ajustar',
+    leftToAdjust_other: 'alimentos por ajustar',
+    counts: {
+      fixed: '{{count}} corregidos',
+      ok: '{{count}} OK',
+      unmatched: '{{count}} sin equivalente',
+      ignored: '{{count}} ignorados'
+    },
+    progress: 'Revisados {{done}} de {{total}}',
+    settings: {
+      title: 'Ajustes',
+      apiKey: 'Clave de API del USDA',
+      apiKeyHint:
+        'Sin clave, la DEMO_KEY compartida permite solo unas 30 búsquedas por hora. Una clave personal gratuita permite 1.000 por hora.',
+      devKeyPlaceholder: 'Usando USDA_API_KEY de .env',
+      apiKeySignup: 'Obtener una clave gratis',
+      decimalSeparator: 'Separador decimal de las filas copiadas',
+      decimalSeparatorHint:
+        'Usa el de la configuración regional de tu hoja (Archivo → Configuración) para que los números pegados no se lean como texto.',
+      checkEmptyLipids: 'Marcar también las celdas de lípidos vacías cuando el USDA tiene perfil de grasas',
+      clearCache: 'Borrar los datos del USDA en caché',
+      cacheCleared: 'Caché borrada',
+      method:
+        'Los macros se comparan por 100 g, y las calorías en kcal por 100 g. Los lípidos se comparan como proporción de los ácidos grasos del alimento: Ω-3 = ALA + EPA + DPA + DHA, Ω-6 = linoleico + araquidónico, Ω-9 = oleico + gondoico + erúcico, SCFA = C4, MCFA = C6–C12, LCFA = el resto, y Tóx = grasas trans. Las diferencias de redondeo (0,1 g, 1 kcal o 1 punto de proporción lipídica) nunca se marcan. El impacto es la mayor desviación de un solo campo.'
+    },
+    filters: {
+      search: 'Buscar alimentos',
+      status: 'Estado',
+      category: 'Categoría',
+      allCategories: 'Todas las categorías',
+      statuses: {
+        deviates: 'Por ajustar',
+        fixed: 'Corregidos',
+        ok: 'OK',
+        unmatched: 'Sin equivalente',
+        ignored: 'Ignorados',
+        all: 'Todos'
+      }
+    },
+    sort: {
+      label: 'Ordenar por',
+      sheet: 'Hoja',
+      name: 'Nombre',
+      impact: 'Impacto',
+      intake: 'Ingesta',
+      asc: 'Ascendente',
+      desc: 'Descendente'
+    },
+    pasteHint:
+      'Copiar pone los valores corregidos en el portapapeles, en el orden de columnas de la pestaña: solo los macros, solo los lípidos o la fila completa. La descripción de cada botón indica la celda donde pegar. Pega con Ctrl/Cmd+Shift+V (solo valores) para conservar también el formato numérico exacto de cada celda.',
+    empty: 'Ningún alimento coincide con estos filtros.',
+    eaten: '{{grams}} g consumidos en este período',
+    eatenTitle: 'Gramos registrados en Registro durante los últimos {{days}} días del registro',
+    eatenAll: '{{grams}} g consumidos en total',
+    eatenTitleAll: 'Gramos registrados en Registro en todo el registro',
+    rowTitle: 'Fila en la pestaña Alimentos',
+    impactTitle: 'Impacto: la mayor desviación entre los campos de este alimento',
+    autoMatch: 'Equivalente automático:',
+    manualMatch: 'Equivalente:',
+    noResults: 'El USDA no encontró nada para "{{query}}". Elige un equivalente a mano.',
+    noQuery: 'No hay palabras reconocibles para buscar en el USDA. Elige un equivalente a mano.',
+    pending: 'Esperando la búsqueda…',
+    ignored: 'Ignorado. No se compara ni se cuenta.',
+    skipped: "Omitido: los platos de {{category}} no se buscan automáticamente. Elige un equivalente a mano para revisarlo.",
+    unignore: 'Dejar de ignorar',
+    changeMatch: 'Cambiar equivalente',
+    openInUsda: 'Abrir en USDA FoodData Central',
+    table: {
+      per100g: 'por 100 g',
+      sheet: 'Hoja',
+      usda: 'USDA',
+      off: 'Desvío'
+    },
+    copyScopes: {
+      macros: 'Macros',
+      lipids: 'Lípidos',
+      row: 'Fila'
+    },
+    pasteInto: 'Copia los valores corregidos. Pégalos en {{header}}, celda {{cell}}.',
+    marksFixed: 'También marca el alimento como corregido.',
+    copied: '¡Copiado!',
+    markFixed: 'Marcar como corregido',
+    unmarkFixed: 'Desmarcar',
+    picker: {
+      title: 'Equivalente para "{{name}}"',
+      hint: 'Busca en el USDA en inglés y elige el alimento con el que se debe comparar esta fila.',
+      placeholder: 'p. ej. apple raw',
+      search: 'Buscar',
+      noResults: 'Sin resultados. Prueba con menos palabras o más simples.',
+      fieldsOff_one: '{{count}} campo desviado (hasta {{max}}%)',
+      fieldsOff_other: '{{count}} campos desviados (hasta {{max}}%)',
+      allWithin: 'Todos los campos dentro de la tolerancia',
+      useAutomatic: 'Usar el equivalente automático',
+      ignore: 'Ignorar este alimento'
+    },
+    errors: {
+      badResponse: 'Respuesta inesperada al leer la pestaña Alimentos.',
+      headerNotFound: 'No se encontró la fila de encabezado de Alimentos (se esperaba una columna "Alimento" en la fila 1).',
+      couldNotReach: 'No se pudo acceder a la pestaña Alimentos.',
+      rateLimited:
+        'Se alcanzó el límite de consultas del USDA. Agrega una clave de API gratuita en Ajustes, o espera una hora y pulsa Analizar. Todo lo consultado hasta ahora queda en caché.',
+      badApiKey: 'El USDA rechazó la clave de API. Revísala en Ajustes.',
+      usdaHttp: 'USDA FoodData Central devolvió un error ({{status}}).'
+    }
   },
 
   errors: {

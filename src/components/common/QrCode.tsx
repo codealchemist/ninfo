@@ -37,7 +37,7 @@ export default function QrCode({ value, size = 220, className }: QrCodeProps) {
       height={size}
       className={className}
       role="img"
-      aria-label={t('topBar.qrCode')}
+      aria-label={t('shareModal.qrAria')}
     >
       <rect width={size} height={size} fill="#ffffff" />
       <path d={modules} fill="#000000" />

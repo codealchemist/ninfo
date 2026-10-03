@@ -3,13 +3,12 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Activity,
-  Check,
   CalendarRange,
+  ClipboardCheck,
   Droplet,
   FileDown,
   LayoutDashboard,
   Menu,
-  QrCode as QrCodeIcon,
   RefreshCw,
   RotateCcw,
   Salad,
@@ -20,10 +19,9 @@ import {
 import { useAppStore } from '../../store/appStore'
 import { getSheetLink } from '../../db/sheetLinkStorage'
 import { buildShareableAppUrl } from '../../utils/googleSheetUrl'
-import { copyTextToClipboard } from '../../utils/clipboard'
 import { setLanguage, type SupportedLanguage } from '../../i18n'
 import MobileMenu from './MobileMenu'
-import ShareQrModal from '../common/ShareQrModal'
+import ShareModal from '../common/ShareModal'
 import ToggleSwitch from '../common/ToggleSwitch'
 
 const LANGUAGE_OPTIONS = [
@@ -43,8 +41,7 @@ export default function TopBar() {
   const setSelectedDate = useAppStore((s) => s.setSelectedDate)
   const goToToday = useAppStore((s) => s.goToToday)
   const clearPinnedDate = useAppStore((s) => s.clearPinnedDate)
-  const [shared, setShared] = useState(false)
-  const [qrUrl, setQrUrl] = useState<string | null>(null)
+  const [shareUrl, setShareUrl] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
 
   const handleGoToChipDate = () => {
@@ -65,25 +62,9 @@ export default function TopBar() {
     google: t('topBar.modeLabels.google'),
   }
 
-  const shareUrl = (): string | null => {
-    if (!sheetLinkId) return null
-    const link = getSheetLink(sheetLinkId)
-    return link ? buildShareableAppUrl(link.url) : null
-  }
-
-  const handleShare = async () => {
-    const url = shareUrl()
-    if (!url) return
-    const ok = await copyTextToClipboard(url)
-    if (ok) {
-      setShared(true)
-      setTimeout(() => setShared(false), 1500)
-    }
-  }
-
-  const handleShareAsQr = () => {
-    const url = shareUrl()
-    if (url) setQrUrl(url)
+  const handleShare = () => {
+    const link = sheetLinkId ? getSheetLink(sheetLinkId) : null
+    if (link) setShareUrl(buildShareableAppUrl(link.url))
   }
 
   return (
@@ -203,6 +184,11 @@ export default function TopBar() {
           <NavLink to="/app/report" className={({ isActive }) => (isActive ? 'active' : '')}>
             <FileDown size={16} /> <span>{t('topBar.nav.report')}</span>
           </NavLink>
+          {import.meta.env.DEV && (
+            <NavLink to="/app/food-check" className={({ isActive }) => (isActive ? 'active' : '')}>
+              <ClipboardCheck size={16} /> <span>{t('topBar.nav.foodCheck')}</span>
+            </NavLink>
+          )}
         </nav>
         {meta?.mode === 'sheet-link' && (
           <>
@@ -215,20 +201,8 @@ export default function TopBar() {
               <RefreshCw size={14} className={status === 'loading' ? 'spin' : undefined} />{' '}
               <span>{t('topBar.refresh')}</span>
             </button>
-            <button
-              className="link-button"
-              onClick={handleShare}
-              title={t('topBar.shareTitle')}
-            >
-              {shared ? <Check size={14} /> : <Share2 size={14} />}{' '}
-              <span>{shared ? t('topBar.shareCopied') : t('topBar.share')}</span>
-            </button>
-            <button
-              className="link-button"
-              onClick={handleShareAsQr}
-              title={t('topBar.qrTitle')}
-            >
-              <QrCodeIcon size={14} /> <span>{t('topBar.qrCode')}</span>
+            <button className="link-button" onClick={handleShare} title={t('topBar.shareTitle')}>
+              <Share2 size={14} /> <span>{t('topBar.share')}</span>
             </button>
           </>
         )}
@@ -236,7 +210,7 @@ export default function TopBar() {
           <RotateCcw size={14} /> <span>{t('topBar.startOver')}</span>
         </button>
       </div>
-      {qrUrl && <ShareQrModal url={qrUrl} onClose={() => setQrUrl(null)} />}
+      {shareUrl && <ShareModal url={shareUrl} onClose={() => setShareUrl(null)} />}
       <MobileMenu
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
@@ -247,8 +221,6 @@ export default function TopBar() {
         onRemoveDateChip={handleRemoveDateChip}
         onGoToday={goToToday}
         onShare={handleShare}
-        onShareAsQr={handleShareAsQr}
-        shared={shared}
         onReset={reset}
       />
     </header>
