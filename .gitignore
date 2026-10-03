@@ -5,3 +5,5 @@ dist
 *.tsbuildinfo
 .netlify
 docs
+.env
+.env.*

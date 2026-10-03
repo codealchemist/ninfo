@@ -4,13 +4,12 @@ import { Link, NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Activity,
-  Check,
   CalendarRange,
+  ClipboardCheck,
   Download,
   Droplet,
   FileDown,
   LayoutDashboard,
-  QrCode as QrCodeIcon,
   RotateCcw,
   Salad,
   Scale,
@@ -38,8 +37,6 @@ interface MobileMenuProps {
   onRemoveDateChip: () => void
   onGoToday: () => void
   onShare: () => void
-  onShareAsQr: () => void
-  shared: boolean
   onReset: () => void
 }
 
@@ -53,8 +50,6 @@ export default function MobileMenu({
   onRemoveDateChip,
   onGoToday,
   onShare,
-  onShareAsQr,
-  shared,
   onReset,
 }: MobileMenuProps) {
   const { t, i18n } = useTranslation()
@@ -131,6 +126,11 @@ export default function MobileMenu({
           <NavLink to="/app/report" onClick={onClose} className={({ isActive }) => (isActive ? 'active' : '')}>
             <FileDown size={16} /> <span>{t('topBar.nav.report')}</span>
           </NavLink>
+          {import.meta.env.DEV && (
+            <NavLink to="/app/food-check" onClick={onClose} className={({ isActive }) => (isActive ? 'active' : '')}>
+              <ClipboardCheck size={16} /> <span>{t('topBar.nav.foodCheck')}</span>
+            </NavLink>
+          )}
         </div>
 
         {pinnedDate && (
@@ -154,11 +154,15 @@ export default function MobileMenu({
 
         {meta?.mode === 'sheet-link' && (
           <div className="mobile-menu-section mobile-menu-actions">
-            <button className="link-button" onClick={onShare} title={t('topBar.shareTitle')}>
-              {shared ? <Check size={14} /> : <Share2 size={14} />} <span>{shared ? t('topBar.shareCopied') : t('topBar.share')}</span>
-            </button>
-            <button className="link-button" onClick={onShareAsQr} title={t('topBar.qrTitle')}>
-              <QrCodeIcon size={14} /> <span>{t('topBar.qrCode')}</span>
+            <button
+              className="link-button"
+              onClick={() => {
+                onShare()
+                onClose()
+              }}
+              title={t('topBar.shareTitle')}
+            >
+              <Share2 size={14} /> <span>{t('topBar.share')}</span>
             </button>
           </div>
         )}

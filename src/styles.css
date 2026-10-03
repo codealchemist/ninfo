@@ -421,6 +421,21 @@ button {
   white-space: nowrap;
 }
 
+.qr-modal-copy {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .bia-glossary-modal {
   max-width: min(92vw, 440px);
   max-height: 80vh;
@@ -3000,4 +3015,454 @@ button {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
     transform: translateY(-50%);
   }
+}
+
+/* ---- Food check ---- */
+
+.food-check-intro {
+  margin: 0 0 14px;
+}
+
+.food-check-intro a,
+.food-check-settings a,
+.food-check-match a {
+  color: var(--accent);
+}
+
+.food-check-error {
+  color: var(--warning-red);
+}
+
+.food-check-scope {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 16px;
+}
+
+.food-check-scope-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Equal-width options so the sliding thumb (1/N of the track) lines up with each one. */
+.food-check-scope-toggle .bia-toggle-option {
+  min-width: 64px;
+  text-align: center;
+}
+
+.food-check-scope .hint {
+  margin: 0;
+}
+
+.food-check-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.food-check-left {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.food-check-left-count {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.food-check-left-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.food-check-summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.food-check-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.food-check-progress .hint {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.food-check-progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ring-track);
+  overflow: hidden;
+}
+
+.food-check-progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.food-check-settings {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.food-check-settings summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.food-check-settings-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.food-check-settings-body .hint {
+  margin: 0;
+}
+
+.food-check-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  max-width: 100%;
+}
+
+.food-check-inline {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.food-check-field input,
+.food-check-controls input,
+.food-check-controls select,
+.match-picker-search input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.food-check-field input {
+  width: 320px;
+  max-width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.food-check-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.food-check-button,
+.match-picker-search button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.food-check-button:disabled,
+.match-picker-search button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.food-check-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.food-check-search {
+  flex: 1 1 200px;
+}
+
+.food-check-controls select {
+  flex: 0 1 auto;
+}
+
+.food-check-sort {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.food-check-sort .icon-button {
+  width: 34px;
+  height: 34px;
+}
+
+.food-check-paste-hint {
+  margin: 10px 0 14px;
+}
+
+.food-check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.food-check-row {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.food-check-row--deviates {
+  border-left: 3px solid var(--warning-amber);
+}
+
+.food-check-row--fixed,
+.food-check-row--ignored {
+  opacity: 0.7;
+}
+
+.food-check-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.food-check-row-number {
+  flex-shrink: 0;
+  min-width: 34px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.food-check-row-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  font-size: 14px;
+}
+
+.food-check-row-title .hint {
+  margin: 0;
+}
+
+.food-check-impact {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--warning-amber);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.food-check-ok {
+  color: var(--accent);
+  display: flex;
+}
+
+.food-check-match {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.food-check-match .hint {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.food-check-datatype {
+  font-size: 11px;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.food-check-fields {
+  border-collapse: collapse;
+  font-size: 12.5px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.food-check-fields th,
+.food-check-fields td {
+  padding: 4px 8px;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.food-check-fields th:first-child,
+.food-check-fields td:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+
+.food-check-fields thead th {
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.food-check-field--flagged td:last-child {
+  color: var(--warning-amber);
+  font-weight: 700;
+}
+
+.food-check-row-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.food-check-copy-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.match-picker-modal {
+  width: min(92vw, 560px);
+  max-width: min(92vw, 560px);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.match-picker-search {
+  display: flex;
+  gap: 6px;
+}
+
+.match-picker-search input {
+  flex: 1;
+}
+
+.match-picker-results {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+.match-picker-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.match-picker-result--selected {
+  border-color: var(--accent);
+}
+
+.match-picker-result button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.match-picker-result button:hover:not(:disabled) {
+  background: var(--bg);
+}
+
+.match-picker-result a {
+  color: var(--text-muted);
+  padding: 10px 10px 0 0;
+}
+
+.match-picker-result-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.match-picker-result-meta {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.match-picker-result-fit {
+  font-size: 11.5px;
+  color: var(--accent);
+}
+
+.match-picker-result-fit--off {
+  color: var(--warning-amber);
+}
+
+.match-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 12px;
 }

@@ -75,15 +75,13 @@ export const en = {
       bia: 'BIA',
       weight: 'Weight',
       liquids: 'Liquids',
-      report: 'Report'
+      report: 'Report',
+      foodCheck: 'Check'
     },
     refreshTitle: 'Re-fetch the latest data from the linked sheet',
     refresh: 'Refresh',
-    shareTitle: 'Copy a link that opens this spreadsheet directly in Ninfo',
+    shareTitle: 'Share a link or QR code that opens this spreadsheet directly in Ninfo',
     share: 'Share',
-    shareCopied: 'Copied!',
-    qrTitle: 'Show a QR code that opens this spreadsheet directly in Ninfo',
-    qrCode: 'QR code',
     startOver: 'Start over',
     clearDateAria: 'Back to today'
   },
@@ -101,9 +99,12 @@ export const en = {
     pickDate: 'Pick a date'
   },
 
-  shareQr: {
-    title: 'Scan to open this spreadsheet',
-    hint: 'Point a phone camera at the code to open it directly in Ninfo.'
+  shareModal: {
+    title: 'Share this spreadsheet',
+    hint: 'Send the link, or point a phone camera at the code, to open it directly in Ninfo.',
+    copy: 'Copy',
+    copied: 'Copied!',
+    qrAria: 'QR code'
   },
 
   today: {
@@ -144,7 +145,7 @@ export const en = {
     warnings: {
       saturatedFat: {
         stamp: 'High saturated fat',
-        body: "Saturated fat ({{grams}}g) is {{pct}}% of today's total fat — above the {{threshold}}% commonly considered a healthy upper bound."
+        body: "Today's unsaturated:saturated fat ratio is {{ratio}}, below the {{threshold}}:1 target. Saturated fat ({{grams}}g) is {{pct}}% of today's fat."
       },
       omegaImbalance: {
         stamp: 'Omega-6/3 imbalance',
@@ -372,7 +373,7 @@ export const en = {
     warnings: {
       saturatedFat: {
         stamp: 'High saturated fat',
-        body: "Saturated fat ({{grams}}g) is {{pct}}% of this meal's total fat — above the {{threshold}}% commonly cited as a healthy upper bound."
+        body: "This meal's unsaturated:saturated fat ratio is {{ratio}}, below the {{threshold}}:1 target. Saturated fat ({{grams}}g) is {{pct}}% of its fat."
       },
       omegaImbalance: {
         stamp: 'Omega-6/3 imbalance',
@@ -418,7 +419,7 @@ export const en = {
       saturated: 'Saturated',
       unsaturated: 'Unsaturated',
       trans: 'Trans',
-      ratioTitleSatUnsat: 'Saturated {{a}}g / Unsaturated {{b}}g',
+      ratioTitleUnsatSat: 'Unsaturated {{a}}g / Saturated {{b}}g',
       ratioTitleOmega: 'Ω-6 {{a}}g / Ω-3 {{b}}g',
       transHint: '{{grams}}g trans'
     }
@@ -435,6 +436,133 @@ export const en = {
     macroSingle: '{{macro}} is at {{pct}}% of goal.',
     macroLeadLag:
       '{{leadMacro}} is leading at {{leadPct}}% of goal, while {{lagMacro}} lags at {{lagPct}}%.'
+  },
+
+  foodCheck: {
+    title: 'Check',
+    needsLinkedSheet: 'This check reads the "Alimentos" tab from a linked Google Sheet. ',
+    intro:
+      'Each food in your "Alimentos" tab is compared with its closest match in USDA\'s lab-analyzed reference data, and foods whose macros or lipids are off by more than {{threshold}}% are listed below. Source:',
+    scope: {
+      label: 'Foods',
+      days: '{{days}} days',
+      all: 'All',
+      countRecent: '{{count}} of {{total}} eaten',
+      countAll: '{{count}} foods'
+    },
+    updated: 'Updated {{date}}',
+    loading: 'Loading the Alimentos tab…',
+    shareHint:
+      'Make sure the sheet is shared as "Anyone with the link can view", and that it has an "Alimentos" tab with an Alimento column.',
+    refresh: 'Refresh',
+    refreshTitle: 'Re-read the Alimentos tab and check it again (USDA data still comes from the local cache)',
+    stop: 'Stop',
+    stopTitle: 'Stop looking foods up in USDA',
+    resume: 'Analyze',
+    resumeTitle: 'Look up the foods that haven\'t been matched yet',
+    leftToAdjust_one: 'food left to adjust',
+    leftToAdjust_other: 'foods left to adjust',
+    counts: {
+      fixed: '{{count}} fixed',
+      ok: '{{count}} OK',
+      unmatched: '{{count}} no match',
+      ignored: '{{count}} ignored'
+    },
+    progress: 'Checked {{done}} of {{total}}',
+    settings: {
+      title: 'Settings',
+      apiKey: 'USDA API key',
+      apiKeyHint:
+        'Without a key, the shared DEMO_KEY allows only about 30 lookups per hour. A free personal key allows 1,000 per hour.',
+      devKeyPlaceholder: 'Using USDA_API_KEY from .env',
+      apiKeySignup: 'Get a free key',
+      decimalSeparator: 'Decimal separator for copied rows',
+      decimalSeparatorHint: 'Match your spreadsheet\'s locale (File → Settings) so pasted numbers aren\'t read as text.',
+      checkEmptyLipids: 'Also flag empty lipid cells when USDA has a fat profile',
+      clearCache: 'Clear cached USDA data',
+      cacheCleared: 'Cache cleared',
+      method:
+        'Macros are compared per 100 g, and calories in kcal per 100 g. Lipids are compared as shares of the food\'s fatty acids: Ω-3 = ALA + EPA + DPA + DHA, Ω-6 = linoleic + arachidonic, Ω-9 = oleic + gondoic + erucic, SCFA = C4, MCFA = C6–C12, LCFA = the rest, and Tóx = trans fats. Differences within rounding (0.1 g, 1 kcal, or 1 point of lipid share) are never flagged. Impact is the largest single-field deviation.'
+    },
+    filters: {
+      search: 'Search foods',
+      status: 'Status',
+      category: 'Category',
+      allCategories: 'All categories',
+      statuses: {
+        deviates: 'To adjust',
+        fixed: 'Fixed',
+        ok: 'OK',
+        unmatched: 'No match',
+        ignored: 'Ignored',
+        all: 'All'
+      }
+    },
+    sort: {
+      label: 'Sort by',
+      sheet: 'Sheet',
+      name: 'Name',
+      impact: 'Impact',
+      intake: 'Intake',
+      asc: 'Ascending',
+      desc: 'Descending'
+    },
+    pasteHint:
+      'Copy puts the corrected values on your clipboard in the tab\'s column order: just the macros, just the lipids, or the whole row. Each button\'s tooltip names the cell to paste into. Paste with Ctrl/Cmd+Shift+V (values only) to also keep each cell\'s exact number format.',
+    empty: 'No foods match these filters.',
+    eaten: '{{grams}} g eaten in this period',
+    eatenTitle: 'Grams logged in Registro over the last {{days}} days of the log',
+    eatenAll: '{{grams}} g eaten in total',
+    eatenTitleAll: 'Grams logged in Registro across the whole log',
+    rowTitle: 'Row in the Alimentos tab',
+    impactTitle: 'Impact: the largest deviation among this food\'s fields',
+    autoMatch: 'Auto-matched to',
+    manualMatch: 'Matched to',
+    noResults: 'USDA found nothing for "{{query}}". Pick a match by hand.',
+    noQuery: 'No recognizable food words to search USDA with. Pick a match by hand.',
+    pending: 'Waiting to be looked up…',
+    ignored: 'Ignored. Not compared, and not counted.',
+    skipped: "Skipped: {{category}} dishes aren't looked up automatically. Pick a match by hand to check it.",
+    unignore: 'Stop ignoring',
+    changeMatch: 'Change match',
+    openInUsda: 'Open in USDA FoodData Central',
+    table: {
+      per100g: 'per 100 g',
+      sheet: 'Sheet',
+      usda: 'USDA',
+      off: 'Off by'
+    },
+    copyScopes: {
+      macros: 'Macros',
+      lipids: 'Lipids',
+      row: 'Row'
+    },
+    pasteInto: 'Copy the corrected values. Paste into {{header}}, cell {{cell}}.',
+    marksFixed: 'Also marks the food as fixed.',
+    copied: 'Copied!',
+    markFixed: 'Mark fixed',
+    unmarkFixed: 'Unmark fixed',
+    picker: {
+      title: 'Match "{{name}}"',
+      hint: 'Search USDA in English and pick the food this row should be compared with.',
+      placeholder: 'e.g. apple raw',
+      search: 'Search',
+      noResults: 'No results. Try fewer or simpler words.',
+      fieldsOff_one: '{{count}} field off (up to {{max}}%)',
+      fieldsOff_other: '{{count}} fields off (up to {{max}}%)',
+      allWithin: 'All fields within tolerance',
+      useAutomatic: 'Use the automatic match',
+      ignore: 'Ignore this food'
+    },
+    errors: {
+      badResponse: 'Unexpected response when reading the Alimentos tab.',
+      headerNotFound: 'Could not find the Alimentos header row (expected an "Alimento" column in row 1).',
+      couldNotReach: "Couldn't reach the Alimentos tab.",
+      rateLimited:
+        'USDA\'s rate limit was reached. Add a free API key in Settings, or wait an hour and press Analyze. Everything looked up so far is cached.',
+      badApiKey: 'USDA rejected the API key. Check it in Settings.',
+      usdaHttp: 'USDA FoodData Central returned an error ({{status}}).'
+    }
   },
 
   errors: {

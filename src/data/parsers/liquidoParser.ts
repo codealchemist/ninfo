@@ -4,7 +4,6 @@ import {
   HeaderNotFoundError,
   makeYearInferrer,
   parseFechaCell,
-  parseNumber,
 } from '../../utils/sheetDates'
 import i18n from '../../i18n'
 
@@ -21,6 +20,20 @@ export interface LiquidEntry {
    * Preferred over summing entries client-side when available — see liquidUtils.dailyTotalMlByDate. */
   dailyTotalMl: number | null
   notes: string | null
+}
+
+/**
+ * Reads a millilitre amount as the sheet displays it ("500 ml", "1.850 ml", "1,850 ml"). The
+ * CSV export carries formatted text, so in a locale that groups thousands with "." a daily
+ * total of 1850 ml arrives as "1.850 ml" — which the generic parseNumber reads as 1.85. Amounts
+ * here are always whole millilitres, so any "." or "," followed by exactly three digits is a
+ * thousands separator, not a decimal point.
+ */
+export function parseMl(raw: string | undefined): number {
+  if (!raw) return 0
+  const digits = raw.replace(/[^0-9.,-]/g, '').replace(/[.,](?=\d{3}(?!\d))/g, '')
+  const n = parseFloat(digits.replace(',', '.'))
+  return Number.isFinite(n) ? n : 0
 }
 
 /**
@@ -71,9 +84,9 @@ export function parseLiquidoCsv(csvText: string, today: Date = new Date()): Liqu
       endTime: row[2]?.trim() || null,
       duration: row[3]?.trim() || null,
       liquidType,
-      amountMl: parseNumber(row[5]),
-      realAmountMl: parseNumber(row[6]),
-      dailyTotalMl: dailyTotalRaw ? parseNumber(dailyTotalRaw) : null,
+      amountMl: parseMl(row[5]),
+      realAmountMl: parseMl(row[6]),
+      dailyTotalMl: dailyTotalRaw ? parseMl(dailyTotalRaw) : null,
       notes: row[9]?.trim() || null,
     })
   }
