@@ -2,15 +2,19 @@ import type { LipidTotals } from './types'
 
 /**
  * Heuristic thresholds for the fat-quality warnings on meal cards. These are common
- * rule-of-thumb figures from nutrition guidance (AHA/WHO-style saturated-fat limits,
- * the widely-cited omega-6:omega-3 balance target), not a personalized clinical
+ * rule-of-thumb figures from nutrition guidance (the Mediterranean / "Mediterranean keto"
+ * fat balance, the widely-cited omega-6:omega-3 balance target), not a personalized clinical
  * assessment — surfaced to the user as "commonly cited guidance" in the tooltip copy.
  */
 export const FAT_WARNING_THRESHOLDS = {
   /** Below this much total fat in a meal, ratio-based warnings are skipped as noise. */
   minFatGramsForRatioWarnings: 3,
-  /** Warn when saturated fat is more than this share of the meal's total fat. */
-  saturatedShareOfFat: 0.4,
+  /**
+   * Warn when the unsaturated:saturated ratio falls below this (i.e. saturated is more than
+   * ~1/3 of fat). Expressed unsaturated-first, like the P:S ratio, so higher is better.
+   * Share-of-fat rather than %-of-calories, since a 10%-of-energy cap would flag every keto meal.
+   */
+  minUnsatToSatRatio: 2,
   /** Warn when the omega-6:omega-3 ratio exceeds this (common cited healthy upper bound is ~4:1). */
   omega6to3Ratio: 4,
   /** Below this much combined omega-6+omega-3 in a meal, the ratio warning is skipped as noise. */
@@ -26,6 +30,10 @@ export interface FatBreakdown {
   trans: number // "Tóx"
   omega3: number
   omega6: number
+  /** null when there's no saturated/unsaturated data; Infinity when there's no saturated fat */
+  unsatToSatRatio: number | null
+  /** Saturated share of the lipid breakdown (sat + unsat + trans), 0 when there's no data */
+  saturatedShareOfFat: number
   /** null when there isn't enough omega-3/6 data to compute a ratio */
   omega6to3Ratio: number | null
   warnings: {
@@ -40,9 +48,19 @@ export function analyzeFat(lipids: LipidTotals, totalFat: number): FatBreakdown 
   const saturated = lipids.scfa + lipids.mcfa + lipids.lcfa
   const trans = lipids.tox
 
-  const hasEnoughFat = totalFat >= FAT_WARNING_THRESHOLDS.minFatGramsForRatioWarnings
+  // Ratios come from the lipid breakdown itself rather than the separately reported fat total,
+  // which doesn't always agree with the breakdown in the source data.
+  const lipidFat = unsaturated + saturated + trans
+  const saturatedShareOfFat = lipidFat > 0 ? saturated / lipidFat : 0
+  let unsatToSatRatio: number | null = null
+  if (saturated > 0 || unsaturated > 0) {
+    unsatToSatRatio = saturated > 0 ? unsaturated / saturated : Infinity
+  }
+  const hasEnoughFat = lipidFat >= FAT_WARNING_THRESHOLDS.minFatGramsForRatioWarnings
   const saturatedHigh =
-    hasEnoughFat && saturated / totalFat > FAT_WARNING_THRESHOLDS.saturatedShareOfFat
+    hasEnoughFat &&
+    unsatToSatRatio !== null &&
+    unsatToSatRatio < FAT_WARNING_THRESHOLDS.minUnsatToSatRatio
 
   let omega6to3Ratio: number | null = null
   if (lipids.omega6 > 0 || lipids.omega3 > 0) {
@@ -64,6 +82,8 @@ export function analyzeFat(lipids: LipidTotals, totalFat: number): FatBreakdown 
     trans,
     omega3: lipids.omega3,
     omega6: lipids.omega6,
+    unsatToSatRatio,
+    saturatedShareOfFat,
     omega6to3Ratio,
     warnings: { saturatedHigh, omegaImbalance, transFatPresent },
   }

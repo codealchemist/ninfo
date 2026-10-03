@@ -36,9 +36,10 @@ export function buildWarningStamps(
       key: 'saturatedFat',
       stamp: t(`${namespace}.warnings.saturatedFat.stamp`),
       description: t(`${namespace}.warnings.saturatedFat.body`, {
+        ratio: `${round(fat.unsatToSatRatio ?? 0)}:1`,
         grams: round(fat.saturated),
-        pct: Math.round((fat.saturated / fat.totalFat) * 100),
-        threshold: Math.round(FAT_WARNING_THRESHOLDS.saturatedShareOfFat * 100),
+        pct: Math.round(fat.saturatedShareOfFat * 100),
+        threshold: FAT_WARNING_THRESHOLDS.minUnsatToSatRatio,
       }),
     })
   }

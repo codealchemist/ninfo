@@ -34,26 +34,26 @@ export default function FatSection({ lipids, breakdown }: Props) {
       <div className="fat-dials-row">
         <div className="fat-dial-row">
           <TwoValueDial
-            valueA={breakdown.saturated}
-            valueB={breakdown.unsaturated}
-            colorA="var(--fat-saturated)"
-            colorB="var(--fat-unsaturated)"
-            centerLabel={formatRatio(breakdown.saturated, breakdown.unsaturated)}
-            title={t('meals.fatSection.ratioTitleSatUnsat', {
-              a: round(breakdown.saturated),
-              b: round(breakdown.unsaturated),
+            valueA={breakdown.unsaturated}
+            valueB={breakdown.saturated}
+            colorA="var(--fat-unsaturated)"
+            colorB="var(--fat-saturated)"
+            centerLabel={formatRatio(breakdown.unsaturated, breakdown.saturated)}
+            title={t('meals.fatSection.ratioTitleUnsatSat', {
+              a: round(breakdown.unsaturated),
+              b: round(breakdown.saturated),
             })}
           />
           <div className="fat-dial-legend">
             <LegendItem
-              colorVar="--fat-saturated"
-              label={t('meals.fatSection.saturated')}
-              value={`${round(breakdown.saturated)}g`}
-            />
-            <LegendItem
               colorVar="--fat-unsaturated"
               label={t('meals.fatSection.unsaturated')}
               value={`${round(breakdown.unsaturated)}g`}
+            />
+            <LegendItem
+              colorVar="--fat-saturated"
+              label={t('meals.fatSection.saturated')}
+              value={`${round(breakdown.saturated)}g`}
             />
           </div>
         </div>

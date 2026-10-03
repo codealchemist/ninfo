@@ -73,7 +73,7 @@ export function formatNutritionLabelAsText(
     `${macros.calories}: ${Math.round(meal.totals.calories)}`,
     RULE,
     `${macros.fat}: ${round(meal.totals.fat)}g`,
-    `  ${fatSection.saturated}: ${round(fat.saturated)}g / ${fatSection.unsaturated}: ${round(fat.unsaturated)}g`
+    `  ${fatSection.unsaturated}: ${round(fat.unsaturated)}g / ${fatSection.saturated}: ${round(fat.saturated)}g`
   ]
 
   if (fat.omega6to3Ratio !== null) {
