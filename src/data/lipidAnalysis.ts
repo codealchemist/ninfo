@@ -11,10 +11,11 @@ export const FAT_WARNING_THRESHOLDS = {
   minFatGramsForRatioWarnings: 3,
   /**
    * Warn when the unsaturated:saturated ratio falls below this (i.e. saturated is more than
-   * ~1/3 of fat). Expressed unsaturated-first, like the P:S ratio, so higher is better.
+   * 1/5 of fat). A deliberately stricter target than the ~2:1 Mediterranean-keto balance.
+   * Expressed unsaturated-first, like the P:S ratio, so higher is better.
    * Share-of-fat rather than %-of-calories, since a 10%-of-energy cap would flag every keto meal.
    */
-  minUnsatToSatRatio: 2,
+  minUnsatToSatRatio: 4,
   /** Warn when the omega-6:omega-3 ratio exceeds this (common cited healthy upper bound is ~4:1). */
   omega6to3Ratio: 4,
   /** Below this much combined omega-6+omega-3 in a meal, the ratio warning is skipped as noise. */

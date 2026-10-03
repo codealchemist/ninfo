@@ -151,7 +151,7 @@ export const es: typeof en = {
     warnings: {
       saturatedFat: {
         stamp: 'Grasa saturada alta',
-        body: 'La relación grasa insaturada:saturada de hoy es {{ratio}}, por debajo del {{threshold}}:1 que se suele citar como mínimo saludable. La grasa saturada ({{grams}}g) es el {{pct}}% de la grasa de hoy.'
+        body: 'La relación grasa insaturada:saturada de hoy es {{ratio}}, por debajo del objetivo de {{threshold}}:1. La grasa saturada ({{grams}}g) es el {{pct}}% de la grasa de hoy.'
       },
       omegaImbalance: {
         stamp: 'Desequilibrio Ω-6/3',
@@ -381,7 +381,7 @@ export const es: typeof en = {
     warnings: {
       saturatedFat: {
         stamp: 'Grasa saturada alta',
-        body: 'La relación grasa insaturada:saturada de esta comida es {{ratio}}, por debajo del {{threshold}}:1 que se suele citar como mínimo saludable. La grasa saturada ({{grams}}g) es el {{pct}}% de su grasa.'
+        body: 'La relación grasa insaturada:saturada de esta comida es {{ratio}}, por debajo del objetivo de {{threshold}}:1. La grasa saturada ({{grams}}g) es el {{pct}}% de su grasa.'
       },
       omegaImbalance: {
         stamp: 'Desequilibrio Ω-6/3',

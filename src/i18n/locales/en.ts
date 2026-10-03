@@ -144,7 +144,7 @@ export const en = {
     warnings: {
       saturatedFat: {
         stamp: 'High saturated fat',
-        body: "Today's unsaturated:saturated fat ratio is {{ratio}}, below the {{threshold}}:1 commonly cited as a healthy minimum. Saturated fat ({{grams}}g) is {{pct}}% of today's fat."
+        body: "Today's unsaturated:saturated fat ratio is {{ratio}}, below the {{threshold}}:1 target. Saturated fat ({{grams}}g) is {{pct}}% of today's fat."
       },
       omegaImbalance: {
         stamp: 'Omega-6/3 imbalance',
@@ -372,7 +372,7 @@ export const en = {
     warnings: {
       saturatedFat: {
         stamp: 'High saturated fat',
-        body: "This meal's unsaturated:saturated fat ratio is {{ratio}}, below the {{threshold}}:1 commonly cited as a healthy minimum. Saturated fat ({{grams}}g) is {{pct}}% of its fat."
+        body: "This meal's unsaturated:saturated fat ratio is {{ratio}}, below the {{threshold}}:1 target. Saturated fat ({{grams}}g) is {{pct}}% of its fat."
       },
       omegaImbalance: {
         stamp: 'Omega-6/3 imbalance',
