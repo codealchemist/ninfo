@@ -169,7 +169,10 @@ export const en = {
     foodLogTitle: 'Food log — {{date}}',
     summaryTitle: 'Day summary — {{date}}',
     ofGoal: '/ {{goal}}{{unit}} goal',
-    waterIntake: 'Water intake'
+    waterIntake: 'Water intake',
+    mtorc1Pulses_one: 'mTORC1 pulse',
+    mtorc1Pulses_other: 'mTORC1 pulses',
+    mtorc1PulsesTitle: 'Likely full mTORC1 activations (muscle protein synthesis pulses) today. Aim for {{target}}–4, at least 3 h apart.'
   },
 
   fasting: {
@@ -221,7 +224,9 @@ export const en = {
       proteinPerKg: 'Protein/kg',
       proteinPerKgTitle: 'Median protein per day, per kg of median body weight, for this period',
       fasting: 'Fasting time',
-      water: 'Water intake'
+      water: 'Water intake',
+      mtorc1: 'mTORC1',
+      mtorc1Title: 'Median likely full mTORC1 activations (muscle protein synthesis pulses) per day for this period. 3–4 spaced at least 3 h apart is a common target.'
     }
   },
 
@@ -414,6 +419,44 @@ export const en = {
       itemsCount_one: '{{count}} item',
       itemsCount_other: '{{count}} items',
       totals: 'Totals'
+    },
+    mtorc1: {
+      title: 'mTORC1 activation',
+      status: {
+        full: 'Likely full mTORC1 activation',
+        partial: 'Likely partial mTORC1 activation',
+        refractory: 'Within the previous pulse',
+        none: 'No likely activation'
+      },
+      meaning: {
+        full: "Enough leucine and protein to switch on mTORC1, the muscle's build signal. Synthesis peaks at ~1.5–2 h and fades by ~3 h.",
+        partial: 'Enough leucine for a smaller pulse. A bit more dairy, meat, fish or egg protein would likely make it full.',
+        refractory: 'Enough protein, but under 3 h since the last pulse: muscle is still "full", so this extends it.',
+        none: 'Too little leucine to switch on mTORC1.'
+      },
+      leucineUnit: 'leucine',
+      level: {
+        full: 'Full activation',
+        strong: 'Strong partial activation',
+        weak: 'Weak partial activation',
+        refractory: 'Within previous pulse',
+        none: 'No activation'
+      },
+      whyTitle: 'Why',
+      gaugeLabel: 'Estimated leucine',
+      gaugePartial: 'partial {{grams}} g',
+      gaugeFull: 'full {{grams}} g',
+      checks: {
+        proteinPerKg: '{{grams}} g protein: a full pulse needs {{needed}} g ({{perKg}} g/kg × {{kg}} kg)',
+        proteinFallback: '{{grams}} g protein: a full pulse needs {{needed}} g (no body weight on record)',
+        firstOfDay: 'First pulse of the day',
+        sincePrevious: '{{duration}} since the {{time}} pulse: a new one needs {{hours}} h',
+        merged: 'Counted together with the {{times}} meal (within {{minutes}} min, absorbed as one)'
+      },
+      sourcesTitle: 'Main leucine sources',
+      sourceValue: '≈{{leucine}} g leucine · {{protein}} g protein',
+      meaningTitle: 'What it means',
+      footnote: "Estimated from each food's protein and source, not measured."
     },
     fatSection: {
       saturated: 'Saturated',

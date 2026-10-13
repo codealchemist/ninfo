@@ -2,6 +2,7 @@ import { forwardRef, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Image as ImageIcon, TriangleAlert } from 'lucide-react'
 import type { Meal } from '../../data/types'
+import type { FeedingWindow } from '../../data/mtorc1'
 import { analyzeFat } from '../../data/lipidAnalysis'
 import { analyzeGlycemicRisk } from '../../data/glycemicRisk'
 import { buildWarningStamps } from '../../data/warningStamps'
@@ -11,10 +12,13 @@ import {
 } from '../../data/mealText'
 import { copyElementAsImage, copyTextToClipboard } from '../../utils/clipboard'
 import FatSection from './FatSection'
+import Mtorc1Badge from './Mtorc1Badge'
 
 interface Props {
   meal: Meal
+  mtorc1Window: FeedingWindow | null
   onShowWarnings: () => void
+  onShowMtorc1: () => void
 }
 
 const round = (n: number) => Math.round(n * 10) / 10
@@ -23,7 +27,7 @@ type CopyState = 'idle' | 'copied' | 'failed'
 
 /** Renders a meal's aggregate macros as a classic "Nutrition Facts" style label. */
 const NutritionLabel = forwardRef<HTMLDivElement, Props>(
-  function NutritionLabel({ meal, onShowWarnings }, ref) {
+  function NutritionLabel({ meal, mtorc1Window, onShowWarnings, onShowMtorc1 }, ref) {
     const { t } = useTranslation()
     const { totals, lipids } = meal
     const fatBreakdown = analyzeFat(lipids, totals.fat)
@@ -65,18 +69,33 @@ const NutritionLabel = forwardRef<HTMLDivElement, Props>(
                 {formatMealDateLabel(meal.date)} · {meal.time}
               </div>
             </div>
-            <button
-              className="icon-button icon-button--ghost warnings-button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onShowWarnings()
-              }}
-              disabled={warnings.length === 0}
-              aria-label={t('meals.warningsButtonAria')}
-              title={t('meals.warningsButtonAria')}
-            >
-              <TriangleAlert size={16} />
-            </button>
+            <div className='nutrition-label-header-buttons'>
+              {mtorc1Window && mtorc1Window.status !== 'none' && (
+                <button
+                  className='mtorc1-button'
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onShowMtorc1()
+                  }}
+                  aria-label={t(`meals.mtorc1.status.${mtorc1Window.status}`)}
+                  title={t(`meals.mtorc1.status.${mtorc1Window.status}`)}
+                >
+                  <Mtorc1Badge window={mtorc1Window} />
+                </button>
+              )}
+              <button
+                className="icon-button icon-button--ghost warnings-button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onShowWarnings()
+                }}
+                disabled={warnings.length === 0}
+                aria-label={t('meals.warningsButtonAria')}
+                title={t('meals.warningsButtonAria')}
+              >
+                <TriangleAlert size={16} />
+              </button>
+            </div>
           </div>
           <div className='nutrition-label-rule nutrition-label-rule--thick' />
           <div className='nutrition-label-calories'>

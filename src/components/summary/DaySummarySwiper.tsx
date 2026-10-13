@@ -9,7 +9,7 @@ import { LiquidoSource } from '../../data/sources/LiquidoSource'
 import type { LiquidEntry } from '../../data/parsers/liquidoParser'
 import { dailyTotalMlByDate } from '../../data/liquidUtils'
 import { PesoSource } from '../../data/sources/PesoSource'
-import type { WeightEntry } from '../../data/parsers/pesoParser'
+import { weightAtOrBefore } from '../../data/weightUtils'
 import { getCachedLatestWeight, setCachedLatestWeight } from '../../db/latestWeightCache'
 import { getCachedLatestWater, setCachedLatestWater } from '../../db/latestWaterCache'
 import { todayLocalIso } from '../../utils/localDate'
@@ -38,17 +38,6 @@ const NAV_ARROW_GAP = 46
 // Common daily water intake guideline, applied to body weight to get a personal goal.
 const WATER_ML_PER_KG = 35
 
-/** Last weigh-in at or before the given date, from an ascending-by-date list — so a past day's
- * water goal reflects the weight known at the time, not today's. */
-function weightAtOrBefore(sortedEntries: WeightEntry[], date: string): WeightEntry | null {
-  let result: WeightEntry | null = null
-  for (const e of sortedEntries) {
-    if (e.date <= date) result = e
-    else break
-  }
-  return result
-}
-
 export default function DaySummarySwiper() {
   const { t } = useTranslation()
   const meals = useAppStore((s) => s.meals)
@@ -68,7 +57,10 @@ export default function DaySummarySwiper() {
   // from the same linked sheet's "Líquido"/"Peso" tabs, if any, with no dedicated error UI
   // since the rest of the day summary is still useful without them.
   const [liquidEntries, setLiquidEntries] = useState<LiquidEntry[]>([])
-  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([])
+  // In the store rather than local state so Today's meal cards judge mTORC1 pulses against the
+  // same per-date weight this summary's daily count uses.
+  const weightEntries = useAppStore((s) => s.weightEntries)
+  const setWeightEntries = useAppStore((s) => s.setWeightEntries)
   useEffect(() => {
     const spreadsheetId = sheetLinkId
       ? parseGoogleSheetUrl(getSheetLink(sheetLinkId)?.url ?? '')?.spreadsheetId ?? null

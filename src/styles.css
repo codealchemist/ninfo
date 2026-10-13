@@ -19,6 +19,13 @@
      theme-invariant (see the dark-mode blocks below), so a fixed darken reads consistently
      in both. */
   --macro-protein-over: #924f3e;
+  /* --macro-protein at low alpha, as a literal (not color-mix) so html2canvas exports it */
+  --macro-protein-soft: rgba(224, 122, 95, 0.16);
+  /* mTORC1 activation ramp: protein hues fading toward the surface as the pulse weakens,
+     stepped to ~5.3 / 3.5 / 2.5:1 contrast against the card in both themes */
+  --mtorc1-full: #b9472d;
+  --mtorc1-strong: #d9694d;
+  --mtorc1-weak: #e4937d;
   --macro-carbs-over: #28634a;
   --macro-fat-over: #9d7322;
   --macro-fiber-over: #394c5e;
@@ -44,6 +51,9 @@
     --text: #f2efe9;
     --text-muted: #a9a495;
     --ring-track: #38352e;
+    --mtorc1-full: #e07a5f;
+    --mtorc1-strong: #b4614c;
+    --mtorc1-weak: #94503f;
   }
 }
 
@@ -54,6 +64,9 @@
   --text: #f2efe9;
   --text-muted: #a9a495;
   --ring-track: #38352e;
+  --mtorc1-full: #e07a5f;
+  --mtorc1-strong: #b4614c;
+  --mtorc1-weak: #94503f;
 }
 
 * {
@@ -1296,10 +1309,45 @@ button {
   min-width: 0;
 }
 
-.day-review-text {
+/* Right-hand column: the mTORC1 pulse count above the review text, so neither takes width
+   from the rings on the left. It inherits the sizing the review text used to have alone. */
+.day-summary-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   min-width: 160px;
   max-width: 420px;
   flex-shrink: 0;
+}
+
+/* A plain figure, no dial — a count of 0–4 doesn't need one. */
+.day-summary-mtorc1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+}
+
+.day-summary-mtorc1-icon {
+  flex-shrink: 0;
+  color: var(--mtorc1-full);
+}
+
+.day-summary-mtorc1-value {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.day-summary-mtorc1-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.day-review-text {
   margin: 0;
   color: var(--text-muted);
   font-size: 13.5px;
@@ -2259,6 +2307,297 @@ button {
   padding: 12px;
 }
 
+/* mTORC1 badge + back view */
+
+.nutrition-label-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.mtorc1-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.mtorc1-button:hover {
+  background: var(--macro-protein-soft);
+}
+
+.mtorc1-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Activation level is carried by color alone: each tone sets --mtorc1-color, which the
+   dumbbell, the back view's tile and its gauge fill all pick up. */
+.mtorc1-tone--full { --mtorc1-color: var(--mtorc1-full); }
+.mtorc1-tone--strong { --mtorc1-color: var(--mtorc1-strong); }
+.mtorc1-tone--weak { --mtorc1-color: var(--mtorc1-weak); }
+.mtorc1-tone--refractory { --mtorc1-color: var(--text-muted); }
+
+.mtorc1-badge {
+  flex-shrink: 0;
+  color: var(--mtorc1-color);
+}
+
+/* Back view: status tile + leucine gauge */
+
+.mtorc1-view-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 2px 0 4px;
+}
+
+.mtorc1-view-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  background: var(--macro-protein-soft);
+}
+
+.mtorc1-view-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mtorc1-view-hero-value {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mtorc1-view-hero-unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Plain text color: the weaker ramp tones are fine for an icon but too faint for small text,
+   so the dumbbell beside it carries the level's color. */
+.mtorc1-view-hero-level {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mtorc1-tone--refractory .mtorc1-view-tile {
+  background: var(--ring-track);
+}
+
+.mtorc1-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mtorc1-gauge-track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--ring-track);
+}
+
+.mtorc1-gauge-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--mtorc1-color);
+}
+
+/* Threshold marks: a surface-colored notch so they read on both the track and the fill. */
+.mtorc1-gauge-tick {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--text);
+  box-shadow: 0 0 0 1.5px var(--surface);
+}
+
+.mtorc1-gauge-labels {
+  position: relative;
+  height: 14px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.mtorc1-gauge-labels span {
+  position: absolute;
+  white-space: nowrap;
+}
+
+/* The two ticks are only ~20% of the card apart — too close to center both labels under them,
+   so each hangs off its tick on the side away from the other. */
+.mtorc1-gauge-label--partial {
+  transform: translateX(calc(-100% + 4px));
+}
+
+.mtorc1-gauge-label--full {
+  transform: translateX(-4px);
+}
+
+.mtorc1-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  font-size: 12.5px;
+}
+
+.mtorc1-disclosure {
+  border-top: 1px solid var(--border);
+}
+
+.mtorc1-disclosure:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.mtorc1-disclosure-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mtorc1-disclosure-header .chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.mtorc1-disclosure-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 0 12px;
+}
+
+.mtorc1-view-meaning {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.mtorc1-checks,
+.mtorc1-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mtorc1-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.35;
+}
+
+.mtorc1-check-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mtorc1-check--pass .mtorc1-check-icon {
+  color: var(--fat-unsaturated);
+}
+
+.mtorc1-check--fail .mtorc1-check-icon {
+  color: var(--warning-red);
+}
+
+.mtorc1-check--info .mtorc1-check-icon {
+  color: var(--info-blue);
+}
+
+.mtorc1-sources li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mtorc1-source-food {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mtorc1-source-value {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mtorc1-view-footnote {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.mtorc1-stat {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+/* Takes its own line under the stats row (which wraps). Touch-only: a hover-capable pointer
+   already gets the same text as the stat's title tooltip. */
+.mtorc1-stat-hint {
+  flex-basis: 100%;
+  margin: 0;
+  max-width: 360px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mtorc1-stat {
+    cursor: default;
+  }
+  .mtorc1-stat-hint {
+    display: none;
+  }
+}
+
+.mtorc1-stat-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mtorc1-full);
+}
+
 .icon-button--ghost {
   width: 42px;
   height: 22px;
@@ -2869,7 +3208,7 @@ button {
   .day-summary-body .progress-ring-row {
     flex: none;
   }
-  .day-review-text {
+  .day-summary-side {
     min-width: 0;
     flex-shrink: 1;
   }

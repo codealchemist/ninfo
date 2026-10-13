@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { useAppStore } from '../store/appStore'
 import { groupIntoMeals, itemsForDate } from '../data/aggregate/dailyTotals'
+import { analyzeMtorc1Day } from '../data/mtorc1'
+import { weightAtOrBefore } from '../data/weightUtils'
 import { todayLocalIso } from '../utils/localDate'
 import DaySummarySwiper from '../components/summary/DaySummarySwiper'
 import MealTimelineStrip from '../components/meals/MealTimelineStrip'
@@ -10,11 +12,20 @@ export default function Today() {
   const meals = useAppStore((s) => s.meals)
   const selectedDate = useAppStore((s) => s.selectedDate)
   const dates = useAppStore((s) => s.dates)
+  const weightEntries = useAppStore((s) => s.weightEntries)
 
   const dayMeals = useMemo(() => {
     if (!selectedDate) return []
     return groupIntoMeals(itemsForDate(meals, selectedDate))
   }, [meals, selectedDate])
+
+  // The full-pulse protein check is per kg of body weight — the same at/before-date weight the
+  // day summary's mTORC1 count uses (loaded by DaySummarySwiper), so the two always agree.
+  // Without one it falls back to an absolute threshold.
+  const mtorc1 = useMemo(() => {
+    const weightKg = selectedDate ? weightAtOrBefore(weightEntries, selectedDate)?.weightKg ?? null : null
+    return analyzeMtorc1Day(dayMeals, weightKg)
+  }, [dayMeals, weightEntries, selectedDate])
 
   if (!selectedDate) return null
 
@@ -35,7 +46,7 @@ export default function Today() {
       {showNormalView && (
         <>
           <DaySummarySwiper />
-          <MealTimelineStrip meals={dayMeals} />
+          <MealTimelineStrip meals={dayMeals} mtorc1ByMealKey={mtorc1.byMealKey} />
         </>
       )}
     </div>

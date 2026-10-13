@@ -13,6 +13,7 @@ import { GoogleSheetLinkSource } from '../data/sources/GoogleSheetLinkSource'
 import { sortedDates } from '../data/aggregate/dailyTotals'
 import { todayLocalIso } from '../utils/localDate'
 import type { DatasetMeta, FoodCatalogItem, MacroTotals, MealItem } from '../data/types'
+import type { WeightEntry } from '../data/parsers/pesoParser'
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
@@ -29,6 +30,9 @@ interface AppState {
   pinnedDate: string | null
   sheetLinkId: string | null
   loadController: AbortController | null
+  /** The linked sheet's "Peso" weigh-ins, ascending — loaded by DaySummarySwiper. */
+  weightEntries: WeightEntry[]
+  setWeightEntries: (entries: WeightEntry[]) => void
 
   loadDemo: () => Promise<void>
   loadUploadedFile: (file: File) => Promise<void>
@@ -67,6 +71,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   pinnedDate: null,
   sheetLinkId: null,
   loadController: null,
+  weightEntries: [],
+  setWeightEntries: (entries) => set({ weightEntries: entries }),
 
   loadDemo: async () => {
     const controller = beginLoad(set)

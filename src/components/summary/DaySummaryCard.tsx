@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Calendar,
@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronsRight,
   Copy,
+  Dumbbell,
   Eye,
   EyeOff,
   Image as ImageIcon,
@@ -34,6 +35,7 @@ import {
 } from '../../data/dayText'
 import { topSourcesByMacro } from '../../data/aggregate/dailyTotals'
 import { buildWarningStamps } from '../../data/warningStamps'
+import { MTORC1_THRESHOLDS, analyzeMtorc1Day } from '../../data/mtorc1'
 import { copyElementAsImage, copyTextToClipboard } from '../../utils/clipboard'
 import GoalProgressRing from './GoalProgressRing'
 import DaySummaryShareCard from './DaySummaryShareCard'
@@ -124,6 +126,8 @@ export default function DaySummaryCard({
   const reviewText = generateDayReview(totals, goals)
   const dayWarnings = buildWarningStamps(fatBreakdown, glycemicRisk, t, 'today')
   const hasWarnings = dayWarnings.length > 0
+  // Same per-date weight Today.tsx gives the meal cards, so this count matches their badges.
+  const mtorc1 = useMemo(() => analyzeMtorc1Day(meals, dayWeightKg), [meals, dayWeightKg])
 
   useEffect(() => {
     if (!showWarnings) return
@@ -402,7 +406,21 @@ export default function DaySummaryCard({
                     />
                   )}
                 </div>
-                <p className='day-review-text'>{reviewText}</p>
+                <div className='day-summary-side'>
+                  {macroView === 'macros' && meals.length > 0 && (
+                    <div
+                      className='day-summary-mtorc1'
+                      title={t('today.mtorc1PulsesTitle', { target: MTORC1_THRESHOLDS.dailyPulseTarget })}
+                    >
+                      <Dumbbell size={20} strokeWidth={2.25} className='day-summary-mtorc1-icon' />
+                      <span className='day-summary-mtorc1-value'>{mtorc1.fullPulses}</span>
+                      <span className='day-summary-mtorc1-label'>
+                        {t('today.mtorc1Pulses', { count: mtorc1.fullPulses })}
+                      </span>
+                    </div>
+                  )}
+                  <p className='day-review-text'>{reviewText}</p>
+                </div>
               </div>
             </div>
 

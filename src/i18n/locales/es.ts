@@ -175,7 +175,10 @@ export const es: typeof en = {
     foodLogTitle: 'Registro de alimentos — {{date}}',
     summaryTitle: 'Resumen del día — {{date}}',
     ofGoal: '/ {{goal}}{{unit}} objetivo',
-    waterIntake: 'Consumo de agua'
+    waterIntake: 'Consumo de agua',
+    mtorc1Pulses_one: 'pulso mTORC1',
+    mtorc1Pulses_other: 'pulsos mTORC1',
+    mtorc1PulsesTitle: 'Activaciones completas probables de mTORC1 (pulsos de síntesis proteica muscular) hoy. Apunta a {{target}}–4, separadas por al menos 3 h.'
   },
 
   fasting: {
@@ -227,7 +230,9 @@ export const es: typeof en = {
       proteinPerKg: 'Proteína/kg',
       proteinPerKgTitle: 'Proteína mediana por día, por kg de peso corporal mediano, para este período',
       fasting: 'Tiempo de ayuno',
-      water: 'Consumo de agua'
+      water: 'Consumo de agua',
+      mtorc1: 'mTORC1',
+      mtorc1Title: 'Mediana de activaciones completas probables de mTORC1 (pulsos de síntesis proteica muscular) por día en este período. 3–4 separados por al menos 3 h es un objetivo habitual.'
     }
   },
 
@@ -424,6 +429,44 @@ export const es: typeof en = {
       itemsCount_one: '{{count}} elemento',
       itemsCount_other: '{{count}} elementos',
       totals: 'Totales'
+    },
+    mtorc1: {
+      title: 'Activación de mTORC1',
+      status: {
+        full: 'Activación completa probable de mTORC1',
+        partial: 'Activación parcial probable de mTORC1',
+        refractory: 'Dentro del pulso anterior',
+        none: 'Sin activación probable'
+      },
+      meaning: {
+        full: 'Suficiente leucina y proteína para encender mTORC1, la señal de construcción muscular. La síntesis llega al pico a las ~1,5–2 h y se apaga a las ~3 h.',
+        partial: 'Suficiente leucina para un pulso menor. Un poco más de proteína de lácteos, carne, pescado o huevo probablemente lo haría completo.',
+        refractory: 'Suficiente proteína, pero a menos de 3 h del último pulso: el músculo sigue "lleno", así que esto lo prolonga.',
+        none: 'Muy poca leucina para encender mTORC1.'
+      },
+      leucineUnit: 'leucina',
+      level: {
+        full: 'Activación completa',
+        strong: 'Activación parcial fuerte',
+        weak: 'Activación parcial débil',
+        refractory: 'Dentro del pulso anterior',
+        none: 'Sin activación'
+      },
+      whyTitle: 'Por qué',
+      gaugeLabel: 'Leucina estimada',
+      gaugePartial: 'parcial {{grams}} g',
+      gaugeFull: 'completo {{grams}} g',
+      checks: {
+        proteinPerKg: '{{grams}} g de proteína: un pulso completo necesita {{needed}} g ({{perKg}} g/kg × {{kg}} kg)',
+        proteinFallback: '{{grams}} g de proteína: un pulso completo necesita {{needed}} g (sin peso corporal registrado)',
+        firstOfDay: 'Primer pulso del día',
+        sincePrevious: '{{duration}} desde el pulso de las {{time}}: uno nuevo necesita {{hours}} h',
+        merged: 'Contada junto con la comida de las {{times}} (a menos de {{minutes}} min, se absorben como una)'
+      },
+      sourcesTitle: 'Principales fuentes de leucina',
+      sourceValue: '≈{{leucine}} g de leucina · {{protein}} g de proteína',
+      meaningTitle: 'Qué significa',
+      footnote: 'Estimado a partir de la proteína y el origen de cada alimento, no medido.'
     },
     fatSection: {
       saturated: 'Saturada',

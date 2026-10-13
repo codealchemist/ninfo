@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, Timer } from 'lucide-react'
 import type { Meal } from '../../data/types'
+import type { FeedingWindow } from '../../data/mtorc1'
 import MealCard from './MealCard'
 
 interface Props {
   meals: Meal[]
+  mtorc1ByMealKey: Map<string, FeedingWindow>
 }
 
-export default function MealTimelineStrip({ meals }: Props) {
+export default function MealTimelineStrip({ meals, mtorc1ByMealKey }: Props) {
   const { t } = useTranslation()
   const [focusedIndex, setFocusedIndex] = useState(0)
   const [flippedKeys, setFlippedKeys] = useState<Set<string>>(new Set())
@@ -148,6 +150,7 @@ export default function MealTimelineStrip({ meals }: Props) {
             <div ref={(el) => (cardRefs.current[i] = el)} onClick={() => setFocusedIndex(i)}>
               <MealCard
                 meal={meal}
+                mtorc1Window={mtorc1ByMealKey.get(meal.key) ?? null}
                 focused={i === focusedIndex}
                 flipped={flippedKeys.has(meal.key)}
                 onToggleFlip={() => toggleFlip(meal.key)}

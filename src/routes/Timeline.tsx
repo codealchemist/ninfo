@@ -2,11 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Link2, Maximize2, Minimize2 } from 'lucide-react'
+import { Dumbbell, Link2, Maximize2, Minimize2 } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { aggregateByDay, dailyTotals, groupIntoMeals, medianTotals } from '../data/aggregate/dailyTotals'
 import { MACRO_VIEWS, macroViewRing, type MacroView } from '../data/aggregate/macroView'
-import { MACRO_KEYS, type MacroKey } from '../data/types'
+import { MACRO_KEYS, type MacroKey, type Meal } from '../data/types'
+import { analyzeMtorc1Day } from '../data/mtorc1'
 import { getSheetLink } from '../db/sheetLinkStorage'
 import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { LiquidoSource } from '../data/sources/LiquidoSource'
@@ -29,6 +30,8 @@ const COLOR_VARS: Record<string, string> = {
   fiber: '--macro-fiber',
   calories: '--macro-calories',
 }
+
+const round1 = (n: number) => Math.round(n * 10) / 10
 
 function median(values: number[]): number {
   if (values.length === 0) return 0
@@ -72,6 +75,9 @@ export default function Timeline() {
   const [liquidEntries, setLiquidEntries] = useState<LiquidEntry[]>([])
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([])
   const [selectedFood, setSelectedFood] = useState<string | null>(null)
+  // Touch devices have no hover tooltip, so tapping the mTORC1 stat toggles its explanation
+  // instead (hidden again on hover-capable pointers via CSS, where the title tooltip covers it).
+  const [showMtorc1Hint, setShowMtorc1Hint] = useState(false)
   const navigate = useNavigate()
 
   const foodNames = useMemo(
@@ -224,6 +230,21 @@ export default function Timeline() {
     const inRange = weightEntries.filter((e) => e.date >= minDate && e.date <= maxDate)
     return inRange.length > 0 ? median(inRange.map((e) => e.weightKg)) : null
   }, [weightEntries, effectiveMedianDays])
+
+  // Likely full mTORC1 pulses per day (see data/mtorc1.ts), always over all foods — a single
+  // food's items alone say nothing about a meal's pulse. Days with no pulse count as zero.
+  const medianMtorc1Pulses = useMemo(() => {
+    if (effectiveMedianDays.length === 0) return null
+    const mealsByDate = new Map<string, Meal[]>()
+    for (const meal of groupIntoMeals(meals)) {
+      const bucket = mealsByDate.get(meal.date)
+      if (bucket) bucket.push(meal)
+      else mealsByDate.set(meal.date, [meal])
+    }
+    return median(
+      effectiveMedianDays.map((d) => analyzeMtorc1Day(mealsByDate.get(d.date) ?? [], medianWeightKg).fullPulses)
+    )
+  }, [meals, effectiveMedianDays, medianWeightKg])
 
   const medianRingProps = (macro: MacroKey) =>
     macroViewRing(
@@ -422,6 +443,20 @@ export default function Timeline() {
                   </span>
                   <span className="bia-stat-label">{t('timeline.metrics.water')}</span>
                 </div>
+                <button
+                  className="bia-stat mtorc1-stat"
+                  style={selectedFood ? { opacity: 0.5 } : undefined}
+                  title={t('timeline.metrics.mtorc1Title')}
+                  aria-expanded={showMtorc1Hint}
+                  onClick={() => setShowMtorc1Hint((v) => !v)}
+                >
+                  <span className="bia-stat-value mtorc1-stat-value">
+                    <Dumbbell size={18} strokeWidth={2.25} />
+                    {medianMtorc1Pulses !== null ? round1(medianMtorc1Pulses) : '—'}
+                  </span>
+                  <span className="bia-stat-label">{t('timeline.metrics.mtorc1')}</span>
+                </button>
+                {showMtorc1Hint && <p className="hint mtorc1-stat-hint">{t('timeline.metrics.mtorc1Title')}</p>}
               </div>
             </div>
           </div>

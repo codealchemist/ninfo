@@ -1,11 +1,15 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { Meal } from '../../data/types'
+import type { FeedingWindow } from '../../data/mtorc1'
 import NutritionLabel from './NutritionLabel'
 import MealItemsTable from './MealItemsTable'
 import MealWarningsView from './MealWarningsView'
+import Mtorc1View from './Mtorc1View'
 
 interface Props {
   meal: Meal
+  /** The meal's mTORC1 feeding window, for the badge and its back view. */
+  mtorc1Window: FeedingWindow | null
   focused: boolean
   flipped: boolean
   onToggleFlip: () => void
@@ -13,13 +17,13 @@ interface Props {
 
 const MIN_CARD_HEIGHT = 340
 
-export default function MealCard({ meal, focused, flipped, onToggleFlip }: Props) {
+export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggleFlip }: Props) {
   const frontRef = useRef<HTMLDivElement>(null)
   const backRef = useRef<HTMLDivElement>(null)
   const [cardHeight, setCardHeight] = useState(MIN_CARD_HEIGHT)
-  // Which content the back face shows once flipped — the warnings button flips straight to
-  // 'warnings' instead of the items table; flipping back to front resets it for next time.
-  const [backView, setBackView] = useState<'items' | 'warnings'>('items')
+  // Which content the back face shows once flipped — the warnings button and mTORC1 badge flip
+  // straight to their own view instead of the items table; flipping back to front resets it.
+  const [backView, setBackView] = useState<'items' | 'warnings' | 'mtorc1'>('items')
 
   // Both faces are laid out in normal flow (no fixed height, no internal scroll) so each is
   // exactly as tall as its own content needs — including content that can change size after
@@ -45,13 +49,13 @@ export default function MealCard({ meal, focused, flipped, onToggleFlip }: Props
     return () => observer.disconnect()
   }, [meal, backView])
 
-  const handleToggleWarnings = () => {
-    if (flipped && backView === 'warnings') {
+  const handleToggleBackView = (view: 'warnings' | 'mtorc1') => {
+    if (flipped && backView === view) {
       setBackView('items')
       onToggleFlip()
       return
     }
-    setBackView('warnings')
+    setBackView(view)
     if (!flipped) onToggleFlip()
   }
 
@@ -67,11 +71,19 @@ export default function MealCard({ meal, focused, flipped, onToggleFlip }: Props
     >
       <div className={'meal-card-inner' + (flipped ? ' meal-card-inner--flipped' : '')}>
         <div className="meal-card-face meal-card-face--front" onClick={onToggleFlip}>
-          <NutritionLabel ref={frontRef} meal={meal} onShowWarnings={handleToggleWarnings} />
+          <NutritionLabel
+            ref={frontRef}
+            meal={meal}
+            mtorc1Window={mtorc1Window}
+            onShowWarnings={() => handleToggleBackView('warnings')}
+            onShowMtorc1={() => handleToggleBackView('mtorc1')}
+          />
         </div>
         <div className="meal-card-face meal-card-face--back">
           {backView === 'warnings' ? (
             <MealWarningsView ref={backRef} meal={meal} onFlipBack={handleFlipBack} />
+          ) : backView === 'mtorc1' && mtorc1Window ? (
+            <Mtorc1View ref={backRef} meal={meal} window={mtorc1Window} onFlipBack={handleFlipBack} />
           ) : (
             <MealItemsTable ref={backRef} meal={meal} onFlipBack={handleFlipBack} />
           )}
