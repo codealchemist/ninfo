@@ -34,12 +34,14 @@ const MealItemsTable = forwardRef<HTMLDivElement, Props>(function MealItemsTable
     if (!maximized) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
+      // Claimed in the capture phase so the card underneath doesn't also flip back (see Modal).
+      e.preventDefault()
       // First Escape clears an active selection; only close once nothing is selected.
       if (selectedIds.size > 0) setSelectedIds(new Set())
       else setMaximized(false)
     }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDown, true)
+    return () => window.removeEventListener('keydown', handleKeyDown, true)
   }, [maximized, selectedIds])
 
   const rows = useMemo(() => {

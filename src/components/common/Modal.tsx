@@ -13,12 +13,16 @@ interface ModalProps {
 export default function Modal({ onClose, className, children }: ModalProps) {
   const { t } = useTranslation()
 
+  // Capture phase + preventDefault: the modal claims Escape before window-level bubble listeners
+  // (e.g. a flipped MealCard) run, which skip already-handled events — one press, one close.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      onClose()
     }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDown, true)
+    return () => window.removeEventListener('keydown', handleKeyDown, true)
   }, [onClose])
 
   return createPortal(

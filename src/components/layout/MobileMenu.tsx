@@ -57,14 +57,17 @@ export default function MobileMenu({
 
   useEffect(() => {
     if (!open) return
+    // Claimed in the capture phase so a flipped meal card behind the menu stays put (see Modal).
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      onClose()
     }
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDown, true)
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
-      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', handleKeyDown, true)
       document.body.style.overflow = prevOverflow
     }
   }, [open, onClose])

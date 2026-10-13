@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { Meal } from '../../data/types'
 import type { FeedingWindow } from '../../data/mtorc1'
 import NutritionLabel from './NutritionLabel'
@@ -63,6 +63,18 @@ export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggl
     setBackView('items')
     onToggleFlip()
   }
+
+  // Escape flips any back view to the front — only while flipped, so it never flips a card open.
+  // Overlays above the card (Modal, the maximized items table, the mobile menu) claim Escape in
+  // the capture phase and preventDefault it, so one press closes just the topmost thing.
+  useEffect(() => {
+    if (!flipped) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !e.defaultPrevented) handleFlipBack()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [flipped, onToggleFlip])
 
   return (
     <div
