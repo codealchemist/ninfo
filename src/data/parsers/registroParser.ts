@@ -64,6 +64,13 @@ export function parseRegistroCsv(csvText: string, today: Date = new Date()): Par
 
     const time = parseHoraCell(row[2] ?? '')
     const ayuno = row[12]?.trim()
+    // Blank means "not recorded" here, unlike the macro columns — keep it distinguishable.
+    const optionalNumber = (cell: string | undefined) => (cell?.trim() ? parseNumber(cell) : null)
+    const glucose = {
+      postMeal: optionalNumber(row[14]),
+      baseline: optionalNumber(row[15]),
+      increment: optionalNumber(row[16]),
+    }
 
     items.push({
       id: `${date}T${time}-${i}`,
@@ -88,6 +95,8 @@ export function parseRegistroCsv(csvText: string, today: Date = new Date()): Par
         lcfa: parseNumber(row[44]),
         tox: parseNumber(row[45]),
       },
+      lipidsRecorded: row.slice(39, 46).some((cell) => Boolean(cell?.trim())),
+      glucose: Object.values(glucose).some((v) => v !== null) ? glucose : null,
     })
 
     // Goal columns (24-28) are only populated on a day's last row — capture whenever present.

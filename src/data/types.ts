@@ -13,6 +13,17 @@ export interface MealItem {
   calories: number
   fastingSincePrev: string | null // raw "Ayuno" value, e.g. "02:40"
   lipids: LipidTotals
+  /** False when the row left every fat-breakdown column blank — "not recorded", which `lipids`
+   * (all zeros then) can't tell apart from a real zero. Absent on rows from older parsers. */
+  lipidsRecorded?: boolean
+  /** Blood glucose readings logged on this row (Registro columns PBG/BGB/BGI), in mg/dL. */
+  glucose?: GlucoseReading | null
+}
+
+export interface GlucoseReading {
+  postMeal: number | null // PBG
+  baseline: number | null // BGB
+  increment: number | null // BGI (PBG − BGB)
 }
 
 /** Fat-quality breakdown, in grams — per-item columns 39-45 of the Registro sheet. */

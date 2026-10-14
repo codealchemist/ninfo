@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAiCardPanel } from '../components/ai/useAiCardPanel'
 import { Info, LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { getSheetLink } from '../db/sheetLinkStorage'
@@ -38,6 +39,10 @@ function fmtDelta(value: number, decimals: number): string {
 
 export default function Bia() {
   const { t, i18n } = useTranslation()
+  // Each panel gets its own AI analysis (see components/ai/useAiCardPanel).
+  const aiSummary = useAiCardPanel('bia:summary')
+  const aiTrends = useAiCardPanel('bia:trends')
+  const aiHistory = useAiCardPanel('bia:history')
   const sheetLinkId = useAppStore((s) => s.sheetLinkId)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -102,7 +107,10 @@ export default function Bia() {
     <div className="page">
       <section className="card">
         <div className="bia-header">
-          <h2>{t('bia.title')}</h2>
+          <div className="ai-heading">
+            <h2>{t('bia.title')}</h2>
+            {aiSummary.button}
+          </div>
           <div className="bia-header-actions">
             <button className="link-button" onClick={() => setShowGlossary(true)} title={t('bia.termsTitle')}>
               <Info size={14} /> <span>{t('bia.termsButton')}</span>
@@ -112,6 +120,7 @@ export default function Bia() {
             </button>
           </div>
         </div>
+        {aiSummary.panel}
 
         {status === 'loading' && entries.length === 0 && (
           <p className="hint">
@@ -175,13 +184,17 @@ export default function Bia() {
       {entries.length > 1 && (
         <section className="card">
           <div className="bia-header">
-            <h2>{t('bia.trends')}</h2>
+            <div className="ai-heading">
+              <h2>{t('bia.trends')}</h2>
+              {aiTrends.button}
+            </div>
             <CopyImageButton
               targetRef={trendsRef}
               ariaLabel={t('bia.copyTrendsImageAria')}
               title={t('bia.copyTrendsImageTitle')}
             />
           </div>
+          {aiTrends.panel}
           <div className="bia-chart-grid" ref={trendsRef}>
             {METRICS.map((m) => {
               const diff = chartDiff[m.key] ?? false
@@ -233,7 +246,13 @@ export default function Bia() {
 
       {entries.length > 0 && (
         <section className="card">
-          <h2>{t('bia.history')}</h2>
+          <div className="bia-header">
+            <div className="ai-heading">
+              <h2>{t('bia.history')}</h2>
+              {aiHistory.button}
+            </div>
+          </div>
+          {aiHistory.panel}
           <div className="bia-table-scroll">
             <table className="bia-table">
               <thead>

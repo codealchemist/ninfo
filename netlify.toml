@@ -11,3 +11,11 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# WebMCP (AI agents in the browser calling the app's tools — see src/webmcp) needs an
+# origin-isolated document. Sent explicitly so a later change can't silently disable it.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Origin-Agent-Cluster = "?1"
+    Permissions-Policy = "tools=(self)"

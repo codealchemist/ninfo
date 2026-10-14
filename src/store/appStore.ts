@@ -11,6 +11,7 @@ import { DemoSource } from '../data/sources/DemoSource'
 import { UploadedCsvSource } from '../data/sources/UploadedCsvSource'
 import { GoogleSheetLinkSource } from '../data/sources/GoogleSheetLinkSource'
 import { sortedDates } from '../data/aggregate/dailyTotals'
+import { clearLastSource, getLastSource, setLastSource } from '../db/lastSourceStorage'
 import { todayLocalIso } from '../utils/localDate'
 import type { DatasetMeta, FoodCatalogItem, MacroTotals, MealItem } from '../data/types'
 import type { WeightEntry } from '../data/parsers/pesoParser'
@@ -30,10 +31,17 @@ interface AppState {
   pinnedDate: string | null
   sheetLinkId: string | null
   loadController: AbortController | null
+  /** The meal card centered in Today's meal strip, if it's mounted — the "current meal" for
+   * the get_meal WebMCP tool. */
+  focusedMealKey: string | null
+  setFocusedMealKey: (key: string | null) => void
+  /** True from startup until restoreLastSource runs — see shouldRestoreOnStartup. */
+  pendingRestore: boolean
   /** The linked sheet's "Peso" weigh-ins, ascending — loaded by DaySummarySwiper. */
   weightEntries: WeightEntry[]
   setWeightEntries: (entries: WeightEntry[]) => void
 
+  restoreLastSource: () => Promise<boolean>
   loadDemo: () => Promise<void>
   loadUploadedFile: (file: File) => Promise<void>
   restoreUploadedSnapshot: () => Promise<boolean>
@@ -59,8 +67,17 @@ export function getDefaultSelectedDate(dates: string[]): string | null {
   return todayLocalIso()
 }
 
+/**
+ * Reopen the last-used source on startup, unless the page was opened from a shared link — that
+ * import (handled by Welcome) takes priority. Evaluated once, at store creation, so the very
+ * first render already sees status 'loading' and DashboardLayout doesn't bounce a reloaded
+ * /app/... URL back to Welcome before the restore has even started.
+ */
+const shouldRestoreOnStartup =
+  getLastSource() !== null && !new URLSearchParams(window.location.search).has('sheet')
+
 export const useAppStore = create<AppState>((set, get) => ({
-  status: 'idle',
+  status: shouldRestoreOnStartup ? 'loading' : 'idle',
   error: null,
   meta: null,
   meals: [],
@@ -71,8 +88,39 @@ export const useAppStore = create<AppState>((set, get) => ({
   pinnedDate: null,
   sheetLinkId: null,
   loadController: null,
+  pendingRestore: shouldRestoreOnStartup,
+  focusedMealKey: null,
+  setFocusedMealKey: (key) => set({ focusedMealKey: key }),
   weightEntries: [],
   setWeightEntries: (entries) => set({ weightEntries: entries }),
+
+  restoreLastSource: async () => {
+    // Runs once (StrictMode calls effects twice in dev) — the flag drops before any await.
+    if (!get().pendingRestore) return false
+    set({ pendingRestore: false })
+    const last = getLastSource()
+    let ok = false
+    try {
+      if (last?.kind === 'demo') {
+        await get().loadDemo()
+        ok = get().meta !== null
+      } else if (last?.kind === 'upload') {
+        ok = await get().restoreUploadedSnapshot()
+      } else if (last?.kind === 'sheet-link') {
+        ok = await get().continueWithSavedLink(last.id)
+      }
+    } catch {
+      ok = false
+    }
+    if (!ok) {
+      // A failed fetch (offline, sheet unshared...) shows its error and keeps the source for
+      // next time; a source that's simply gone (snapshot cleared, link removed) is forgotten.
+      if (get().status !== 'error') clearLastSource()
+      // The startup 'loading' status has no load behind it when the source was gone.
+      if (get().status === 'loading' && !get().loadController) set({ status: 'idle' })
+    }
+    return ok
+  },
 
   loadDemo: async () => {
     const controller = beginLoad(set)
@@ -80,6 +128,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const result = await new DemoSource().load(controller.signal)
       if (!isCurrent(get, controller)) return
       applyResult(set, result)
+      setLastSource({ kind: 'demo' })
     } catch (err) {
       failLoad(get, set, controller, err)
     } finally {
@@ -99,6 +148,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       applyResult(set, result)
       try {
         await saveSnapshot({ csvText, fileName: file.name, uploadedAt })
+        setLastSource({ kind: 'upload' })
       } catch {
         // IndexedDB unavailable — the session still works, it just won't survive a reload.
       }
@@ -121,6 +171,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       ).load(controller.signal)
       if (!isCurrent(get, controller)) return false
       applyResult(set, result)
+      setLastSource({ kind: 'upload' })
       return true
     } catch (err) {
       failLoad(get, set, controller, err)
@@ -138,6 +189,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       applyResult(set, result)
       const saved = addSheetLink(url, name)
       set({ sheetLinkId: saved.id })
+      setLastSource({ kind: 'sheet-link', id: saved.id })
       return true
     } catch (err) {
       failLoad(get, set, controller, err)
@@ -155,6 +207,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       applyResult(set, result)
       replaceSheetLink(id, url)
       set({ sheetLinkId: id })
+      setLastSource({ kind: 'sheet-link', id })
       return true
     } catch (err) {
       failLoad(get, set, controller, err)
@@ -174,6 +227,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       applyResult(set, result)
       touchSheetLink(id)
       set({ sheetLinkId: id })
+      setLastSource({ kind: 'sheet-link', id })
       return true
     } catch (err) {
       failLoad(get, set, controller, err)
@@ -201,6 +255,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       // IndexedDB unavailable — nothing to clear.
     }
     clearSheetLinks()
+    clearLastSource()
     set({
       status: 'idle',
       error: null,

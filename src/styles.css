@@ -26,6 +26,9 @@
   --mtorc1-full: #b9472d;
   --mtorc1-strong: #d9694d;
   --mtorc1-weak: #e4937d;
+  /* AI analysis accent — its own hue so it never reads as a macro color */
+  --ai: #7c3aed;
+  --ai-soft: rgba(124, 58, 237, 0.1);
   --macro-carbs-over: #28634a;
   --macro-fat-over: #9d7322;
   --macro-fiber-over: #394c5e;
@@ -54,6 +57,8 @@
     --mtorc1-full: #e07a5f;
     --mtorc1-strong: #b4614c;
     --mtorc1-weak: #94503f;
+    --ai: #a78bfa;
+    --ai-soft: rgba(167, 139, 250, 0.12);
   }
 }
 
@@ -67,6 +72,8 @@
   --mtorc1-full: #e07a5f;
   --mtorc1-strong: #b4614c;
   --mtorc1-weak: #94503f;
+  --ai: #a78bfa;
+  --ai-soft: rgba(167, 139, 250, 0.12);
 }
 
 * {
@@ -1321,12 +1328,23 @@ button {
 }
 
 /* A plain figure, no dial — a count of 0–4 doesn't need one. */
+.day-summary-side-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.day-summary-side-row:empty {
+  display: none;
+}
+
 .day-summary-mtorc1 {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
   cursor: default;
 }
 
@@ -2144,19 +2162,37 @@ button {
   font-weight: 700;
 }
 
+/* Two rows: the title shares the top row with the icon buttons, and the date/time spans the
+   full width underneath — so neither the title nor the date has to wrap around the icons. */
 .nutrition-label-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 6px;
 }
 
-/* Shrinks and wraps its own text (the date can get long) rather than pushing the warnings
-   below — those stay pinned top-right of the card regardless of subtitle length. */
+/* Its title and subtitle become grid items of the header (see above). */
 .nutrition-label-heading {
+  display: contents;
+}
+
+.nutrition-label-header .nutrition-label-title {
+  grid-row: 1;
+  grid-column: 1;
   min-width: 0;
-  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.nutrition-label-header .nutrition-label-subtitle {
+  grid-row: 2;
+  grid-column: 1 / -1;
+}
+
+.nutrition-label-header .nutrition-label-header-buttons {
+  grid-row: 1;
+  grid-column: 2;
 }
 
 .nutrition-label-hint {
@@ -2312,8 +2348,18 @@ button {
 .nutrition-label-header-buttons {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 0;
   flex-shrink: 0;
+}
+
+/* Compact hit areas in the narrow meal card (the icons themselves keep their size). */
+.nutrition-label-header-buttons .ai-button,
+.nutrition-label-header-buttons .mtorc1-button,
+.nutrition-label-header-buttons .warnings-button {
+  width: 24px;
+  height: 24px;
+  margin-left: 0;
+  padding: 0;
 }
 
 .mtorc1-button {
@@ -3804,4 +3850,649 @@ button {
   justify-content: flex-end;
   gap: 14px;
   margin-top: 12px;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   AI analysis (WebMCP) — see components/ai. Content is agent-provided plain text, so long words
+   and URLs must wrap rather than overflow. */
+
+.ai-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 24px;
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ai-button--has-feedback,
+.ai-button:hover,
+.ai-button--active {
+  color: var(--ai);
+}
+
+.ai-button:hover,
+.ai-button--active {
+  background: var(--ai-soft);
+}
+
+.ai-button:focus-visible {
+  outline: 2px solid var(--ai);
+  outline-offset: 2px;
+}
+
+.ai-button-dot {
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ai);
+  box-shadow: 0 0 0 1.5px var(--surface);
+}
+
+/* Title + AI icon side by side inside the existing card headers. */
+.ai-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ai-heading h2 {
+  margin-bottom: 0;
+}
+
+.ai-heading .ai-button {
+  margin-left: 0;
+}
+
+/* Timeline headers spaced off the h2's own margin, which .ai-heading zeroes. */
+.timeline-header .ai-heading {
+  margin-bottom: 14px;
+}
+
+.ai-card-panel {
+  margin: 0 0 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ai);
+  border-radius: 10px;
+  background: var(--ai-soft);
+}
+
+.ai-card-panel-header,
+.ai-view-header-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-card-panel-header {
+  justify-content: space-between;
+  padding: 6px 6px 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ai);
+}
+
+.ai-card-panel-header > span,
+.ai-view-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-view-header-title {
+  color: var(--ai);
+}
+
+/* The day panel's AI view. Inset so its edges stay clear of the swiper's prev/next arrows,
+   which float over the card's sides. */
+.day-summary-ai-view {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 36px;
+}
+
+.day-summary-ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ai-view {
+  /* Laid out by its own width, not the viewport's: compact in a 250px meal card, two columns +
+     stat tiles when a panel gives it room (see the @container block below). */
+  container: ai-view / inline-size;
+  padding: 10px 12px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  /* Agent text can hold long unbroken tokens (URLs, ids). break-word splits only a word that
+     can't fit a line on its own; "anywhere" also shrinks min-content, which let narrow columns
+     (the estimate labels) get squeezed into mid-word breaks. */
+  overflow-wrap: break-word;
+}
+
+/* Scrollable variants: section panels and the day view stay compact; the meal card's back face
+   is capped so the card keeps the height of its nutrition-facts front. */
+.ai-view--scroll {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.ai-view--card {
+  max-height: 460px;
+  overflow-y: auto;
+}
+
+.ai-view-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-view-main,
+.ai-view-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ai-view-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.ai-view-summary {
+  margin: 0;
+  max-width: 72ch;
+  white-space: pre-line;
+}
+
+.ai-view-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ai-view-recommendations,
+.ai-view-observations {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-view-recommendations {
+  gap: 10px;
+}
+
+.ai-view-observations {
+  gap: 4px;
+  max-width: 72ch;
+  padding-left: 16px;
+  list-style: disc;
+  color: var(--text-muted);
+}
+
+/* Priority chip on its own line, then the title and detail in normal full-width flow — a chip
+   beside the title would indent every wrapped line of it. */
+.ai-view-rec {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.ai-view-rec-title {
+  font-weight: 600;
+}
+
+.ai-view-rec-detail {
+  color: var(--text-muted);
+}
+
+.ai-view-priority {
+  margin-bottom: 2px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 17px;
+  text-transform: uppercase;
+  background: var(--ring-track);
+  color: var(--text-muted);
+}
+
+.ai-view-priority--high {
+  background: var(--ai);
+  color: #fff;
+}
+
+.ai-view-priority--medium {
+  background: var(--ai-soft);
+  color: var(--ai);
+}
+
+.ai-view-estimates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+/* Narrow: label | value on one line, the note on its own full-width line below. The label column
+   never gets narrower than its longest word, so labels wrap between words only. */
+.ai-view-estimate {
+  display: grid;
+  grid-template-columns: minmax(min-content, max-content) minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 1px;
+  align-items: baseline;
+}
+
+.ai-view-estimate dt,
+.ai-view-estimate dd {
+  margin: 0;
+}
+
+.ai-view-estimate-value {
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-view-estimate-note {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.ai-view-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Estimates table: wide views only (toggled on in the @container block below). The label and
+   value columns get priority: they shrink-to-fit their content (width: 1% + nowrap) and never
+   wrap, so only the note column wraps, taking whatever width is left. Scrolls sideways rather
+   than squashing if a label + value are ever wider than the panel. */
+.ai-view-estimates-table-wrap {
+  display: none;
+  overflow-x: auto;
+}
+
+.ai-view-estimates-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ai-view-estimates-table thead th {
+  padding: 0 16px 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ai-view-estimates-table tbody th,
+.ai-view-estimates-table td {
+  padding: 7px 16px 7px 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.ai-view-estimates-table tbody tr:last-child th,
+.ai-view-estimates-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ai-view-estimates-table tbody th,
+.ai-view-estimates-table-value {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.ai-view-estimates-table tbody th {
+  font-weight: 500;
+}
+
+.ai-view-estimates-table-value {
+  padding-right: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-view-estimates-table-note {
+  min-width: 160px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Copy (menu of formats) and remove, in each AI view's header beside its close button. */
+.ai-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ai-actions {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ai-actions-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.ai-actions-button:hover,
+.ai-actions-button[aria-expanded='true'] {
+  background: var(--ai-soft);
+  color: var(--ai);
+}
+
+.ai-actions-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 128px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.ai-actions-menu-item {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ai-actions-menu-item:hover,
+.ai-actions-menu-item:focus-visible {
+  background: var(--ai-soft);
+  color: var(--ai);
+  outline: none;
+}
+
+/* Wide: reading text and recommendations side by side, estimates as a three-column table. */
+@container ai-view (min-width: 620px) {
+  .ai-view-main,
+  .ai-view-recs,
+  .ai-view-estimates-section,
+  .ai-view-footer {
+    width: 100%;
+  }
+
+  /* (On the inner layout — a container query can't style the container element itself.) */
+  .ai-view-layout:has(.ai-view-recs) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas:
+      'main recs'
+      'est est'
+      'footer footer';
+    column-gap: 28px;
+    row-gap: 18px;
+    align-items: start;
+  }
+
+  .ai-view-main {
+    grid-area: main;
+  }
+
+  .ai-view-recs {
+    grid-area: recs;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--ai-soft);
+  }
+
+  .ai-view-estimates-section {
+    grid-area: est;
+  }
+
+  .ai-view-footer {
+    grid-area: footer;
+  }
+
+  .ai-view-title {
+    font-size: 16px;
+  }
+
+  .ai-view-summary {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .ai-view-recommendations {
+    gap: 0;
+  }
+
+  .ai-view-rec {
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .ai-view-rec:first-child {
+    padding-top: 2px;
+    border-top: none;
+  }
+
+  .ai-view-rec:last-child {
+    padding-bottom: 0;
+  }
+
+  /* The estimates switch from the stacked list to the table. */
+  .ai-view-estimates {
+    display: none;
+  }
+
+  .ai-view-estimates-table-wrap {
+    display: block;
+  }
+}
+
+.ai-view--empty {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.ai-view--empty p {
+  margin: 0;
+}
+
+.ai-view-empty-icon {
+  color: var(--ai);
+}
+
+.ai-view-prompt {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 4px 8px 10px;
+  border: 1px dashed var(--ai);
+  border-radius: 8px;
+  color: var(--text);
+  font-style: italic;
+  text-align: left;
+}
+
+.webmcp-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--ai-soft);
+  color: var(--ai);
+  cursor: pointer;
+}
+
+.webmcp-status:hover {
+  box-shadow: inset 0 0 0 1px var(--ai);
+}
+
+.webmcp-status:focus-visible {
+  outline: 2px solid var(--ai);
+  outline-offset: 2px;
+}
+
+.webmcp-status--error {
+  background: var(--warning-red-light);
+  color: var(--warning-red);
+}
+
+/* AI assistant explainer, opened from the top bar's WebMCP chip. */
+.ai-help-modal {
+  max-width: min(92vw, 500px);
+  max-height: 85vh;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ai-help-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ai);
+}
+
+.ai-help-modal h4 {
+  margin: 16px 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ai-help-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--ai-soft);
+  color: var(--ai);
+  font-weight: 600;
+}
+
+.ai-help-status svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ai-help-status--error {
+  background: var(--warning-red-light);
+  color: var(--warning-red);
+}
+
+.ai-help-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.ai-help-note,
+.ai-help-text {
+  margin: 0;
+}
+
+.ai-help-note {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ai-help-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-help-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 16px 0 0;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.ai-help-tools code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--ring-track);
+  color: var(--text);
+  font-size: 11px;
 }

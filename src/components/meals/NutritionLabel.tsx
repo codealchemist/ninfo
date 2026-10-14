@@ -13,12 +13,16 @@ import {
 import { copyElementAsImage, copyTextToClipboard } from '../../utils/clipboard'
 import FatSection from './FatSection'
 import Mtorc1Badge from './Mtorc1Badge'
+import AiButton from '../ai/AiButton'
+import { mealTarget } from '../../webmcp/targets'
 
 interface Props {
   meal: Meal
   mtorc1Window: FeedingWindow | null
   onShowWarnings: () => void
   onShowMtorc1: () => void
+  onShowAi: () => void
+  aiActive: boolean
 }
 
 const round = (n: number) => Math.round(n * 10) / 10
@@ -27,7 +31,7 @@ type CopyState = 'idle' | 'copied' | 'failed'
 
 /** Renders a meal's aggregate macros as a classic "Nutrition Facts" style label. */
 const NutritionLabel = forwardRef<HTMLDivElement, Props>(
-  function NutritionLabel({ meal, mtorc1Window, onShowWarnings, onShowMtorc1 }, ref) {
+  function NutritionLabel({ meal, mtorc1Window, onShowWarnings, onShowMtorc1, onShowAi, aiActive }, ref) {
     const { t } = useTranslation()
     const { totals, lipids } = meal
     const fatBreakdown = analyzeFat(lipids, totals.fat)
@@ -70,6 +74,7 @@ const NutritionLabel = forwardRef<HTMLDivElement, Props>(
               </div>
             </div>
             <div className='nutrition-label-header-buttons'>
+              <AiButton target={mealTarget(meal)} active={aiActive} onClick={onShowAi} />
               {mtorc1Window && mtorc1Window.status !== 'none' && (
                 <button
                   className='mtorc1-button'

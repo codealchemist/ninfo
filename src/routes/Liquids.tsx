@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAiCardPanel } from '../components/ai/useAiCardPanel'
 import { ChevronDown, LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { getSheetLink } from '../db/sheetLinkStorage'
@@ -78,6 +79,10 @@ function liquidShares(entries: LiquidEntry[]): Array<{ type: string; pct: number
 
 export default function Liquids() {
   const { t, i18n } = useTranslation()
+  // Each panel gets its own AI analysis (see components/ai/useAiCardPanel).
+  const aiSummary = useAiCardPanel('liquids:summary')
+  const aiTrends = useAiCardPanel('liquids:trends')
+  const aiHistory = useAiCardPanel('liquids:history')
   const sheetLinkId = useAppStore((s) => s.sheetLinkId)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -146,7 +151,10 @@ export default function Liquids() {
     <div className="page">
       <section className="card">
         <div className="bia-header">
-          <h2>{t('liquid.title')}</h2>
+          <div className="ai-heading">
+            <h2>{t('liquid.title')}</h2>
+            {aiSummary.button}
+          </div>
           <div className="bia-header-actions">
             <div className="range-buttons">
               {RANGES.map((r) => (
@@ -169,6 +177,7 @@ export default function Liquids() {
             </button>
           </div>
         </div>
+        {aiSummary.panel}
 
         {status === 'loading' && entries.length === 0 && (
           <p className="hint">
@@ -268,13 +277,17 @@ export default function Liquids() {
       {totals.length > 1 && (
         <section className="card">
           <div className="bia-header">
-            <h2>{t('bia.trends')}</h2>
+            <div className="ai-heading">
+              <h2>{t('bia.trends')}</h2>
+              {aiTrends.button}
+            </div>
             <CopyImageButton
               targetRef={trendsRef}
               ariaLabel={t('bia.copyTrendsImageAria')}
               title={t('bia.copyTrendsImageTitle')}
             />
           </div>
+          {aiTrends.panel}
           <TrendChart
             ref={trendsRef}
             points={totals.map((d) => ({ date: d.date, value: d.totalMl }))}
@@ -287,7 +300,13 @@ export default function Liquids() {
 
       {filteredEntries.length > 0 && (
         <section className="card">
-          <h2>{t('bia.history')}</h2>
+          <div className="bia-header">
+            <div className="ai-heading">
+              <h2>{t('bia.history')}</h2>
+              {aiHistory.button}
+            </div>
+          </div>
+          {aiHistory.panel}
           <LiquidHistoryList entries={rows} />
         </section>
       )}

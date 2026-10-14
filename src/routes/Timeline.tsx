@@ -20,6 +20,7 @@ import TimelineScrubber from '../components/charts/TimelineScrubber'
 import FoodSearchInput from '../components/charts/FoodSearchInput'
 import GoalProgressRing from '../components/summary/GoalProgressRing'
 import CopyImageButton from '../components/common/CopyImageButton'
+import { useAiCardPanel } from '../components/ai/useAiCardPanel'
 
 const RANGES = [7, 30, 90, 0] as const // 0 = all
 
@@ -57,6 +58,8 @@ function formatFastingMinutes(totalMinutes: number): string {
 
 export default function Timeline() {
   const { t } = useTranslation()
+  const aiChart = useAiCardPanel('timeline:chart')
+  const aiMedians = useAiCardPanel('timeline:medians')
   const meals = useAppStore((s) => s.meals)
   const goalsByDate = useAppStore((s) => s.goalsByDate)
   const foodCatalog = useAppStore((s) => s.foodCatalog)
@@ -283,7 +286,10 @@ export default function Timeline() {
   const content = (
     <>
       <div className="timeline-header">
-        <h2>{t('timeline.title')}</h2>
+        <div className="ai-heading">
+          <h2>{t('timeline.title')}</h2>
+          {aiChart.button}
+        </div>
         <div className="range-buttons">
           {RANGES.map((r) => (
             <button
@@ -309,6 +315,7 @@ export default function Timeline() {
           </button>
         </div>
       </div>
+      {aiChart.panel}
       <div className="timeline-search-row">
         <FoodSearchInput foods={foodNames} selectedFood={selectedFood} onSelect={setSelectedFood} />
       </div>
@@ -340,7 +347,10 @@ export default function Timeline() {
       {medians && (
         <section className="card">
           <div className="timeline-header">
-            <h2>{t('timeline.medianTitle')}</h2>
+            <div className="ai-heading">
+              <h2>{t('timeline.medianTitle')}</h2>
+              {aiMedians.button}
+            </div>
             <div className="range-buttons">
               <label className="skip-last-day-toggle" title={t('timeline.skipLastDayTitle')}>
                 <input type="checkbox" checked={skipLastDay} onChange={(e) => setSkipLastDay(e.target.checked)} />
@@ -372,6 +382,7 @@ export default function Timeline() {
               />
             </div>
           </div>
+          {aiMedians.panel}
           <div className="macro-view-tabs" role="tablist" aria-label={t('timeline.medianView.ariaLabel')}>
             {MACRO_VIEWS.map((view) => (
               <button

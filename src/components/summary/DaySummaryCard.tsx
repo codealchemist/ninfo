@@ -11,7 +11,9 @@ import {
   EyeOff,
   Image as ImageIcon,
   ListChecks,
-  TriangleAlert
+  Sparkles,
+  TriangleAlert,
+  X
 } from 'lucide-react'
 import {
   MACRO_KEYS,
@@ -42,6 +44,11 @@ import DaySummaryShareCard from './DaySummaryShareCard'
 import ToggleSwitch from '../common/ToggleSwitch'
 import WarningStampList from '../common/WarningStampList'
 import { useAppStore } from '../../store/appStore'
+import AiButton from '../ai/AiButton'
+import AiFeedbackView from '../ai/AiFeedbackView'
+import AiFeedbackActions from '../ai/AiFeedbackActions'
+import { suggestedAiPrompt } from '../ai/useAiCardPanel'
+import { dayTarget } from '../../webmcp/targets'
 
 function formatDateHeading(iso: string, locale: string): string {
   const d = new Date(iso + 'T00:00:00')
@@ -114,6 +121,8 @@ export default function DaySummaryCard({
     useState<ComparisonMode>('yesterday')
   const [activeTab, setActiveTab] = useState<MobileTab>('summary')
   const [showWarnings, setShowWarnings] = useState(false)
+  // The AI view replaces the day's content like the warnings view does; at most one is open.
+  const [showAi, setShowAi] = useState(false)
   const shareCardRef = useRef<HTMLDivElement>(null)
   const [foodListCopyState, setFoodListCopyState] = useState<CopyState>('idle')
   const [summaryTextCopyState, setSummaryTextCopyState] =
@@ -130,13 +139,15 @@ export default function DaySummaryCard({
   const mtorc1 = useMemo(() => analyzeMtorc1Day(meals, dayWeightKg), [meals, dayWeightKg])
 
   useEffect(() => {
-    if (!showWarnings) return
+    if (!showWarnings && !showAi) return
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowWarnings(false)
+      if (e.key !== 'Escape' || e.defaultPrevented) return
+      setShowWarnings(false)
+      setShowAi(false)
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [showWarnings])
+  }, [showWarnings, showAi])
 
   const comparisonTotals: Record<ComparisonMode, MacroTotals | null> = {
     yesterday: prevDayTotals,
@@ -287,7 +298,10 @@ export default function DaySummaryCard({
             )}
             <button
               className='icon-button icon-button--ghost warnings-button'
-              onClick={() => setShowWarnings(s => !s)}
+              onClick={() => {
+                setShowWarnings(s => !s)
+                setShowAi(false)
+              }}
               disabled={!hasWarnings}
               aria-label={t('today.warningsButtonAria')}
               title={t('today.warningsButtonAria')}
@@ -309,7 +323,32 @@ export default function DaySummaryCard({
           </div>
         )}
 
-        {!collapsed && !showWarnings && (
+        {!collapsed && showAi && (
+          <div className='day-summary-ai-view'>
+            <div className='day-summary-ai-header'>
+              <span className='ai-view-header-title'>
+                <Sparkles size={14} /> {t('ai.title')}
+              </span>
+              <div className='ai-header-actions'>
+                <AiFeedbackActions target={dayTarget(date)} />
+                <button
+                  className='icon-button icon-button--ghost'
+                  onClick={() => setShowAi(false)}
+                  aria-label={t('common.close')}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+            <AiFeedbackView
+              target={dayTarget(date)}
+              suggestedPrompt={suggestedAiPrompt(t, dayTarget(date))}
+              className='ai-view--scroll'
+            />
+          </div>
+        )}
+
+        {!collapsed && !showWarnings && !showAi && (
           <>
             <div className='day-summary-tabbar'>
               <button
@@ -407,18 +446,29 @@ export default function DaySummaryCard({
                   )}
                 </div>
                 <div className='day-summary-side'>
-                  {macroView === 'macros' && meals.length > 0 && (
-                    <div
-                      className='day-summary-mtorc1'
-                      title={t('today.mtorc1PulsesTitle', { target: MTORC1_THRESHOLDS.dailyPulseTarget })}
-                    >
-                      <Dumbbell size={20} strokeWidth={2.25} className='day-summary-mtorc1-icon' />
-                      <span className='day-summary-mtorc1-value'>{mtorc1.fullPulses}</span>
-                      <span className='day-summary-mtorc1-label'>
-                        {t('today.mtorc1Pulses', { count: mtorc1.fullPulses })}
-                      </span>
-                    </div>
-                  )}
+                  {/* mTORC1 count with the day's AI icon to its right. Either can be absent;
+                      the row collapses (:empty) when both are. */}
+                  <div className='day-summary-side-row'>
+                    {macroView === 'macros' && meals.length > 0 && (
+                      <div
+                        className='day-summary-mtorc1'
+                        title={t('today.mtorc1PulsesTitle', { target: MTORC1_THRESHOLDS.dailyPulseTarget })}
+                      >
+                        <Dumbbell size={20} strokeWidth={2.25} className='day-summary-mtorc1-icon' />
+                        <span className='day-summary-mtorc1-value'>{mtorc1.fullPulses}</span>
+                        <span className='day-summary-mtorc1-label'>
+                          {t('today.mtorc1Pulses', { count: mtorc1.fullPulses })}
+                        </span>
+                      </div>
+                    )}
+                    <AiButton
+                      target={dayTarget(date)}
+                      onClick={() => {
+                        setShowAi(true)
+                        setShowWarnings(false)
+                      }}
+                    />
+                  </div>
                   <p className='day-review-text'>{reviewText}</p>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAiCardPanel } from '../components/ai/useAiCardPanel'
 import { LoaderCircle, RefreshCw, TriangleAlert } from 'lucide-react'
 import { useAppStore } from '../store/appStore'
 import { getSheetLink } from '../db/sheetLinkStorage'
@@ -63,6 +64,10 @@ function entryAtOrBefore(sortedEntries: WeightEntry[], targetDate: string): Weig
 
 export default function Weight() {
   const { t, i18n } = useTranslation()
+  // Each panel gets its own AI analysis (see components/ai/useAiCardPanel).
+  const aiSummary = useAiCardPanel('weight:summary')
+  const aiTrends = useAiCardPanel('weight:trends')
+  const aiHistory = useAiCardPanel('weight:history')
   const sheetLinkId = useAppStore((s) => s.sheetLinkId)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -134,7 +139,10 @@ export default function Weight() {
     <div className="page">
       <section className="card">
         <div className="bia-header">
-          <h2>{t('weight.title')}</h2>
+          <div className="ai-heading">
+            <h2>{t('weight.title')}</h2>
+            {aiSummary.button}
+          </div>
           <div className="bia-header-actions">
             <div className="range-buttons">
               {RANGES.map((r) => (
@@ -152,6 +160,7 @@ export default function Weight() {
             </button>
           </div>
         </div>
+        {aiSummary.panel}
 
         {status === 'loading' && entries.length === 0 && (
           <p className="hint">
@@ -234,20 +243,30 @@ export default function Weight() {
       {filteredEntries.length > 1 && (
         <section className="card">
           <div className="bia-header">
-            <h2>{t('bia.trends')}</h2>
+            <div className="ai-heading">
+              <h2>{t('bia.trends')}</h2>
+              {aiTrends.button}
+            </div>
             <CopyImageButton
               targetRef={trendsRef}
               ariaLabel={t('bia.copyTrendsImageAria')}
               title={t('bia.copyTrendsImageTitle')}
             />
           </div>
+          {aiTrends.panel}
           <TrendChart ref={trendsRef} points={points} label={t('weight.metrics.weight')} unit="kg" color="#577590" />
         </section>
       )}
 
       {filteredEntries.length > 0 && (
         <section className="card">
-          <h2>{t('bia.history')}</h2>
+          <div className="bia-header">
+            <div className="ai-heading">
+              <h2>{t('bia.history')}</h2>
+              {aiHistory.button}
+            </div>
+          </div>
+          {aiHistory.panel}
           <WeightHistoryList entries={rows} />
         </section>
       )}

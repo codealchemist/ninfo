@@ -104,7 +104,7 @@ export function trailingDates(dates: string[], beforeDate: string, count: number
   return dates.slice(Math.max(0, idx - count), idx)
 }
 
-function median(values: number[]): number {
+export function median(values: number[]): number {
   if (values.length === 0) return 0
   const sorted = [...values].sort((a, b) => a - b)
   const mid = Math.floor(sorted.length / 2)

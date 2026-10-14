@@ -23,6 +23,7 @@ import { setLanguage, type SupportedLanguage } from '../../i18n'
 import MobileMenu from './MobileMenu'
 import ShareModal from '../common/ShareModal'
 import ToggleSwitch from '../common/ToggleSwitch'
+import WebMcpStatus from '../ai/WebMcpStatus'
 
 const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'EN' },
@@ -78,6 +79,7 @@ export default function TopBar() {
             <Salad size={20} />
             <span className="brand-name">Ninfo</span>
           </Link>
+          <WebMcpStatus />
         </div>
         <div className="top-bar-mobile-actions">
           <NavLink
@@ -142,6 +144,7 @@ export default function TopBar() {
           </Link>
           <span className="brand-version">v{__APP_VERSION__}</span>
           {meta && <span className={`mode-badge mode-badge--${meta.mode}`}>{modeLabels[meta.mode]}</span>}
+          <WebMcpStatus />
           <ToggleSwitch
             toggle={{
               options: LANGUAGE_OPTIONS,

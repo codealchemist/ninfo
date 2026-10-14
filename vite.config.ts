@@ -2,6 +2,12 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import pkg from './package.json'
 
+// Same as netlify.toml's: WebMCP needs an origin-isolated document (see src/webmcp).
+const WEBMCP_HEADERS = {
+  'Origin-Agent-Cluster': '?1',
+  'Permissions-Policy': 'tools=(self)',
+}
+
 export default defineConfig(({ command, mode }) => {
   // The developer's own USDA key from .env, for the dev server only — never baked into a build
   // (`npm run deploy` builds locally, so gating on the mode alone wouldn't be enough). The Food
@@ -17,10 +23,12 @@ export default defineConfig(({ command, mode }) => {
     server: {
       port: 7171,
       strictPort: true,
+      headers: WEBMCP_HEADERS,
     },
     preview: {
       port: 7171,
       strictPort: true,
+      headers: WEBMCP_HEADERS,
     },
   }
 })

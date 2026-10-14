@@ -193,6 +193,97 @@ export const es: typeof en = {
     lastMealTab: 'Última comida'
   },
 
+  ai: {
+    title: 'Análisis de IA',
+    open: 'Abrir análisis de IA',
+    openEmpty: 'Análisis de IA: pregúntale a tu asistente de IA',
+    empty: 'Todavía no hay un análisis de IA aquí. Pídeselo al asistente de IA conectado a este navegador, por ejemplo:',
+    copyPrompt: 'Copiar pedido',
+    recommendations: 'Recomendaciones',
+    estimates: 'Estimaciones de la IA',
+    observations: 'Observaciones',
+    receivedAt: 'De tu asistente de IA · {{date}}',
+    dismiss: 'Quitar este análisis',
+    copyAs: 'Copiar análisis',
+    copyFormatTitle: 'Copiar este análisis como {{format}}',
+    copyFormats: {
+      markdown: 'Markdown',
+      text: 'Texto',
+      json: 'JSON'
+    },
+    table: {
+      estimate: 'Estimación',
+      value: 'Valor',
+      note: 'Nota'
+    },
+    priority: {
+      high: 'Alta',
+      medium: 'Media',
+      low: 'Baja'
+    },
+    prompt: {
+      day: 'Usa las herramientas de Ninfo para analizar mi día {{date}} (micronutrientes, grasas y pulsos mTORC1) y publica tu resumen y recomendaciones con show_ai_analysis.',
+      meal: 'Usa la herramienta get_meal de Ninfo para analizar mi comida de las {{time}} del {{date}} (micronutrientes, grasas y mTORC1) y publica tus comentarios en su tarjeta con show_ai_analysis.',
+      panel: 'Usa las herramientas de Ninfo para analizar mi {{panel}} y publica tus recomendaciones en ese panel con show_ai_analysis.'
+    },
+    panels: {
+      timeline_chart: 'línea de tiempo de macros',
+      timeline_medians: 'mediana de macros',
+      bia_summary: 'último resultado de bioimpedancia',
+      bia_trends: 'tendencia de bioimpedancia',
+      bia_history: 'historial de bioimpedancia',
+      weight_summary: 'último peso',
+      weight_trends: 'tendencia de peso',
+      weight_history: 'historial de peso',
+      liquids_summary: 'consumo de líquidos',
+      liquids_trends: 'tendencia de consumo de líquidos',
+      liquids_history: 'historial de consumo de líquidos'
+    },
+    status: {
+      ready_one: 'Asistente de IA conectado (WebMCP): {{count}} herramienta disponible',
+      ready_other: 'Asistente de IA conectado (WebMCP): {{count}} herramientas disponibles',
+      error: 'No se pudieron registrar las herramientas WebMCP: {{error}}'
+    },
+    help: {
+      openHint: 'Haz clic para ver cómo usarlo',
+      title: 'Asistente de IA',
+      intro: 'Este navegador tiene un asistente de IA que puede trabajar directamente con Ninfo (mediante WebMCP): lee tus datos y muestra su análisis aquí mismo en la app.',
+      errorDetail: 'Tu navegador admite asistentes de IA, pero Ninfo no pudo conectarse: {{error}}. Recarga la página para volver a intentarlo.',
+      canTitle: 'Qué puede hacer tu asistente',
+      can: {
+        day: 'Leer cualquier día registrado completo: cada comida y alimento, macros frente a tus objetivos, calidad de las grasas, riesgo de pico de glucosa, ayuno y pulsos mTORC1.',
+        timeline: 'Leer tus tendencias de 7, 30, 90 días o de todo el registro, incluidas las medianas y un solo alimento.',
+        body: 'Leer tu historial de peso, bioimpedancia y consumo de líquidos.',
+        post: 'Mostrar su propio análisis en un día, una comida o cualquier panel: un resumen, recomendaciones y estimaciones que la app no calcula, como micronutrientes, grasas en detalle o una estimación de mTORC1 más precisa.'
+      },
+      needsSheet: 'El peso, la bioimpedancia y los líquidos solo están disponibles cuando tus datos vienen de una hoja de Google vinculada.',
+      whereTitle: 'Dónde aparece su análisis',
+      where: {
+        meal: 'Tarjetas de comida: el ícono ✨ del encabezado gira la tarjeta y muestra el análisis.',
+        day: 'Hoy: el ícono ✨ junto al conteo de mTORC1 abre el análisis del día.',
+        panels: 'Línea de tiempo, BIA, Peso y Líquidos: cada panel tiene su propio ícono ✨ junto al título.',
+        dot: 'Un punto en el ícono indica que hay un análisis nuevo. Los análisis se guardan en este navegador hasta que los quites.'
+      },
+      tryTitle: 'Prueba a pedirle',
+      examples: {
+        day: 'Usa la herramienta get_day de Ninfo para analizar mi último día y publica tu resumen y recomendaciones con show_ai_analysis.',
+        meal: 'Usa las herramientas de Ninfo para revisar cada comida de hoy, estimar micronutrientes y pulsos mTORC1, y publica comentarios en cada tarjeta con show_ai_analysis.',
+        timeline: 'Usa la herramienta get_timeline de Ninfo para revisar mis últimos 30 días y publica qué debería cambiar en el panel de mediana de macros con show_ai_analysis.',
+        body: 'Usa las herramientas de Ninfo para comparar mis tendencias de peso y bioimpedancia con mi consumo de proteína y publica tus conclusiones en esos paneles con show_ai_analysis.'
+      },
+      browsersTitle: 'Dónde funciona',
+      browsers: {
+        chatgpt: 'ChatGPT para escritorio y su navegador integrado: sin configuración.',
+        chrome: 'Chrome 149 o posterior con la opción de WebMCP activada (chrome://flags/#enable-webmcp-testing).',
+        edge: 'Edge 150 o posterior.',
+        others: 'Firefox y Safari todavía no lo admiten; Ninfo funciona igual, solo que sin el asistente.'
+      },
+      privacyTitle: 'Privacidad',
+      privacy: 'Lo que tu asistente lee de Ninfo se envía al proveedor de ese asistente, como cualquier otra cosa que compartas con él. Su análisis es texto simple, guardado solo en este navegador para cada fuente de datos; puedes quitar cualquiera desde su panel.',
+      toolsLabel: 'Herramientas disponibles para el asistente:'
+    }
+  },
+
   timeline: {
     title: 'Cronología de macronutrientes',
     hint: 'Haz clic en un día para ver sus detalles.',

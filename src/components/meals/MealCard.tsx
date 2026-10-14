@@ -5,6 +5,7 @@ import NutritionLabel from './NutritionLabel'
 import MealItemsTable from './MealItemsTable'
 import MealWarningsView from './MealWarningsView'
 import Mtorc1View from './Mtorc1View'
+import MealAiView from './MealAiView'
 
 interface Props {
   meal: Meal
@@ -23,7 +24,7 @@ export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggl
   const [cardHeight, setCardHeight] = useState(MIN_CARD_HEIGHT)
   // Which content the back face shows once flipped — the warnings button and mTORC1 badge flip
   // straight to their own view instead of the items table; flipping back to front resets it.
-  const [backView, setBackView] = useState<'items' | 'warnings' | 'mtorc1'>('items')
+  const [backView, setBackView] = useState<'items' | 'warnings' | 'mtorc1' | 'ai'>('items')
 
   // Both faces are laid out in normal flow (no fixed height, no internal scroll) so each is
   // exactly as tall as its own content needs — including content that can change size after
@@ -49,7 +50,7 @@ export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggl
     return () => observer.disconnect()
   }, [meal, backView])
 
-  const handleToggleBackView = (view: 'warnings' | 'mtorc1') => {
+  const handleToggleBackView = (view: 'warnings' | 'mtorc1' | 'ai') => {
     if (flipped && backView === view) {
       setBackView('items')
       onToggleFlip()
@@ -89,11 +90,15 @@ export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggl
             mtorc1Window={mtorc1Window}
             onShowWarnings={() => handleToggleBackView('warnings')}
             onShowMtorc1={() => handleToggleBackView('mtorc1')}
+            onShowAi={() => handleToggleBackView('ai')}
+            aiActive={flipped && backView === 'ai'}
           />
         </div>
         <div className="meal-card-face meal-card-face--back">
           {backView === 'warnings' ? (
             <MealWarningsView ref={backRef} meal={meal} onFlipBack={handleFlipBack} />
+          ) : backView === 'ai' ? (
+            <MealAiView ref={backRef} meal={meal} onFlipBack={handleFlipBack} />
           ) : backView === 'mtorc1' && mtorc1Window ? (
             <Mtorc1View ref={backRef} meal={meal} window={mtorc1Window} onFlipBack={handleFlipBack} />
           ) : (

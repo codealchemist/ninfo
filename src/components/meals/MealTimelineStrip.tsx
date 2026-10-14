@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, Timer } from 'lucide-react'
 import type { Meal } from '../../data/types'
 import type { FeedingWindow } from '../../data/mtorc1'
+import { useAppStore } from '../../store/appStore'
 import MealCard from './MealCard'
 
 interface Props {
@@ -25,6 +26,14 @@ export default function MealTimelineStrip({ meals, mtorc1ByMealKey }: Props) {
     setFocusedIndex(0)
     setFlippedKeys(new Set())
   }, [meals])
+
+  // Publish the centered card so an AI assistant can ask for "the current meal" (get_meal).
+  const setFocusedMealKey = useAppStore((s) => s.setFocusedMealKey)
+  const focusedKey = meals[focusedIndex]?.key ?? null
+  useEffect(() => {
+    setFocusedMealKey(focusedKey)
+  }, [focusedKey, setFocusedMealKey])
+  useEffect(() => () => setFocusedMealKey(null), [setFocusedMealKey])
 
   useEffect(() => {
     if (scrollSyncRef.current) {
