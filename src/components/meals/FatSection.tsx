@@ -57,24 +57,6 @@ export default function FatSection({ lipids, breakdown }: Props) {
             />
           </div>
         </div>
-
-        <div className="fat-dial-row">
-          <TwoValueDial
-            valueA={breakdown.omega6}
-            valueB={breakdown.omega3}
-            colorA="var(--fat-omega6)"
-            colorB="var(--fat-omega3)"
-            centerLabel={formatRatio(breakdown.omega6, breakdown.omega3)}
-            title={t('meals.fatSection.ratioTitleOmega', {
-              a: round(breakdown.omega6),
-              b: round(breakdown.omega3),
-            })}
-          />
-          <div className="fat-dial-legend">
-            <LegendItem colorVar="--fat-omega6" label={LIPID_LABELS.omega6} value={`${round(breakdown.omega6)}g`} />
-            <LegendItem colorVar="--fat-omega3" label={LIPID_LABELS.omega3} value={`${round(breakdown.omega3)}g`} />
-          </div>
-        </div>
       </div>
 
       <div className="fat-section-hint">

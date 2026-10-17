@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronLeft, Droplet } from 'lucide-react'
+import { Check, ChevronLeft, Copy, Droplet, Image as ImageIcon, ListChecks } from 'lucide-react'
 import { useAppStore } from '../../store/appStore'
-import { dailyTotals, groupIntoMeals } from '../../data/aggregate/dailyTotals'
+import { dailyTotals, groupIntoMeals, itemsForDate } from '../../data/aggregate/dailyTotals'
+import { formatDayFoodListAsText, formatFastingAsText } from '../../data/dayText'
+import { formatMealDateLabel, formatMealItemsAsText } from '../../data/mealText'
+import { copyElementAsImage, copyTextToClipboard } from '../../utils/clipboard'
 import { todayLocalIso } from '../../utils/localDate'
 import { MACRO_KEYS, MACRO_UNITS } from '../../data/types'
 import { getSheetLink } from '../../db/sheetLinkStorage'
@@ -17,6 +20,7 @@ import { getCachedLatestWater, setCachedLatestWater } from '../../db/latestWater
 import GoalProgressRing from './GoalProgressRing'
 
 type MacroSource = 'lastDay' | 'lastMeal'
+type CopyState = 'idle' | 'copied' | 'failed'
 
 const COLOR_VARS: Record<string, string> = {
   protein: '--macro-protein',
@@ -46,13 +50,14 @@ function formatDateLabel(iso: string, locale: string): string {
   return d.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
-function formatElapsed(ms: number): string {
+/** A duration, spelled with units ("17h 05m 09s") so it can't be misread as a time of day. */
+function formatElapsed(ms: number, withSeconds = true): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000))
   const h = Math.floor(totalSeconds / 3600)
   const m = Math.floor((totalSeconds % 3600) / 60)
   const s = totalSeconds % 60
   const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${h}:${pad(m)}:${pad(s)}`
+  return withSeconds ? `${h}h ${pad(m)}m ${pad(s)}s` : `${h}h ${pad(m)}m`
 }
 
 /** Shown on the Today page — a live "how long since your last meal" clock. Without today's data
@@ -194,14 +199,50 @@ export default function FastingTimer() {
   // the doc comment above for why there's nothing left to expand it into.
   const isOpen = !hasTodayData
   const title = hasTodayData ? t('fasting.title') : t('fasting.noEntriesTodayTitle')
-  const elapsed = lastMeal
-    ? formatElapsed(now.getTime() - new Date(`${lastMeal.date}T${lastMeal.time}`).getTime())
-    : null
+  const elapsedMs = lastMeal ? now.getTime() - new Date(`${lastMeal.date}T${lastMeal.time}`).getTime() : null
+  const elapsed = elapsedMs !== null ? formatElapsed(elapsedMs) : null
+
+  // Same copy-as-list/text/image trio the day summary card has, for the source the tabs show.
+  const cardRef = useRef<HTMLElement>(null)
+  const [foodListCopyState, setFoodListCopyState] = useState<CopyState>('idle')
+  const [textCopyState, setTextCopyState] = useState<CopyState>('idle')
+  const [imageCopyState, setImageCopyState] = useState<CopyState>('idle')
+  const flash = (setState: (s: CopyState) => void, ok: boolean) => {
+    setState(ok ? 'copied' : 'failed')
+    setTimeout(() => setState('idle'), 1500)
+  }
+  const lastMealTitle = lastMeal
+    ? t('fasting.lastMealTitle', { date: formatMealDateLabel(lastMeal.date), time: lastMeal.time })
+    : ''
+
+  const handleCopyFoodList = async () => {
+    if (!lastMeal) return
+    const text =
+      effectiveMacroSource === 'lastDay' && lastDayDate
+        ? formatDayFoodListAsText(groupIntoMeals(itemsForDate(meals, lastDayDate)), lastDayDate)
+        : formatMealItemsAsText(lastMeal.items, lastMealTitle)
+    flash(setFoodListCopyState, await copyTextToClipboard(text))
+  }
+
+  const handleCopyText = async () => {
+    if (!lastMeal || elapsedMs === null || !macroTotals) return
+    const macrosTitle =
+      effectiveMacroSource === 'lastDay' && lastDayDate
+        ? t('today.summaryTitle', { date: formatMealDateLabel(lastDayDate) })
+        : lastMealTitle
+    const text = formatFastingAsText(formatElapsed(elapsedMs, false), lastMeal, macrosTitle, macroTotals, macroGoals)
+    flash(setTextCopyState, await copyTextToClipboard(text))
+  }
+
+  const handleCopyImage = async () => {
+    if (!cardRef.current) return
+    flash(setImageCopyState, await copyElementAsImage(cardRef.current))
+  }
 
   const header = (
     <>
       <h2>{title}</h2>
-      {isOpen && lastMeal && <p className="hint">{t('fasting.sinceLastMeal')}</p>}
+      {isOpen && lastMeal && <p className="hint">{t('fasting.fastingFor')}</p>}
       {elapsed ? (
         <div className={'fasting-timer-clock' + (isOpen ? '' : ' fasting-timer-clock--compact')}>{elapsed}</div>
       ) : (
@@ -212,7 +253,35 @@ export default function FastingTimer() {
 
   return (
     <div className="fasting-timer-viewport">
-      <section className={'card fasting-timer-card' + (isOpen ? '' : ' fasting-timer-card--compact')}>
+      <section ref={cardRef} className={'card fasting-timer-card' + (isOpen ? '' : ' fasting-timer-card--compact')}>
+        {isOpen && lastMeal && (
+          <div className="fasting-timer-actions image-export-exclude">
+            <button
+              className="icon-button icon-button--ghost"
+              onClick={handleCopyFoodList}
+              aria-label={t('fasting.copyFoodListAria')}
+              title={t('fasting.copyFoodListTitle')}
+            >
+              {foodListCopyState === 'copied' ? <Check size={14} /> : <ListChecks size={14} />}
+            </button>
+            <button
+              className="icon-button icon-button--ghost"
+              onClick={handleCopyText}
+              aria-label={t('fasting.copySummaryTextAria')}
+              title={t('fasting.copySummaryTextTitle')}
+            >
+              {textCopyState === 'copied' ? <Check size={14} /> : <Copy size={14} />}
+            </button>
+            <button
+              className="icon-button icon-button--ghost"
+              onClick={handleCopyImage}
+              aria-label={t('fasting.copyImageAria')}
+              title={t('fasting.copyImageTitle')}
+            >
+              {imageCopyState === 'copied' ? <Check size={14} /> : <ImageIcon size={14} />}
+            </button>
+          </div>
+        )}
         {/* Desktop splits into time+liquids (left) / last day's macros (right) — see the
             max-width:640px override, which stacks it back to one column on mobile. The class
             only applies to the full (no-data-today) view; the compact strip has nothing to

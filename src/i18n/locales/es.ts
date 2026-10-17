@@ -153,10 +153,6 @@ export const es: typeof en = {
         stamp: 'Grasa saturada alta',
         body: 'La relación grasa insaturada:saturada de hoy es {{ratio}}, por debajo del objetivo de {{threshold}}:1. La grasa saturada ({{grams}}g) es el {{pct}}% de la grasa de hoy.'
       },
-      omegaImbalance: {
-        stamp: 'Desequilibrio Ω-6/3',
-        body: 'La proporción Ω-6:Ω-3 de hoy es {{ratio}}, por encima del {{threshold}}:1 citado comúnmente como límite saludable. Las dietas muy inclinadas hacia Ω-6 se asocian con más inflamación.'
-      },
       transFat: {
         stamp: 'Grasa trans',
         body: 'Hoy incluye {{grams}}g de grasa trans/"Tóx". Las guías consideran insegura cualquier cantidad de grasa trans.'
@@ -184,8 +180,16 @@ export const es: typeof en = {
   fasting: {
     title: 'Ayuno actual',
     noEntriesTodayTitle: 'Todavía no registraste nada hoy',
-    sinceLastMeal: 'Tiempo desde tu última comida',
-    lastMealLabel: '{{date}} a las {{time}}',
+    fastingFor: 'Llevas en ayuno',
+    lastMealLabel: 'Última comida: {{date}} a las {{time}}',
+    textHeading: 'En ayuno hace {{elapsed}} — última comida: {{date}} a las {{time}}',
+    lastMealTitle: 'Última comida — {{date}}, {{time}}',
+    copyFoodListAria: 'Copiar lista de alimentos',
+    copyFoodListTitle: 'Copiar la lista de alimentos (día anterior o última comida, según lo elegido) como texto',
+    copySummaryTextAria: 'Copiar resumen de ayuno como texto',
+    copySummaryTextTitle: 'Copiar el tiempo de ayuno y los macros como texto',
+    copyImageAria: 'Copiar resumen de ayuno como imagen',
+    copyImageTitle: 'Copiar este panel como imagen',
     noMealsYet: 'Aún no hay comidas registradas — en cuanto registres la primera, esto empezará a contar el tiempo desde entonces.',
     macrosSectionTitle: 'Macros',
     macroSourceAriaLabel: 'Cambiar la fuente de macros',
@@ -479,11 +483,6 @@ export const es: typeof en = {
         stamp: 'Grasa saturada alta',
         body: 'La relación grasa insaturada:saturada de esta comida es {{ratio}}, por debajo del objetivo de {{threshold}}:1. La grasa saturada ({{grams}}g) es el {{pct}}% de su grasa.'
       },
-      omegaImbalance: {
-        stamp: 'Desequilibrio Ω-6/3',
-        undefinedRatio: 'indefinida (sin Ω-3)',
-        body: 'La proporción es {{ratio}}, por encima de {{threshold}}:1, la cifra que suele citarse como límite saludable. Las dietas muy escoradas hacia Ω-6 se asocian con más inflamación.'
-      },
       transFat: {
         stamp: 'Grasa trans',
         body: 'Esta comida tiene {{grams}}g de grasas trans/"Tóx". Las recomendaciones consideran insegura cualquier cantidad de grasas trans.'
@@ -547,6 +546,8 @@ export const es: typeof en = {
       gaugeLabel: 'Leucina estimada',
       gaugePartial: 'parcial {{grams}} g',
       gaugeFull: 'completo {{grams}} g',
+      gaugeSincePulse: 'Desde el pulso de las {{time}}',
+      gaugeNewPulse: 'nuevo pulso {{hours}} h',
       checks: {
         proteinPerKg: '{{grams}} g de proteína: un pulso completo necesita {{needed}} g ({{perKg}} g/kg × {{kg}} kg)',
         proteinFallback: '{{grams}} g de proteína: un pulso completo necesita {{needed}} g (sin peso corporal registrado)',
@@ -557,14 +558,17 @@ export const es: typeof en = {
       sourcesTitle: 'Principales fuentes de leucina',
       sourceValue: '≈{{leucine}} g de leucina · {{protein}} g de proteína',
       meaningTitle: 'Qué significa',
-      footnote: 'Estimado a partir de la proteína y el origen de cada alimento, no medido.'
+      footnote: 'Estimado a partir de la proteína y el origen de cada alimento, no medido.',
+      copyTextAria: 'Copiar detalles de mTORC1 como texto',
+      copyTextTitle: 'Copiar todos los detalles de mTORC1 (por qué, qué significa, fuentes) como texto',
+      copyImageAria: 'Copiar resumen de mTORC1 como imagen',
+      copyImageTitle: 'Copiar el resumen de mTORC1 (nivel y por qué) como imagen'
     },
     fatSection: {
       saturated: 'Saturada',
       unsaturated: 'Insaturada',
       trans: 'Trans',
       ratioTitleUnsatSat: 'Insaturada {{a}}g / Saturada {{b}}g',
-      ratioTitleOmega: 'Ω-6 {{a}}g / Ω-3 {{b}}g',
       transHint: '{{grams}}g trans'
     }
   },

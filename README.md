@@ -7,8 +7,8 @@ Everything is parsed in your browser. Nothing is uploaded to a server.
 ## Features
 
 - **Today:** macro rings against your goals (also per kg of body weight or as % of calories), a comparison with yesterday or the week/month median, top food sources, and a short review of the day.
-- **Meal cards:** a "Nutrition Facts" label per meal, with saturated/unsaturated and Ω-6/Ω-3 dials, a sortable items table, and copy as text or image.
-- **Warnings:** high saturated fat, omega imbalance, trans fat and likely glucose spikes, per meal and per day.
+- **Meal cards:** a "Nutrition Facts" label per meal, with an unsaturated/saturated fat dial, a sortable items table, and copy as text or image.
+- **Warnings:** high saturated fat, trans fat and likely glucose spikes, per meal and per day.
 - **mTORC1 pulses:** flags meals that likely triggered a muscle protein synthesis pulse. Leucine is estimated from each food's protein and source, close meals are combined, and the 3 h refractory period is respected. Tap the dumbbell for the reasoning.
 - **Timeline:** a macro chart over 7/30/90 days or all time, filterable by food, plus a median panel (protein per kg, fasting time, water, mTORC1 pulses per day).
 - **Body tracking:** bioimpedance (BIA), weight and liquid-intake pages.

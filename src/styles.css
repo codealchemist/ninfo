@@ -36,8 +36,6 @@
 
   --fat-saturated: #c0392b;
   --fat-unsaturated: #3d9970;
-  --fat-omega6: #f2994a;
-  --fat-omega3: #2f80ed;
   --warning-amber: #e08e0b;
   --warning-red: #c0392b;
   --warning-red-light: #d9584a;
@@ -833,6 +831,19 @@ button {
   text-align: center;
   gap: 4px;
   padding: 36px 20px;
+}
+
+/* Copy buttons, pinned to the card's top-right corner (left out of the copied image). */
+.fasting-timer-card {
+  position: relative;
+}
+
+.fasting-timer-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 4px;
 }
 
 /* The collapsed strip shown once today already has logged data — title and clock only, sized
@@ -2397,7 +2408,31 @@ button {
   color: var(--mtorc1-color);
 }
 
-/* Back view: status tile + leucine gauge */
+/* Back view: status tile, gauges and sources (shared with the copy-as-image card) */
+
+/* Off-screen, fixed-width rendition of the view's basics, for "copy as image" (see Mtorc1View). */
+.mtorc1-view.mtorc1-share {
+  width: 440px;
+  white-space: nowrap;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mtorc1-share-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.mtorc1-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
 
 .mtorc1-view-hero {
   display: flex;
@@ -2444,6 +2479,48 @@ button {
   font-weight: 700;
 }
 
+/* The in-card view's hero is compact, and its spacing tighter, so the flipped card keeps about
+   the front's height; the copy-as-image card keeps the big version. */
+.mtorc1-view.mtorc1-view--screen {
+  gap: 8px;
+}
+
+.mtorc1-view--screen .mtorc1-view-hero {
+  gap: 10px;
+  margin: 0;
+}
+
+.mtorc1-view--screen .mtorc1-view-tile {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+}
+
+.mtorc1-view--screen .mtorc1-view-hero-text {
+  gap: 0;
+}
+
+.mtorc1-view--screen .mtorc1-view-hero-value {
+  font-size: 18px;
+}
+
+.mtorc1-view--screen .mtorc1-view-hero-level {
+  font-size: 12px;
+}
+
+.mtorc1-view--screen .mtorc1-disclosure-body {
+  gap: 6px;
+  padding-bottom: 10px;
+}
+
+.mtorc1-view--screen .mtorc1-gauge {
+  gap: 4px;
+}
+
+.mtorc1-view--screen .mtorc1-disclosure-header {
+  padding: 7px 0;
+}
+
 .mtorc1-tone--refractory .mtorc1-view-tile {
   background: var(--ring-track);
 }
@@ -2459,6 +2536,27 @@ button {
   height: 8px;
   border-radius: 4px;
   background: var(--ring-track);
+}
+
+.mtorc1-gauge-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mtorc1-gauge-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mtorc1-note {
+  margin: 0;
+}
+
+.mtorc1-note--muted {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-muted);
 }
 
 .mtorc1-gauge-fill {
@@ -2493,11 +2591,15 @@ button {
 
 /* The two ticks are only ~20% of the card apart — too close to center both labels under them,
    so each hangs off its tick on the side away from the other. */
-.mtorc1-gauge-label--partial {
+.mtorc1-gauge--failed .mtorc1-gauge-fill {
+  background: var(--warning-red);
+}
+
+.mtorc1-gauge-label--left {
   transform: translateX(calc(-100% + 4px));
 }
 
-.mtorc1-gauge-label--full {
+.mtorc1-gauge-label--right {
   transform: translateX(-4px);
 }
 
@@ -2550,47 +2652,24 @@ button {
   line-height: 1.45;
 }
 
-.mtorc1-checks,
 .mtorc1-sources {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.mtorc1-check {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  line-height: 1.35;
-}
-
-.mtorc1-check-icon {
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.mtorc1-check--pass .mtorc1-check-icon {
-  color: var(--fat-unsaturated);
-}
-
-.mtorc1-check--fail .mtorc1-check-icon {
-  color: var(--warning-red);
-}
-
-.mtorc1-check--info .mtorc1-check-icon {
-  color: var(--info-blue);
-}
-
 .mtorc1-sources li {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .mtorc1-source-food {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2598,6 +2677,8 @@ button {
 }
 
 .mtorc1-source-value {
+  flex-shrink: 0;
+  white-space: nowrap;
   font-size: 11.5px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;

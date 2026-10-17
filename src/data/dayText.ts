@@ -39,16 +39,33 @@ export function formatDaySummaryAsText(
   totals: MacroTotals,
   goals: MacroTotals | null
 ): string {
+  return [i18n.t('today.summaryTitle', { date: formatMealDateLabel(dateIso) }), '', ...macroLines(totals, goals)].join('\n')
+}
+
+/** One "Protein: 138g / 140g goal" line per macro. */
+function macroLines(totals: MacroTotals, goals: MacroTotals | null): string[] {
   const macros = i18n.t('common.macros', { returnObjects: true }) as Record<string, string>
-
-  const lines = [i18n.t('today.summaryTitle', { date: formatMealDateLabel(dateIso) }), '']
-
-  for (const key of MACRO_KEYS as readonly MacroKey[]) {
+  return (MACRO_KEYS as readonly MacroKey[]).map((key) => {
     const unit = key === 'calories' ? '' : MACRO_UNITS[key]
     const value = Math.round(totals[key])
     const goalSuffix = goals ? ` ${i18n.t('today.ofGoal', { goal: Math.round(goals[key]), unit })}` : ''
-    lines.push(`${macros[key]}: ${value}${unit}${goalSuffix}`)
-  }
+    return `${macros[key]}: ${value}${unit}${goalSuffix}`
+  })
+}
 
-  return lines.join('\n')
+/** The no-data-today fasting panel as plain text: how long since the last meal, then the macros
+ * of whichever source (last day or last meal) the panel is showing. */
+export function formatFastingAsText(
+  elapsed: string,
+  lastMeal: Meal,
+  macrosTitle: string,
+  totals: MacroTotals,
+  goals: MacroTotals | null
+): string {
+  return [
+    i18n.t('fasting.textHeading', { elapsed, date: formatMealDateLabel(lastMeal.date), time: lastMeal.time }),
+    '',
+    macrosTitle,
+    ...macroLines(totals, goals),
+  ].join('\n')
 }

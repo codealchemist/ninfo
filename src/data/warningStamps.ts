@@ -24,11 +24,6 @@ export function buildWarningStamps(
   t: Translate,
   namespace: 'meals' | 'today'
 ): WarningStamp[] {
-  const omegaRatio =
-    fat.omega6to3Ratio === Infinity || fat.omega6to3Ratio === null
-      ? t('meals.warnings.omegaImbalance.undefinedRatio')
-      : `${round(fat.omega6to3Ratio)}:1`
-
   const stamps: WarningStamp[] = []
 
   if (fat.warnings.saturatedHigh) {
@@ -40,17 +35,6 @@ export function buildWarningStamps(
         grams: round(fat.saturated),
         pct: Math.round(fat.saturatedShareOfFat * 100),
         threshold: FAT_WARNING_THRESHOLDS.minUnsatToSatRatio,
-      }),
-    })
-  }
-
-  if (fat.warnings.omegaImbalance) {
-    stamps.push({
-      key: 'omegaImbalance',
-      stamp: t(`${namespace}.warnings.omegaImbalance.stamp`),
-      description: t(`${namespace}.warnings.omegaImbalance.body`, {
-        ratio: omegaRatio,
-        threshold: FAT_WARNING_THRESHOLDS.omega6to3Ratio,
       }),
     })
   }

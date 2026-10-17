@@ -1,8 +1,16 @@
-import { forwardRef, useState } from 'react'
+import { forwardRef, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, ChevronDown, Info, X } from 'lucide-react'
+import { Check, ChevronDown, Copy, Image as ImageIcon, X } from 'lucide-react'
 import type { Meal } from '../../data/types'
-import { MTORC1_THRESHOLDS, estimateLeucine, type FeedingWindow } from '../../data/mtorc1'
+import { MTORC1_THRESHOLDS, type FeedingWindow } from '../../data/mtorc1'
+import {
+  formatDuration,
+  formatMtorc1AsText,
+  mtorc1ExportTitle,
+  mtorc1TopSources,
+  roundTenth as round,
+} from '../../data/mtorc1Text'
+import { copyElementAsImage, copyTextToClipboard } from '../../utils/clipboard'
 import Mtorc1Badge, { mtorc1Tone } from './Mtorc1Badge'
 
 // The leucine gauge's full scale — far enough past the full trigger that both threshold ticks
@@ -15,18 +23,65 @@ interface Props {
   onFlipBack: () => void
 }
 
-const round = (n: number) => Math.round(n * 10) / 10
+const pct = (value: number, max: number) => `${Math.min(value / max, 1) * 100}%`
 
-type Section = 'why' | 'meaning' | 'sources'
+interface GaugeTick {
+  at: number
+  label: string
+  /** Which side of the tick its label hangs off — away from a neighboring tick's label. */
+  hang: 'left' | 'right'
+}
 
-/** A collapsible row: the header toggles it; the parent keeps at most one open at a time. */
+/** A bar filled to `value` of `max`, with threshold ticks — used for leucine, protein and time
+ * since the previous pulse. */
+function Gauge({
+  label,
+  valueLabel,
+  value,
+  max,
+  ticks,
+  failed = false,
+}: {
+  label: string
+  valueLabel: string
+  value: number
+  max: number
+  ticks: GaugeTick[]
+  failed?: boolean
+}) {
+  return (
+    <div className={'mtorc1-gauge' + (failed ? ' mtorc1-gauge--failed' : '')}>
+      <div className="mtorc1-gauge-heading">
+        <span>{label}</span>
+        <span className="mtorc1-gauge-value">{valueLabel}</span>
+      </div>
+      <div className="mtorc1-gauge-track">
+        <div className="mtorc1-gauge-fill" style={{ width: pct(value, max) }} />
+        {ticks.map((tick, i) => (
+          <span key={i} className="mtorc1-gauge-tick" style={{ left: pct(tick.at, max) }} />
+        ))}
+      </div>
+      <div className="mtorc1-gauge-labels">
+        {ticks.map((tick, i) => (
+          <span key={i} className={`mtorc1-gauge-label--${tick.hang}`} style={{ left: pct(tick.at, max) }}>
+            {tick.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+type Section = 'why' | 'sources' | 'meaning'
+
+/** A collapsible row; the parent keeps at most one open, so the back face never outgrows the card. */
 function Disclosure({
   title,
   open,
   onToggle,
   children,
 }: {
-  title: React.ReactNode
+  title: string
   open: boolean
   onToggle: () => void
   children: React.ReactNode
@@ -41,7 +96,7 @@ function Disclosure({
         }}
         aria-expanded={open}
       >
-        <span>{title}</span>
+        <strong>{title}</strong>
         <ChevronDown size={14} className={open ? 'chevron chevron--open' : 'chevron'} />
       </button>
       {open && <div className="mtorc1-disclosure-body">{children}</div>}
@@ -49,56 +104,148 @@ function Disclosure({
   )
 }
 
-function formatDuration(minutes: number): string {
-  const h = Math.floor(minutes / 60)
-  const m = minutes % 60
-  return h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`
+// The pieces below are shared by the card's back face and its copy-as-image rendition, so the
+// two always match; each arranges them its own way (accordion on screen, all open in the image).
+
+/** Tile, estimated leucine and level. `compact` is the in-card size (see .mtorc1-view--screen). */
+function Hero({ window, compact = false }: { window: FeedingWindow; compact?: boolean }) {
+  const { t } = useTranslation()
+  return (
+    <div className="mtorc1-view-hero">
+      <span className="mtorc1-view-tile" title={t(`meals.mtorc1.status.${window.status}`)}>
+        <Mtorc1Badge window={window} size={compact ? 22 : 40} />
+      </span>
+      <div className="mtorc1-view-hero-text">
+        <span className="mtorc1-view-hero-value">
+          ≈{round(window.leucine)} g <span className="mtorc1-view-hero-unit">{t('meals.mtorc1.leucineUnit')}</span>
+        </span>
+        <span className="mtorc1-view-hero-level">{t(`meals.mtorc1.level.${mtorc1Tone(window)}`)}</span>
+      </div>
+    </div>
+  )
 }
 
-type CheckState = 'pass' | 'fail' | 'info'
-
-const CHECK_ICONS = { pass: Check, fail: X, info: Info }
-
-function CheckRow({ state, children }: { state: CheckState; children: React.ReactNode }) {
-  const Icon = CHECK_ICONS[state]
+/** "Why" as gauges: leucine, protein and time since the previous pulse. `withMergedNote` adds
+ * the merged-meals note, on screen only since it wraps. */
+function WhyGauges({ meal, window, withMergedNote = false }: { meal: Meal; window: FeedingWindow; withMergedNote?: boolean }) {
+  const { t } = useTranslation()
+  const th = MTORC1_THRESHOLDS
+  const minutes = window.minutesSincePreviousPulse
+  const otherMeals = window.meals.filter((m) => m.key !== meal.key)
   return (
-    <li className={`mtorc1-check mtorc1-check--${state}`}>
-      <Icon size={14} className="mtorc1-check-icon" />
-      <span>{children}</span>
-    </li>
+    <>
+      <Gauge
+        label={t('meals.mtorc1.gaugeLabel')}
+        valueLabel={`≈${round(window.leucine)} g`}
+        value={window.leucine}
+        max={GAUGE_MAX_LEUCINE}
+        ticks={[
+          { at: th.partialLeucineGrams, label: t('meals.mtorc1.gaugePartial', { grams: th.partialLeucineGrams }), hang: 'left' },
+          { at: th.fullLeucineGrams, label: t('meals.mtorc1.gaugeFull', { grams: th.fullLeucineGrams }), hang: 'right' },
+        ]}
+      />
+      <Gauge
+        label={t('common.macros.protein')}
+        valueLabel={`${Math.round(window.protein)} g`}
+        value={window.protein}
+        max={window.proteinThreshold * 2}
+        ticks={[
+          { at: window.proteinThreshold, label: t('meals.mtorc1.gaugeFull', { grams: Math.round(window.proteinThreshold) }), hang: 'right' },
+        ]}
+        failed={window.protein < window.proteinThreshold}
+      />
+      {window.previousPulseStart === null || minutes === null ? (
+        <p className="mtorc1-note">{t('meals.mtorc1.checks.firstOfDay')}</p>
+      ) : (
+        <Gauge
+          label={t('meals.mtorc1.gaugeSincePulse', { time: window.previousPulseStart })}
+          valueLabel={formatDuration(minutes)}
+          value={minutes}
+          max={th.refractoryMinutes * 2}
+          ticks={[{ at: th.refractoryMinutes, label: t('meals.mtorc1.gaugeNewPulse', { hours: th.refractoryMinutes / 60 }), hang: 'right' }]}
+          failed={minutes < th.refractoryMinutes}
+        />
+      )}
+      {withMergedNote && otherMeals.length > 0 && (
+        <p className="mtorc1-note mtorc1-note--muted">
+          {t('meals.mtorc1.checks.merged', {
+            times: otherMeals.map((m) => m.time).join(', '),
+            minutes: th.mergeWindowMinutes,
+          })}
+        </p>
+      )}
+    </>
+  )
+}
+
+function SourcesList({ window }: { window: FeedingWindow }) {
+  const { t } = useTranslation()
+  return (
+    <ul className="mtorc1-sources">
+      {mtorc1TopSources(window).map((s, i) => (
+        <li key={i}>
+          <span className="mtorc1-source-food" title={s.food}>
+            {s.food}
+          </span>
+          <span className="mtorc1-source-value">
+            {t('meals.mtorc1.sourceValue', { leucine: round(s.leucine), protein: Math.round(s.protein) })}
+          </span>
+        </li>
+      ))}
+    </ul>
   )
 }
 
 /** The meal card's back face when flipped via the mTORC1 badge: why we think it fired, and what that means. */
 const Mtorc1View = forwardRef<HTMLDivElement, Props>(function Mtorc1View({ meal, window, onFlipBack }, ref) {
   const { t } = useTranslation()
-  const th = MTORC1_THRESHOLDS
-  // Only the big icon is always on; "Why", the status explanation and the sources open one at
-  // a time (starting on "Why"), so the back face stays about the size of the front instead of
-  // growing to show everything at once.
+  const tone = mtorc1Tone(window)
+  const hasSources = mtorc1TopSources(window).length > 0
+  // Accordion: opening a section closes the others, starting on "Why".
   const [openSection, setOpenSection] = useState<Section | null>('why')
   const toggleSection = (section: Section) => setOpenSection((open) => (open === section ? null : section))
 
-  const gaugePct = (grams: number) => `${Math.min(grams / GAUGE_MAX_LEUCINE, 1) * 100}%`
-  const proteinState: CheckState = window.protein >= window.proteinThreshold ? 'pass' : 'fail'
-  const timingState: CheckState =
-    window.minutesSincePreviousPulse === null || window.minutesSincePreviousPulse >= th.refractoryMinutes
-      ? 'pass'
-      : 'fail'
-
-  const otherMeals = window.meals.filter((m) => m.key !== meal.key)
-  const topSources = window.meals
-    .flatMap((m) => m.items)
-    .map((item) => ({ food: item.food, protein: item.protein, leucine: estimateLeucine(item) }))
-    .filter((s) => s.leucine >= 0.05)
-    .sort((a, b) => b.leucine - a.leucine)
-    .slice(0, 3)
+  // Text carries everything (including "What it means"); the image is the body as shown,
+  // rendered off-screen at a fixed width so it doesn't depend on the card's size.
+  const imageRef = useRef<HTMLDivElement>(null)
+  const [textCopied, setTextCopied] = useState(false)
+  const [imageCopied, setImageCopied] = useState(false)
+  const flash = (setCopied: (v: boolean) => void, ok: boolean) => {
+    if (!ok) return
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+  const handleCopyText = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    flash(setTextCopied, await copyTextToClipboard(formatMtorc1AsText(meal, window, tone)))
+  }
+  const handleCopyImage = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!imageRef.current) return
+    flash(setImageCopied, await copyElementAsImage(imageRef.current))
+  }
 
   return (
     <div className="meal-items-table-wrap" ref={ref}>
       <div className="meal-items-table-header">
         <span>{t('meals.mtorc1.title')}</span>
         <div className="meal-items-table-actions">
+          <button
+            className="icon-button icon-button--ghost"
+            onClick={handleCopyText}
+            aria-label={t('meals.mtorc1.copyTextAria')}
+            title={t('meals.mtorc1.copyTextTitle')}
+          >
+            {textCopied ? <Check size={14} /> : <Copy size={14} />}
+          </button>
+          <button
+            className="icon-button icon-button--ghost"
+            onClick={handleCopyImage}
+            aria-label={t('meals.mtorc1.copyImageAria')}
+            title={t('meals.mtorc1.copyImageTitle')}
+          >
+            {imageCopied ? <Check size={14} /> : <ImageIcon size={14} />}
+          </button>
           <button
             className="icon-button icon-button--ghost"
             onClick={(e) => {
@@ -112,101 +259,45 @@ const Mtorc1View = forwardRef<HTMLDivElement, Props>(function Mtorc1View({ meal,
         </div>
       </div>
 
-      <div className={`mtorc1-view mtorc1-tone--${mtorc1Tone(window)}`}>
-        <div className="mtorc1-view-hero">
-          <span className="mtorc1-view-tile" title={t(`meals.mtorc1.status.${window.status}`)}>
-            <Mtorc1Badge window={window} size={40} />
-          </span>
-          <div className="mtorc1-view-hero-text">
-            <span className="mtorc1-view-hero-value">
-              ≈{round(window.leucine)} g <span className="mtorc1-view-hero-unit">{t('meals.mtorc1.leucineUnit')}</span>
-            </span>
-            <span className="mtorc1-view-hero-level">{t(`meals.mtorc1.level.${mtorc1Tone(window)}`)}</span>
-          </div>
-        </div>
-
-        <Disclosure
-          title={<strong>{t('meals.mtorc1.whyTitle')}</strong>}
-          open={openSection === 'why'}
-          onToggle={() => toggleSection('why')}
-        >
-          <div className="mtorc1-gauge">
-            <span>{t('meals.mtorc1.gaugeLabel')}</span>
-            <div className="mtorc1-gauge-track">
-              <div className="mtorc1-gauge-fill" style={{ width: gaugePct(window.leucine) }} />
-              <span className="mtorc1-gauge-tick" style={{ left: gaugePct(th.partialLeucineGrams) }} />
-              <span className="mtorc1-gauge-tick" style={{ left: gaugePct(th.fullLeucineGrams) }} />
-            </div>
-            <div className="mtorc1-gauge-labels">
-              <span className="mtorc1-gauge-label--partial" style={{ left: gaugePct(th.partialLeucineGrams) }}>
-                {t('meals.mtorc1.gaugePartial', { grams: th.partialLeucineGrams })}
-              </span>
-              <span className="mtorc1-gauge-label--full" style={{ left: gaugePct(th.fullLeucineGrams) }}>
-                {t('meals.mtorc1.gaugeFull', { grams: th.fullLeucineGrams })}
-              </span>
-            </div>
-          </div>
-          <ul className="mtorc1-checks">
-            <CheckRow state={proteinState}>
-              {window.weightKg
-                ? t('meals.mtorc1.checks.proteinPerKg', {
-                    grams: Math.round(window.protein),
-                    needed: Math.round(window.proteinThreshold),
-                    perKg: th.proteinPerKg,
-                    kg: round(window.weightKg),
-                  })
-                : t('meals.mtorc1.checks.proteinFallback', {
-                    grams: Math.round(window.protein),
-                    needed: th.fallbackProteinGrams,
-                  })}
-            </CheckRow>
-            <CheckRow state={timingState}>
-              {window.previousPulseStart === null || window.minutesSincePreviousPulse === null
-                ? t('meals.mtorc1.checks.firstOfDay')
-                : t('meals.mtorc1.checks.sincePrevious', {
-                    duration: formatDuration(window.minutesSincePreviousPulse),
-                    time: window.previousPulseStart,
-                    hours: th.refractoryMinutes / 60,
-                  })}
-            </CheckRow>
-            {otherMeals.length > 0 && (
-              <CheckRow state="info">
-                {t('meals.mtorc1.checks.merged', {
-                  times: otherMeals.map((m) => m.time).join(', '),
-                  minutes: th.mergeWindowMinutes,
-                })}
-              </CheckRow>
-            )}
-          </ul>
+      <div className={`mtorc1-view mtorc1-view--screen mtorc1-tone--${tone}`}>
+        <Hero window={window} compact />
+        <Disclosure title={t('meals.mtorc1.whyTitle')} open={openSection === 'why'} onToggle={() => toggleSection('why')}>
+          <WhyGauges meal={meal} window={window} withMergedNote />
         </Disclosure>
-
+        {hasSources && (
+          <Disclosure
+            title={t('meals.mtorc1.sourcesTitle')}
+            open={openSection === 'sources'}
+            onToggle={() => toggleSection('sources')}
+          >
+            <SourcesList window={window} />
+          </Disclosure>
+        )}
         <Disclosure
-          title={<strong>{t('meals.mtorc1.meaningTitle')}</strong>}
+          title={t('meals.mtorc1.meaningTitle')}
           open={openSection === 'meaning'}
           onToggle={() => toggleSection('meaning')}
         >
           <p className="mtorc1-view-meaning">{t(`meals.mtorc1.meaning.${window.status}`)}</p>
           <p className="mtorc1-view-footnote">{t('meals.mtorc1.footnote')}</p>
         </Disclosure>
+      </div>
 
-        {topSources.length > 0 && (
-          <Disclosure
-            title={<strong>{t('meals.mtorc1.sourcesTitle')}</strong>}
-            open={openSection === 'sources'}
-            onToggle={() => toggleSection('sources')}
-          >
-            <ul className="mtorc1-sources">
-              {topSources.map((s, i) => (
-                <li key={i}>
-                  <span className="mtorc1-source-food">{s.food}</span>
-                  <span className="mtorc1-source-value">
-                    {t('meals.mtorc1.sourceValue', { leucine: round(s.leucine), protein: Math.round(s.protein) })}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Disclosure>
-        )}
+      <div className="day-summary-share-offscreen" aria-hidden="true">
+        <div ref={imageRef} className={`card mtorc1-view mtorc1-share mtorc1-tone--${tone}`}>
+          <div className="mtorc1-share-title">{mtorc1ExportTitle(meal)}</div>
+          <Hero window={window} />
+          <div className="mtorc1-section">
+            <strong>{t('meals.mtorc1.whyTitle')}</strong>
+            <WhyGauges meal={meal} window={window} />
+          </div>
+          {hasSources && (
+            <div className="mtorc1-section">
+              <strong>{t('meals.mtorc1.sourcesTitle')}</strong>
+              <SourcesList window={window} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

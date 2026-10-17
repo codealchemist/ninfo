@@ -147,10 +147,6 @@ export const en = {
         stamp: 'High saturated fat',
         body: "Today's unsaturated:saturated fat ratio is {{ratio}}, below the {{threshold}}:1 target. Saturated fat ({{grams}}g) is {{pct}}% of today's fat."
       },
-      omegaImbalance: {
-        stamp: 'Omega-6/3 imbalance',
-        body: "Today's Ω-6:Ω-3 ratio is {{ratio}}, above the {{threshold}}:1 commonly cited as a healthy upper bound. Diets skewed heavily toward Ω-6 are linked to more inflammation."
-      },
       transFat: {
         stamp: 'Trans fat',
         body: 'Today includes {{grams}}g of trans/"Tóx" fat. Guidance treats any amount of trans fat as unsafe.'
@@ -178,8 +174,16 @@ export const en = {
   fasting: {
     title: 'Currently fasting',
     noEntriesTodayTitle: "You haven't logged anything today yet",
-    sinceLastMeal: 'Time since your last meal',
-    lastMealLabel: '{{date}} at {{time}}',
+    fastingFor: 'Fasting for',
+    lastMealLabel: 'Last meal: {{date}} at {{time}}',
+    textHeading: 'Fasting for {{elapsed}} — last meal: {{date}} at {{time}}',
+    lastMealTitle: 'Last meal — {{date}}, {{time}}',
+    copyFoodListAria: 'Copy food list',
+    copyFoodListTitle: 'Copy the food list (last day or last meal, as selected) as text',
+    copySummaryTextAria: 'Copy fasting summary as text',
+    copySummaryTextTitle: 'Copy the fasting time and macros as text',
+    copyImageAria: 'Copy fasting summary as image',
+    copyImageTitle: 'Copy this panel as an image',
     noMealsYet: 'No meals logged yet — once you log your first one, this will track the time since.',
     macrosSectionTitle: 'Macros',
     macroSourceAriaLabel: 'Switch macros source',
@@ -471,11 +475,6 @@ export const en = {
         stamp: 'High saturated fat',
         body: "This meal's unsaturated:saturated fat ratio is {{ratio}}, below the {{threshold}}:1 target. Saturated fat ({{grams}}g) is {{pct}}% of its fat."
       },
-      omegaImbalance: {
-        stamp: 'Omega-6/3 imbalance',
-        undefinedRatio: 'undefined (no Ω-3)',
-        body: 'Ratio is {{ratio}}, above the {{threshold}}:1 commonly cited as a healthy upper bound. Diets skewed heavily toward Ω-6 are linked to more inflammation.'
-      },
       transFat: {
         stamp: 'Trans fat',
         body: 'This meal has {{grams}}g of trans/"Tóx" fat. Guidance treats any amount of trans fat as unsafe.'
@@ -537,6 +536,8 @@ export const en = {
       gaugeLabel: 'Estimated leucine',
       gaugePartial: 'partial {{grams}} g',
       gaugeFull: 'full {{grams}} g',
+      gaugeSincePulse: 'Since the {{time}} pulse',
+      gaugeNewPulse: 'new pulse {{hours}} h',
       checks: {
         proteinPerKg: '{{grams}} g protein: a full pulse needs {{needed}} g ({{perKg}} g/kg × {{kg}} kg)',
         proteinFallback: '{{grams}} g protein: a full pulse needs {{needed}} g (no body weight on record)',
@@ -547,14 +548,17 @@ export const en = {
       sourcesTitle: 'Main leucine sources',
       sourceValue: '≈{{leucine}} g leucine · {{protein}} g protein',
       meaningTitle: 'What it means',
-      footnote: "Estimated from each food's protein and source, not measured."
+      footnote: "Estimated from each food's protein and source, not measured.",
+      copyTextAria: 'Copy mTORC1 details as text',
+      copyTextTitle: 'Copy all mTORC1 details (why, meaning, sources) as text',
+      copyImageAria: 'Copy mTORC1 summary as image',
+      copyImageTitle: 'Copy the mTORC1 summary (level and why) as an image'
     },
     fatSection: {
       saturated: 'Saturated',
       unsaturated: 'Unsaturated',
       trans: 'Trans',
       ratioTitleUnsatSat: 'Unsaturated {{a}}g / Saturated {{b}}g',
-      ratioTitleOmega: 'Ω-6 {{a}}g / Ω-3 {{b}}g',
       transHint: '{{grams}}g trans'
     }
   },
