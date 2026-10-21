@@ -2206,6 +2206,26 @@ button {
   grid-column: 2;
 }
 
+/* Meal card action buttons (footer and back-face header): muted and faded until the card is
+   hovered, then the one under the pointer lights up — same as the food tracker's mini cards. */
+.meal-card-flip .nutrition-label-actions .icon-button--ghost,
+.meal-card-flip .meal-items-table-actions .icon-button--ghost {
+  color: var(--text-muted);
+  opacity: 0.55;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.meal-card-flip:hover .nutrition-label-actions .icon-button--ghost,
+.meal-card-flip:hover .meal-items-table-actions .icon-button--ghost {
+  opacity: 1;
+}
+
+.meal-card-flip .nutrition-label-actions .icon-button--ghost:hover,
+.meal-card-flip .meal-items-table-actions .icon-button--ghost:hover,
+.meal-card-flip .icon-button--ghost:focus-visible {
+  color: var(--text);
+}
+
 .nutrition-label-hint {
   margin-left: auto;
   font-size: 10.5px;
@@ -4576,4 +4596,399 @@ button {
   background: var(--ring-track);
   color: var(--text);
   font-size: 11px;
+}
+
+/* Food tracker (Today page): collapsible panel with one mini card per tracked food. */
+.food-tracker-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.food-tracker-copy {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.food-tracker-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.food-tracker-toggle h2 {
+  margin: 0;
+}
+
+.food-tracker-count {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: var(--ring-track);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.food-tracker-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.food-tracker-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.food-tracker-controls .food-search {
+  flex: 1 1 240px;
+}
+
+.food-tracker-body .macro-view-tabs {
+  margin-top: 0;
+}
+
+.food-tracker-body .hint {
+  margin: 0;
+}
+
+.food-tracker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.food-mini-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  /* Opaque, so a copied card image doesn't come out see-through. */
+  background: color-mix(in srgb, var(--ring-track) 35%, var(--surface));
+}
+
+.food-mini-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.food-mini-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: auto 0 -6px -3px;
+}
+
+.food-mini-card-hint {
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.food-mini-card-footer .food-search-clear {
+  opacity: 0.55;
+  padding: 2px 3px;
+}
+
+.food-mini-card:hover .food-mini-card-footer .food-search-clear {
+  opacity: 1;
+}
+
+.food-mini-card-header .food-search-clear {
+  opacity: 0.55;
+  padding: 2px 3px;
+}
+
+.food-mini-card:hover .food-search-clear {
+  opacity: 1;
+}
+
+.food-mini-card-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.food-mini-card-summary {
+  display: flex;
+  align-items: flex-end;
+}
+
+.food-mini-card-times {
+  display: flex;
+  align-items: baseline;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.food-mini-card-times--zero {
+  color: var(--text-muted);
+}
+
+.food-mini-card-times-unit {
+  margin-left: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* One cell per day of the period across the card's full width (columns set inline: up to 15 per
+   row), filled on days the food was eaten. Weekends look like any other day here (the flipped
+   day grid marks them), so eaten vs. not is the only contrast. */
+.food-mini-card-strip {
+  display: grid;
+  gap: 3px;
+  margin-top: -2px;
+}
+
+.food-mini-card-strip-day {
+  height: 9px;
+  border-radius: 2px;
+  background: var(--ring-track);
+}
+
+.food-mini-card-strip-day--eaten {
+  background: var(--accent);
+}
+
+.food-mini-card-empty {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.food-mini-card-macros {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+}
+
+.food-mini-card-macros li {
+  display: grid;
+  grid-template-columns: 52px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+}
+
+.food-mini-card-macro {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.food-mini-card-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--ring-track);
+  overflow: hidden;
+}
+
+.food-mini-card-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.food-mini-card-value {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.food-mini-card-macro-row--zero .food-mini-card-value {
+  font-weight: 500;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* Flip: both faces stacked in one grid cell (so the card takes the taller face's height), the
+   back turned away until the inner wrapper rotates. */
+.food-mini-card-flip {
+  position: relative;
+  min-width: 0;
+  perspective: 900px;
+}
+
+/* Remove confirmation, covering the whole card (either face). */
+.food-mini-card-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ring-track) 35%, var(--surface));
+  text-align: center;
+  cursor: default;
+}
+
+.food-mini-card-confirm p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.food-mini-card-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.food-mini-card-confirm-remove {
+  border-color: var(--warning-red);
+  color: var(--warning-red);
+}
+
+.food-mini-card-confirm-remove:hover {
+  background: var(--warning-red);
+  color: #fff;
+}
+
+.food-mini-card-flip--interactive {
+  cursor: pointer;
+}
+
+.food-mini-card-flip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+.food-mini-card-inner {
+  display: grid;
+  height: 100%;
+  transition: transform 0.45s ease;
+  transform-style: preserve-3d;
+}
+
+.food-mini-card-inner--flipped {
+  transform: rotateY(180deg);
+}
+
+.food-mini-card-face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.food-mini-card-face--back {
+  transform: rotateY(180deg);
+}
+
+/* The back's day grid stretches over all the space below the header. */
+.food-mini-card-days {
+  flex: 1;
+  display: grid;
+  grid-auto-rows: minmax(30px, 1fr);
+  gap: 4px;
+}
+
+/* Date on top, meal count in the middle, weekday at the bottom — one line each, centered. */
+.food-mini-card-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 4px 2px;
+  border-radius: 6px;
+  background: var(--ring-track);
+  overflow: hidden;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.food-mini-card-day--eaten {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+.food-mini-card-day-date,
+.food-mini-card-day-name {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.food-mini-card-day-name {
+  text-transform: capitalize;
+}
+
+.food-mini-card-day--eaten .food-mini-card-day-date,
+.food-mini-card-day--eaten .food-mini-card-day-name {
+  color: inherit;
+  opacity: 0.75;
+}
+
+/* Weekends keep the normal square colors; their date and day name turn amber instead (a lighter
+   amber on the green "eaten" squares, to stay readable). */
+.food-mini-card-day--weekend .food-mini-card-day-date,
+.food-mini-card-day--weekend .food-mini-card-day-name {
+  color: var(--warning-amber);
+  opacity: 1;
+}
+
+.food-mini-card-day--weekend.food-mini-card-day--eaten .food-mini-card-day-date,
+.food-mini-card-day--weekend.food-mini-card-day--eaten .food-mini-card-day-name {
+  color: color-mix(in srgb, var(--macro-fat) 70%, white);
+}
+
+.food-mini-card-day-times {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .food-tracker-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

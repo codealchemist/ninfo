@@ -136,6 +136,9 @@ export async function copyElementAsImage(element: HTMLElement): Promise<boolean>
       backgroundColor: background,
       width,
       height,
+      // Applies to the clone's root only: an element turned around on screen (a flip card's back
+      // face) would otherwise come out mirrored.
+      style: { transform: 'none' },
       // Controls that sit inside the captured element (e.g. its own copy buttons) opt out.
       filter: (node) => !(node instanceof Element && node.classList.contains('image-export-exclude')),
     })

@@ -9,12 +9,16 @@ interface Props {
   foods: string[]
   selectedFood: string | null
   onSelect: (food: string | null) => void
+  placeholder?: string
+  /** List every food (in the given order) while the box is focused but still empty, so the
+   * user can pick by browsing rather than only by typing. */
+  showAllWhenEmpty?: boolean
 }
 
 /** Autocomplete search box for filtering the timeline/median panels down to a single food —
  * a plain filter-as-you-type list rather than a full combobox, since the food list is short
  * enough (the food catalog) that ranking/fuzzy-matching isn't needed. */
-export default function FoodSearchInput({ foods, selectedFood, onSelect }: Props) {
+export default function FoodSearchInput({ foods, selectedFood, onSelect, placeholder, showAllWhenEmpty = false }: Props) {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -37,10 +41,14 @@ export default function FoodSearchInput({ foods, selectedFood, onSelect }: Props
     )
   }
 
-  const matches =
-    open && query.trim().length > 0
+  const matches = !open
+    ? []
+    : query.trim().length > 0
       ? foods.filter((f) => normalizeSearchKey(f).includes(normalizeSearchKey(query))).slice(0, MAX_MATCHES)
-      : []
+      : showAllWhenEmpty
+        ? foods
+        : []
+  const placeholderText = placeholder ?? t('timeline.searchFoodPlaceholder')
 
   return (
     <div className="food-search">
@@ -55,8 +63,8 @@ export default function FoodSearchInput({ foods, selectedFood, onSelect }: Props
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        placeholder={t('timeline.searchFoodPlaceholder')}
-        aria-label={t('timeline.searchFoodPlaceholder')}
+        placeholder={placeholderText}
+        aria-label={placeholderText}
       />
       {matches.length > 0 && (
         <ul className="food-search-menu">
@@ -71,7 +79,8 @@ export default function FoodSearchInput({ foods, selectedFood, onSelect }: Props
                 onClick={() => {
                   onSelect(food)
                   setQuery('')
-                  setOpen(false)
+                  // Browsing mode stays open, to pick several in a row.
+                  setOpen(showAllWhenEmpty)
                 }}
               >
                 {food}

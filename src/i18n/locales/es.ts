@@ -177,6 +177,30 @@ export const es: typeof en = {
     mtorc1PulsesTitle: 'Activaciones completas probables de mTORC1 (pulsos de síntesis proteica muscular) hoy. Apunta a {{target}}–4, separadas por al menos 3 h.'
   },
 
+  foodTracker: {
+    title: 'Seguimiento de alimentos',
+    addPlaceholder: 'Agrega un alimento de los últimos {{days}} días',
+    empty: 'Elige alimentos arriba para ver con qué frecuencia los comes y cuánto aportan.',
+    period: '{{start}} – {{end}}',
+    periodAll: 'Todo lo registrado hasta el {{end}}',
+    shareHint: '% = mediana de la parte de los macros del día que aportó, en los días registrados del período',
+    timesUnit_one: 'vez',
+    timesUnit_other: 'veces',
+    notEaten: 'No se comió en este período',
+    remove: 'Dejar de seguir {{food}}',
+    removeConfirm: '¿Dejar de seguir {{food}}?',
+    removeAction: 'Quitar',
+    cancel: 'Cancelar',
+    copyAllText: 'Copiar todas las tarjetas como texto',
+    copyAllImage: 'Copiar todas las tarjetas como imagen',
+    copyText: 'Copiar {{food}} como texto',
+    copyImage: 'Copiar {{food}} como imagen',
+    showDays: '{{food}}: ver los días en que se comió',
+    daysHint: 'Clic para ver los días →',
+    summaryHint: '← Clic para el resumen',
+    showSummary: '{{food}}: volver al resumen'
+  },
+
   fasting: {
     title: 'Ayuno actual',
     noEntriesTodayTitle: 'Todavía no registraste nada hoy',

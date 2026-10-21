@@ -171,6 +171,30 @@ export const en = {
     mtorc1PulsesTitle: 'Likely full mTORC1 activations (muscle protein synthesis pulses) today. Aim for {{target}}–4, at least 3 h apart.'
   },
 
+  foodTracker: {
+    title: 'Food tracker',
+    addPlaceholder: 'Add a food eaten in the last {{days}} days',
+    empty: 'Pick foods above to see how often you eat them and how much they contribute.',
+    period: '{{start}} – {{end}}',
+    periodAll: 'Everything logged up to {{end}}',
+    shareHint: "% = median share of the day's macros it supplied, across the period's logged days",
+    timesUnit_one: 'time',
+    timesUnit_other: 'times',
+    notEaten: 'Not eaten in this period',
+    remove: 'Stop tracking {{food}}',
+    removeConfirm: 'Stop tracking {{food}}?',
+    removeAction: 'Remove',
+    cancel: 'Cancel',
+    copyAllText: 'Copy all food cards as text',
+    copyAllImage: 'Copy all food cards as an image',
+    copyText: 'Copy {{food}} as text',
+    copyImage: 'Copy {{food}} as an image',
+    showDays: '{{food}}: show the days it was eaten',
+    daysHint: 'Click for days →',
+    summaryHint: '← Click for summary',
+    showSummary: '{{food}}: back to the summary'
+  },
+
   fasting: {
     title: 'Currently fasting',
     noEntriesTodayTitle: "You haven't logged anything today yet",

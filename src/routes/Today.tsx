@@ -7,6 +7,7 @@ import { todayLocalIso } from '../utils/localDate'
 import DaySummarySwiper from '../components/summary/DaySummarySwiper'
 import MealTimelineStrip from '../components/meals/MealTimelineStrip'
 import FastingTimer from '../components/summary/FastingTimer'
+import FoodTracker from '../components/summary/FoodTracker'
 
 export default function Today() {
   const meals = useAppStore((s) => s.meals)
@@ -49,6 +50,7 @@ export default function Today() {
           <MealTimelineStrip meals={dayMeals} mtorc1ByMealKey={mtorc1.byMealKey} />
         </>
       )}
+      <FoodTracker />
     </div>
   )
 }
