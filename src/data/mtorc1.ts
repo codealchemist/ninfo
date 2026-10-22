@@ -76,6 +76,8 @@ export interface FeedingWindow {
 
 export interface Mtorc1Day {
   windows: FeedingWindow[]
+  /** Per meal: its window — except later meals of a window that fired, which get their own
+   * one-meal window marked as eaten during that pulse (see duringPulseWindow). */
   byMealKey: Map<string, FeedingWindow>
   fullPulses: number
   partialPulses: number
@@ -84,6 +86,27 @@ export interface Mtorc1Day {
 const toMinutes = (time: string): number => {
   const [h, m] = time.split(':').map(Number)
   return h * 60 + m
+}
+
+/**
+ * A later meal of a feeding window that fired: the pulse is credited to the window's first meal
+ * (it started at that time), so this one is judged on its own, as eaten during that pulse —
+ * "refractory" when it has enough leucine to have counted otherwise, else "none".
+ */
+function duringPulseWindow(meal: Meal, pulse: FeedingWindow): FeedingWindow {
+  const protein = meal.items.reduce((sum, i) => sum + i.protein, 0)
+  const leucine = meal.items.reduce((sum, i) => sum + estimateLeucine(i), 0)
+  return {
+    meals: [meal],
+    start: meal.time,
+    protein,
+    leucine,
+    proteinThreshold: pulse.proteinThreshold,
+    weightKg: pulse.weightKg,
+    status: leucine >= MTORC1_THRESHOLDS.partialLeucineGrams ? 'refractory' : 'none',
+    previousPulseStart: pulse.start,
+    minutesSincePreviousPulse: toMinutes(meal.time) - toMinutes(pulse.start),
+  }
 }
 
 /** Classifies one day's meals (as from groupIntoMeals, chronological) into feeding windows. */
@@ -137,9 +160,10 @@ export function analyzeMtorc1Day(meals: Meal[], weightKg: number | null): Mtorc1
       minutesSincePreviousPulse,
     }
     windows.push(window)
-    for (const meal of group) byMealKey.set(meal.key, window)
+    const fired = status === 'full' || status === 'partial'
+    group.forEach((meal, i) => byMealKey.set(meal.key, fired && i > 0 ? duringPulseWindow(meal, window) : window))
 
-    if (status === 'full' || status === 'partial') {
+    if (fired) {
       previousPulseStart = start
       if (status === 'full') fullPulses++
       else partialPulses++
