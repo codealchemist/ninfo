@@ -317,6 +317,12 @@ export const en = {
     viewFullscreen: 'View fullscreen',
     all: 'All',
     rangeDays: '{{count}}d',
+    fasting: {
+      title: 'Fasting time',
+      hint: 'The fast before each day\'s first meal. Median: {{median}}. Click a day to open it.',
+      copyImageAria: 'Copy fasting chart as image',
+      copyImageTitle: 'Copy the fasting chart as an image'
+    },
     medianTitle: 'Median macros',
     medianHint: 'Median value for the selected range',
     medianView: {

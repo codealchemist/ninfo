@@ -14,11 +14,16 @@ interface Props {
   focused: boolean
   flipped: boolean
   onToggleFlip: () => void
+  /** Reports this card's natural height (its taller face, at least MIN_CARD_HEIGHT)... */
+  onMeasure?: (key: string, height: number) => void
+  /** ...and the height to render at instead — the strip passes the tallest card's, so every
+   * card in it is the same height. */
+  height?: number
 }
 
 const MIN_CARD_HEIGHT = 340
 
-export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggleFlip }: Props) {
+export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggleFlip, onMeasure, height }: Props) {
   const frontRef = useRef<HTMLDivElement>(null)
   const backRef = useRef<HTMLDivElement>(null)
   const [cardHeight, setCardHeight] = useState(MIN_CARD_HEIGHT)
@@ -39,14 +44,22 @@ export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggl
     const back = backRef.current
     if (!front || !back) return
 
+    // The front label stretches to the card (to pin its footer to the bottom), so its natural
+    // height is the sum of its parts rather than its own, possibly stretched, box. The back's
+    // content keeps its natural height (see .meal-card-face--back), so scrollHeight is fine.
+    const naturalFront = () => Array.from(front.children).reduce((sum, el) => sum + (el as HTMLElement).offsetHeight, 0)
     const measure = () => {
-      setCardHeight(Math.max(front.scrollHeight, back.scrollHeight, MIN_CARD_HEIGHT))
+      const natural = Math.max(naturalFront(), back.scrollHeight, MIN_CARD_HEIGHT)
+      setCardHeight(natural)
+      onMeasure?.(meal.key, natural)
     }
     measure()
 
     const observer = new ResizeObserver(measure)
     observer.observe(front)
     observer.observe(back)
+    // The stretched label doesn't resize when its content shrinks — its parts do.
+    for (const child of Array.from(front.children)) observer.observe(child)
     return () => observer.disconnect()
   }, [meal, backView])
 
@@ -80,7 +93,7 @@ export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggl
   return (
     <div
       className={'meal-card-flip' + (focused ? ' meal-card-flip--focused' : '')}
-      style={{ height: cardHeight }}
+      style={{ height: Math.max(height ?? 0, cardHeight) }}
     >
       <div className={'meal-card-inner' + (flipped ? ' meal-card-inner--flipped' : '')}>
         <div className="meal-card-face meal-card-face--front" onClick={onToggleFlip}>

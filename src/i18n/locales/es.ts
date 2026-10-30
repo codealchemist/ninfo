@@ -323,6 +323,12 @@ export const es: typeof en = {
     viewFullscreen: 'Ver en pantalla completa',
     all: 'Todo',
     rangeDays: '{{count}}d',
+    fasting: {
+      title: 'Tiempo de ayuno',
+      hint: 'El ayuno antes de la primera comida de cada día. Mediana: {{median}}. Haz clic en un día para abrirlo.',
+      copyImageAria: 'Copiar gráfico de ayuno como imagen',
+      copyImageTitle: 'Copiar el gráfico de ayuno como imagen'
+    },
     medianTitle: 'Mediana de macros',
     medianHint: 'Valor mediano del período seleccionado',
     medianView: {

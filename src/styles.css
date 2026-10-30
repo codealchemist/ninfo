@@ -2110,6 +2110,24 @@ button {
 .meal-card-face--back {
   transform: rotateY(180deg);
   display: flex;
+  /* Content keeps its natural height (not stretched to the card's), so MealCard can measure it
+     — the strip sizes every card to the tallest one. */
+  align-items: flex-start;
+}
+
+/* The label fills the front face with its footer (copy buttons, details hint) at the bottom, so
+   cards sized up to the strip's tallest don't leave a gap under it. */
+.meal-card-face--front {
+  display: flex;
+  flex-direction: column;
+}
+
+.meal-card-face--front > .nutrition-label {
+  flex: 1 0 auto;
+}
+
+.meal-card-face--front .nutrition-label-actions {
+  margin-top: auto;
 }
 
 /* Nutrition Facts label */

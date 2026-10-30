@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, Timer } from 'lucide-react'
 import type { Meal } from '../../data/types'
@@ -17,6 +17,13 @@ export default function MealTimelineStrip({ meals, mtorc1ByMealKey }: Props) {
   const [flippedKeys, setFlippedKeys] = useState<Set<string>>(new Set())
   const cardRefs = useRef<Array<HTMLDivElement | null>>([])
   const stripRef = useRef<HTMLDivElement>(null)
+  // Each card's natural height, by meal key — every card renders at the tallest, so the strip
+  // stays even however many items (and so how tall a back face) each meal has.
+  const [cardHeights, setCardHeights] = useState<Map<string, number>>(new Map())
+  const handleMeasure = useCallback((key: string, height: number) => {
+    setCardHeights((prev) => (prev.get(key) === height ? prev : new Map(prev).set(key, height)))
+  }, [])
+  const uniformHeight = meals.reduce((max, m) => Math.max(max, cardHeights.get(m.key) ?? 0), 0)
   // Set right before a scroll-driven setFocusedIndex, so the scrollIntoView effect below knows
   // to skip itself — the card is already where the user's swipe left it, no need to re-animate.
   const scrollSyncRef = useRef(false)
@@ -150,7 +157,7 @@ export default function MealTimelineStrip({ meals, mtorc1ByMealKey }: Props) {
       <div className="meal-strip" ref={stripRef} onScroll={handleScroll}>
         {meals.map((meal, i) => (
           <div className="meal-strip-entry" key={meal.key}>
-            {i > 0 && meal.items[0].fastingSincePrev && (
+            {meal.items[0].fastingSincePrev && (
               <div className="fasting-connector">
                 <Timer size={14} />
                 {meal.items[0].fastingSincePrev}
@@ -163,6 +170,8 @@ export default function MealTimelineStrip({ meals, mtorc1ByMealKey }: Props) {
                 focused={i === focusedIndex}
                 flipped={flippedKeys.has(meal.key)}
                 onToggleFlip={() => toggleFlip(meal.key)}
+                onMeasure={handleMeasure}
+                height={uniformHeight}
               />
             </div>
           </div>

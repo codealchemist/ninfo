@@ -8,6 +8,7 @@ import { aggregateByDay, dailyTotals, groupIntoMeals, medianTotals } from '../da
 import { MACRO_VIEWS, macroViewRing, type MacroView } from '../data/aggregate/macroView'
 import { MACRO_KEYS, type MacroKey, type Meal } from '../data/types'
 import { analyzeMtorc1Day } from '../data/mtorc1'
+import { formatFastingMinutes, parseFastingMinutes } from '../data/fasting'
 import { getSheetLink } from '../db/sheetLinkStorage'
 import { parseGoogleSheetUrl } from '../utils/googleSheetUrl'
 import { LiquidoSource } from '../data/sources/LiquidoSource'
@@ -16,6 +17,7 @@ import { dailyTotalMlByDate } from '../data/liquidUtils'
 import { PesoSource } from '../data/sources/PesoSource'
 import type { WeightEntry } from '../data/parsers/pesoParser'
 import MacroTimelineChart from '../components/charts/MacroTimelineChart'
+import FastingChart from '../components/charts/FastingChart'
 import TimelineScrubber from '../components/charts/TimelineScrubber'
 import FoodSearchInput from '../components/charts/FoodSearchInput'
 import GoalProgressRing from '../components/summary/GoalProgressRing'
@@ -41,21 +43,6 @@ function median(values: number[]): number {
   return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
 }
 
-/** "02:40" -> 160. Null if missing/unparsable (e.g. the very first logged day, which has no
- * previous meal to measure a fast from). */
-function parseFastingMinutes(value: string | null): number | null {
-  if (!value) return null
-  const [h, m] = value.split(':').map(Number)
-  if (Number.isNaN(h) || Number.isNaN(m)) return null
-  return h * 60 + m
-}
-
-function formatFastingMinutes(totalMinutes: number): string {
-  const h = Math.floor(totalMinutes / 60)
-  const m = Math.round(totalMinutes % 60)
-  return `${h}h ${m}m`
-}
-
 export default function Timeline() {
   const { t } = useTranslation()
   const aiChart = useAiCardPanel('timeline:chart')
@@ -68,6 +55,8 @@ export default function Timeline() {
   const [range, setRange] = useState<number>(30)
   const chartRef = useRef<HTMLDivElement>(null)
   const medianPanelRef = useRef<HTMLDivElement>(null)
+  const fastingRef = useRef<HTMLDivElement>(null)
+  const [fastingRange, setFastingRange] = useState<number>(30)
   const [fullscreen, setFullscreen] = useState(false)
   const [scrubIndex, setScrubIndex] = useState<number | null>(null)
   const [kcalLineValue, setKcalLineValue] = useState<number | null>(null)
@@ -207,16 +196,29 @@ export default function Timeline() {
 
   // The daily fast is measured from the gap before each day's first meal (the overnight fast),
   // not every inter-meal gap — that's the one meaningful "how long was today's fast" number.
-  const medianFastingMinutes = useMemo(() => {
-    const firstMealByDate = new Map<string, string | null>()
+  const fastingMinutesByDate = useMemo(() => {
+    const byDate = new Map<string, number | null>()
     for (const meal of groupIntoMeals(meals)) {
-      if (!firstMealByDate.has(meal.date)) firstMealByDate.set(meal.date, meal.items[0]?.fastingSincePrev ?? null)
+      if (!byDate.has(meal.date)) byDate.set(meal.date, parseFastingMinutes(meal.items[0]?.fastingSincePrev ?? null))
     }
+    return byDate
+  }, [meals])
+  const medianFastingMinutes = useMemo(() => {
     const values = effectiveMedianDays
-      .map((d) => parseFastingMinutes(firstMealByDate.get(d.date) ?? null))
+      .map((d) => fastingMinutesByDate.get(d.date) ?? null)
       .filter((v): v is number => v !== null)
     return values.length > 0 ? median(values) : null
-  }, [meals, effectiveMedianDays])
+  }, [fastingMinutesByDate, effectiveMedianDays])
+
+  const fastingPoints = useMemo(
+    () =>
+      (fastingRange === 0 ? allDays : allDays.slice(-fastingRange)).map((d) => ({
+        date: d.date,
+        minutes: fastingMinutesByDate.get(d.date) ?? null,
+      })),
+    [allDays, fastingRange, fastingMinutesByDate]
+  )
+  const fastingValues = fastingPoints.map((p) => p.minutes).filter((v): v is number => v !== null)
 
   const medianWaterMl = useMemo(() => {
     if (effectiveMedianDays.length === 0 || liquidEntries.length === 0) return null
@@ -470,6 +472,37 @@ export default function Timeline() {
                 {showMtorc1Hint && <p className="hint mtorc1-stat-hint">{t('timeline.metrics.mtorc1Title')}</p>}
               </div>
             </div>
+          </div>
+        </section>
+      )}
+
+      {fastingValues.length > 0 && (
+        <section className="card">
+          <div className="timeline-header">
+            <h2>{t('timeline.fasting.title')}</h2>
+            <div className="range-buttons">
+              {RANGES.map((r) => (
+                <button
+                  key={r}
+                  className={'range-button' + (fastingRange === r ? ' range-button--active' : '')}
+                  onClick={() => setFastingRange(r)}
+                >
+                  {r === 0 ? t('timeline.all') : t('timeline.rangeDays', { count: r })}
+                </button>
+              ))}
+              <CopyImageButton
+                targetRef={fastingRef}
+                ariaLabel={t('timeline.fasting.copyImageAria')}
+                title={t('timeline.fasting.copyImageTitle')}
+              />
+            </div>
+          </div>
+          {/* The hint is inside the captured region so a copied image still says what it shows. */}
+          <div ref={fastingRef}>
+            <p className="hint">
+              {t('timeline.fasting.hint', { median: formatFastingMinutes(median(fastingValues)) })}
+            </p>
+            <FastingChart points={fastingPoints} label={t('timeline.fasting.title')} onDayClick={handleDayClick} />
           </div>
         </section>
       )}
