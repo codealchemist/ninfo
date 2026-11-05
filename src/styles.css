@@ -2073,6 +2073,7 @@ button {
    fat-details panel is expanded. */
 .meal-card-flip {
   width: 250px;
+  transition: height 0.3s ease;
   perspective: 1200px;
   flex-shrink: 0;
 }

@@ -17,8 +17,8 @@ export default function MealTimelineStrip({ meals, mtorc1ByMealKey }: Props) {
   const [flippedKeys, setFlippedKeys] = useState<Set<string>>(new Set())
   const cardRefs = useRef<Array<HTMLDivElement | null>>([])
   const stripRef = useRef<HTMLDivElement>(null)
-  // Each card's natural height, by meal key — every card renders at the tallest, so the strip
-  // stays even however many items (and so how tall a back face) each meal has.
+  // Each card's front height, by meal key — every card renders at the tallest front so the strip
+  // lines up; a flipped card grows past it only as far as its back face needs.
   const [cardHeights, setCardHeights] = useState<Map<string, number>>(new Map())
   const handleMeasure = useCallback((key: string, height: number) => {
     setCardHeights((prev) => (prev.get(key) === height ? prev : new Map(prev).set(key, height)))

@@ -14,10 +14,10 @@ interface Props {
   focused: boolean
   flipped: boolean
   onToggleFlip: () => void
-  /** Reports this card's natural height (its taller face, at least MIN_CARD_HEIGHT)... */
+  /** Reports this card's front-face height (at least MIN_CARD_HEIGHT)... */
   onMeasure?: (key: string, height: number) => void
-  /** ...and the height to render at instead — the strip passes the tallest card's, so every
-   * card in it is the same height. */
+  /** ...and the height to render the front at instead — the strip passes the tallest front's,
+   * so every card in it lines up. */
   height?: number
 }
 
@@ -26,16 +26,17 @@ const MIN_CARD_HEIGHT = 340
 export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggleFlip, onMeasure, height }: Props) {
   const frontRef = useRef<HTMLDivElement>(null)
   const backRef = useRef<HTMLDivElement>(null)
-  const [cardHeight, setCardHeight] = useState(MIN_CARD_HEIGHT)
+  const [frontHeight, setFrontHeight] = useState(MIN_CARD_HEIGHT)
+  const [backHeight, setBackHeight] = useState(0)
   // Which content the back face shows once flipped — the warnings button and mTORC1 badge flip
   // straight to their own view instead of the items table; flipping back to front resets it.
   const [backView, setBackView] = useState<'items' | 'warnings' | 'mtorc1' | 'ai'>('items')
 
-  // Both faces are laid out in normal flow (no fixed height, no internal scroll) so each is
-  // exactly as tall as its own content needs — including content that can change size after
-  // the initial render, like the fat-quality details panel expanding or a sort/selection
-  // change in the items table. The card itself then adopts whichever face is taller, so
-  // neither ever has to scroll or get clipped. A ResizeObserver (rather than re-measuring
+  // Both faces are measured at their natural content height — including content that changes
+  // size after the first render, like the fat-quality details expanding or a sort/selection
+  // change in the items table. The card is as tall as its front (so the strip has no empty
+  // space under the labels) and only grows to the back's height while flipped, so neither face
+  // ever has to scroll or get clipped. A ResizeObserver (rather than re-measuring
   // only on `meal`/`flipped` changes) catches those interior changes regardless of which
   // deeply-nested child state caused them, without threading callbacks through every layer.
   // Re-runs on `backView` too, since that swaps which element `backRef` actually points at.
@@ -49,9 +50,10 @@ export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggl
     // content keeps its natural height (see .meal-card-face--back), so scrollHeight is fine.
     const naturalFront = () => Array.from(front.children).reduce((sum, el) => sum + (el as HTMLElement).offsetHeight, 0)
     const measure = () => {
-      const natural = Math.max(naturalFront(), back.scrollHeight, MIN_CARD_HEIGHT)
-      setCardHeight(natural)
-      onMeasure?.(meal.key, natural)
+      const front = Math.max(naturalFront(), MIN_CARD_HEIGHT)
+      setFrontHeight(front)
+      setBackHeight(back.scrollHeight)
+      onMeasure?.(meal.key, front)
     }
     measure()
 
@@ -93,7 +95,7 @@ export default function MealCard({ meal, mtorc1Window, focused, flipped, onToggl
   return (
     <div
       className={'meal-card-flip' + (focused ? ' meal-card-flip--focused' : '')}
-      style={{ height: Math.max(height ?? 0, cardHeight) }}
+      style={{ height: Math.max(height ?? 0, frontHeight, flipped ? backHeight : 0) }}
     >
       <div className={'meal-card-inner' + (flipped ? ' meal-card-inner--flipped' : '')}>
         <div className="meal-card-face meal-card-face--front" onClick={onToggleFlip}>
