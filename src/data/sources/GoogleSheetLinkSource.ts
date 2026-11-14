@@ -4,6 +4,7 @@ import type { DatasetMeta } from '../types'
 import {
   buildSheetExportCsvUrl,
   buildSheetGvizCsvUrl,
+  buildSheetGvizCsvUrlByName,
   parseGoogleSheetUrl,
 } from '../../utils/googleSheetUrl'
 import { fetchSheetCsv } from '../../utils/fetchSheetCsv'
@@ -17,12 +18,17 @@ import type { NutritionSource } from './NutritionSource'
  * fresh every time load() runs (see appStore's refreshSheetLink), which is what makes this
  * a meaningfully "live" source without the OAuth backend the full Google sign-in needs.
  *
- * Two export endpoints are tried, in order: the gviz visualization endpoint (more reliably
+ * Which tab: the one the link names (its gid), else the tab named "Registro" — links copied
+ * from the Drive app never name a tab — and as a last resort the first tab. Only gviz can
+ * address a tab by name, and it blanks the Fecha/Hora headings over its typed date/time
+ * columns; parseRegistroCsv accepts that.
+ *
+ * Two export endpoints are tried for a gid: the gviz visualization endpoint (more reliably
  * reachable cross-origin, but its CSV serialization can differ subtly from a literal
  * "Download as CSV") and the plain export endpoint (byte-for-byte what the parser was built
  * against, but historically less consistent cross-origin). If a fetch *succeeds* but the
- * content doesn't parse as a Registro tab, that's most likely the wrong tab (no gid in the
- * URL defaults to the first tab, which usually isn't Registro) rather than a format issue —
+ * content doesn't parse as a Registro tab, that's most likely the wrong tab (e.g. a link
+ * naming another tab, or a workbook without a "Registro" tab) rather than a format issue —
  * both endpoints would fail identically in that case, which the final error message covers.
  */
 export class GoogleSheetLinkSource implements NutritionSource {
@@ -34,7 +40,9 @@ export class GoogleSheetLinkSource implements NutritionSource {
       throw new Error(i18n.t('errors.notGoogleSheetLink'))
     }
 
-    const attempts = [buildSheetGvizCsvUrl(parsed), buildSheetExportCsvUrl(parsed)]
+    const byName = buildSheetGvizCsvUrlByName(parsed.spreadsheetId, 'Registro')
+    const byGid = [buildSheetGvizCsvUrl(parsed), buildSheetExportCsvUrl(parsed)]
+    const attempts = parsed.gid !== null ? [...byGid, byName] : [byName, ...byGid]
     let lastError: Error | null = null
 
     for (const url of attempts) {

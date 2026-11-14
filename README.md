@@ -24,7 +24,7 @@ From the welcome screen, choose one of:
 |---|---|
 | **Demo** | Explore every page with a bundled sample dataset. |
 | **Upload a CSV** | Export your spreadsheet's `Registro` tab as CSV and drop it in. |
-| **Link a Google Sheet** | Share the sheet as *Anyone with the link can view* and paste the URL with the `Registro` tab open. Ninfo fetches it fresh each visit, with no login. |
+| **Link a Google Sheet** | Share the sheet as *Anyone with the link can view* and paste its link: from the browser's address bar, or from the Drive or Sheets app (Share → Copy link). Ninfo reads the `Registro` tab and fetches it fresh each visit, with no login. |
 
 No spreadsheet yet? Download the template from the welcome screen ([`public/sample-spreadsheet.xlsx`](public/sample-spreadsheet.xlsx)).
 

@@ -44,7 +44,7 @@ export const es: typeof en = {
       'Exporta la pestaña "Registro" de tu hoja de cálculo como CSV y suéltala aquí — se procesa todo en tu navegador, nunca se sube a ningún sitio.',
     importFromLink: 'Importar desde un enlace compartido',
     importFromLinkDesc:
-      'Abre tu hoja de cálculo, haz clic en la pestaña "Registro" y copia la URL directamente desde la barra de direcciones del navegador (debería terminar en "#gid=..." una vez que Registro esté abierta). La hoja debe estar compartida como "Cualquier persona con el enlace puede verla" — la volveremos a obtener cada vez que vuelvas, sin necesidad de iniciar sesión.',
+      'Pega el enlace de tu hoja de cálculo: desde la barra de direcciones del navegador, o desde la app de Drive o de Hojas de cálculo (Compartir → Copiar enlace). Leemos su pestaña "Registro". La hoja debe estar compartida como "Cualquier persona con el enlace puede verla" — la volveremos a obtener cada vez que vuelvas, sin necesidad de iniciar sesión.',
     urlPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
     import: 'Importar',
     addAsNewSheet: 'Añadir como hoja nueva',
@@ -758,7 +758,7 @@ export const es: typeof en = {
     foundInstead:
       ' Se encontró en su lugar: "{{preview}}" — comprueba que esta sea la pestaña correcta.',
     shareHintRegistro:
-      'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede verla", y de que el enlace se haya copiado con la pestaña "Registro" abierta (Compartir → Copiar enlace, desde esa pestaña) — de lo contrario, el enlace apunta a la primera pestaña, que no siempre es Registro.',
+      'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede verla", de que sea un archivo de Hojas de cálculo de Google (no un Excel subido) y de que tenga una pestaña llamada "Registro".',
     shareHintBioimpedancia:
       'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede verla" y de que tenga una pestaña "Bioimpedancia" con columnas Fecha/Peso.',
     shareHintPeso:
@@ -766,7 +766,7 @@ export const es: typeof en = {
     shareHintLiquido:
       'Asegúrate de que la hoja esté compartida como "Cualquier persona con el enlace puede verla" y de que tenga una pestaña "Líquido" con columnas Fecha/Líquido.',
     notGoogleSheetLink:
-      'Eso no parece un enlace de Google Sheets. Cópialo desde la barra de direcciones o mediante Compartir → Copiar enlace.',
+      'Eso no parece un enlace de Google Sheets o de Drive. Cópialo desde la barra de direcciones, o mediante Compartir → Copiar enlace en la app de Drive o de Hojas de cálculo.',
     couldNotReachSheet: 'No se pudo acceder a esa hoja de cálculo.',
     couldNotReachBioimpedancia:
       'No se pudo acceder a la pestaña Bioimpedancia.',

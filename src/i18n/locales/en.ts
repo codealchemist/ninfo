@@ -41,7 +41,7 @@ export const en = {
       'Export your spreadsheet\'s "Registro" tab as CSV and drop it here — parsed entirely in your browser, never uploaded anywhere.',
     importFromLink: 'Import from a shared link',
     importFromLinkDesc:
-      'Open your spreadsheet, click the "Registro" tab, then copy the URL straight from your browser\'s address bar (it should end in "#gid=..." once Registro is open). The sheet must be shared as "Anyone with the link can view" — we\'ll re-fetch it fresh each time you come back, no login needed.',
+      'Paste your spreadsheet\'s link: from the browser\'s address bar, or from the Drive or Sheets app (Share → Copy link). We read its "Registro" tab. The sheet must be shared as "Anyone with the link can view" — we\'ll re-fetch it fresh each time you come back, no login needed.',
     urlPlaceholder: 'https://docs.google.com/spreadsheets/d/...',
     import: 'Import',
     addAsNewSheet: 'Add as a new sheet',
@@ -746,7 +746,7 @@ export const en = {
     foundInstead:
       ' Found instead: "{{preview}}" — check that this is the right tab.',
     shareHintRegistro:
-      'Make sure the sheet is shared as "Anyone with the link can view", and that the link was copied while the "Registro" tab was open (Share → Copy link, from within that tab) — otherwise the link points at whichever tab is first, not necessarily Registro.',
+      'Make sure the sheet is shared as "Anyone with the link can view", that it\'s a Google Sheets file (not an uploaded Excel file), and that it has a tab named "Registro".',
     shareHintBioimpedancia:
       'Make sure the sheet is shared as "Anyone with the link can view", and that it has a "Bioimpedancia" tab with Fecha/Peso columns.',
     shareHintPeso:
@@ -754,7 +754,7 @@ export const en = {
     shareHintLiquido:
       'Make sure the sheet is shared as "Anyone with the link can view", and that it has a "Líquido" tab with Fecha/Líquido columns.',
     notGoogleSheetLink:
-      "That doesn't look like a Google Sheets link. Copy it from the address bar or via Share → Copy link.",
+      "That doesn't look like a Google Sheets or Drive link. Copy it from the address bar, or via Share → Copy link in the Drive or Sheets app.",
     couldNotReachSheet: "Couldn't reach that spreadsheet.",
     couldNotReachBioimpedancia: "Couldn't reach the Bioimpedancia tab.",
     couldNotReachPeso: "Couldn't reach the Peso tab.",

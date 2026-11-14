@@ -32,8 +32,15 @@ export function parseRegistroCsv(csvText: string, today: Date = new Date()): Par
   const { data } = Papa.parse<string[]>(csvText, { skipEmptyLines: false })
   const rows = data as string[][]
 
+  // Google's query endpoint (used when the link names no tab) types each column by its values
+  // and blanks cells that don't fit — so in its output the Fecha/Hora headings over the date
+  // and time columns come back empty. Accept that, as long as Alimento is where it belongs.
+  const headingOrBlank = (cell: string | undefined, heading: string) => {
+    const value = cell?.trim() ?? ''
+    return value === heading || value === ''
+  }
   const headerIdx = rows.findIndex(
-    (r) => r[1]?.trim() === 'Fecha' && r[2]?.trim() === 'Hora' && r[3]?.trim() === 'Alimento'
+    (r) => r[3]?.trim() === 'Alimento' && headingOrBlank(r[1], 'Fecha') && headingOrBlank(r[2], 'Hora')
   )
   if (headerIdx === -1) {
     throw new HeaderNotFoundError(

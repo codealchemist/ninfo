@@ -1,23 +1,41 @@
 export interface ParsedGoogleSheetUrl {
   spreadsheetId: string
-  gid: string
+  /** The tab the link was copied from; null when the link names none (see GoogleSheetLinkSource,
+   * which then looks the Registro tab up by name). */
+  gid: string | null
 }
 
+// Where a spreadsheet ID can appear, across the links people actually copy:
+// - Sheets in a browser or the Sheets app: docs.google.com/spreadsheets/d/<id>/edit#gid=…
+//   (also with an account segment, /spreadsheets/u/0/d/<id>)
+// - Drive app "Copy link": drive.google.com/file/d/<id>/view?usp=drivesdk, or the older
+//   drive.google.com/open?id=<id> (and …/uc?id=<id>)
+const ID_PATTERNS = [
+  /\/spreadsheets\/(?:u\/\d+\/)?d\/([a-zA-Z0-9_-]{20,})/,
+  /drive\.google\.com\/(?:u\/\d+\/)?file\/d\/([a-zA-Z0-9_-]{20,})/,
+  /drive\.google\.com\/[^#]*[?&]id=([a-zA-Z0-9_-]{20,})/,
+]
+
 /**
- * Pulls the spreadsheet ID and tab (gid) out of a standard Google Sheets share link, e.g.
- * "https://docs.google.com/spreadsheets/d/1AbC.../edit?usp=sharing#gid=123456789". The gid
- * is only present when the link was copied while a specific tab was open — if it's missing
- * we fall back to gid=0 (the first tab), which is very likely NOT the "Registro" tab in a
- * multi-tab workbook (see docs/nutrition-app-proposal.md §3.1 — Registro is typically the
- * 4th tab, not the 1st), so callers should tell users to open the Registro tab before copying.
+ * Pulls the spreadsheet ID and, if present, the tab (gid) out of a Google Sheets or Drive link,
+ * e.g. "https://docs.google.com/spreadsheets/d/1AbC.../edit#gid=123456789". The gid is only
+ * there when the link was copied while a specific tab was open in Sheets — links from the
+ * Drive app never have one.
  */
 export function parseGoogleSheetUrl(url: string): ParsedGoogleSheetUrl | null {
-  const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
-  if (!idMatch) return null
+  const trimmed = url.trim()
+  let spreadsheetId: string | null = null
+  for (const pattern of ID_PATTERNS) {
+    const match = trimmed.match(pattern)
+    if (match) {
+      spreadsheetId = match[1]
+      break
+    }
+  }
+  if (!spreadsheetId) return null
 
-  const gidMatch = url.match(/[#?&]gid=(\d+)/)
-
-  return { spreadsheetId: idMatch[1], gid: gidMatch ? gidMatch[1] : '0' }
+  const gidMatch = trimmed.match(/[#?&]gid=(\d+)/)
+  return { spreadsheetId, gid: gidMatch ? gidMatch[1] : null }
 }
 
 /**
@@ -28,7 +46,7 @@ export function parseGoogleSheetUrl(url: string): ParsedGoogleSheetUrl | null {
  * it's tried first but not assumed to always match byte-for-byte.
  */
 export function buildSheetGvizCsvUrl({ spreadsheetId, gid }: ParsedGoogleSheetUrl): string {
-  const params = new URLSearchParams({ tqx: 'out:csv', gid })
+  const params = new URLSearchParams({ tqx: 'out:csv', gid: gid ?? '0' })
   return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${params.toString()}`
 }
 
@@ -38,7 +56,7 @@ export function buildSheetGvizCsvUrl({ spreadsheetId, gid }: ParsedGoogleSheetUr
  * Used as a fallback since it's historically less consistent cross-origin than gviz above.
  */
 export function buildSheetExportCsvUrl({ spreadsheetId, gid }: ParsedGoogleSheetUrl): string {
-  const params = new URLSearchParams({ format: 'csv', gid })
+  const params = new URLSearchParams({ format: 'csv', gid: gid ?? '0' })
   return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?${params.toString()}`
 }
 
